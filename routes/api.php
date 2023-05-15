@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\KaryawanController;
 use App\Http\Controllers\API\KecamatanController;
 use App\Http\Controllers\API\KelurahanController;
+use App\Http\Controllers\API\KritikSaranController;
 use App\Http\Controllers\API\LowonganController;
 use App\Http\Controllers\API\PengumumanController;
 use App\Http\Controllers\API\QuestionsController;
@@ -51,6 +52,13 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   Route::post('cek-jawaban', [AuthController::class, 'checkAnswer']);
   Route::post('forget-password', [AuthController::class, 'forgetPassword']);
   Route::get('profile', [KaryawanController::class, 'profile']);
+
+  /**
+   * Kritik dan saran
+   */
+  Route::get('/kritiksaran/me', [KritikSaranController::class, 'getAllKritikDanSaran']);
+  Route::post('/kritiksaran/add', [KritikSaranController::class, 'insertKritikSaran']);
+  Route::get('/kritiksaran/detail', [KritikSaranController::class, 'detailKritikSaran']);
 });
 
 
