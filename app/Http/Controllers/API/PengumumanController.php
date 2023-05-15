@@ -51,7 +51,7 @@ class PengumumanController extends Controller
     }
 
     // get all pengumuman
-    public function getAllPengumuman()
+    public function getAllPengumuman(Request $request)
     {
         try {
             /**
@@ -60,6 +60,7 @@ class PengumumanController extends Controller
              * lakukan pagination bawaan laravel
              */
             $data = DB::table('tbl_pemberitahuan')
+                ->whereIn('receive_by', [4])
                 ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
                 ->select(
                     'tbl_pemberitahuan.id as id',
@@ -70,6 +71,86 @@ class PengumumanController extends Controller
                     'nama_grup as penerima'
                 )
                 ->paginate(10);
+
+            if ($request->badge_id) {
+
+                // get grup id
+                $data_user = DB::table('tbl_karyawan')
+                    ->select('id_grup')
+                    ->where('badge_id', $request->badge_id)
+                    ->first();
+
+                 /**
+                 * apabila user tidak ada id grup
+                 */
+                $data = DB::table('tbl_pemberitahuan')
+                ->whereIn('receive_by', [4])
+                ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+                ->select(
+                    'tbl_pemberitahuan.id as id',
+                    'judul',
+                    'waktu_pemberitahuan',
+                    'deskripsi',
+                    'image',
+                    'nama_grup as penerima'
+                )
+                ->paginate(10);
+
+                /**
+                 * Apabila karyawan adalah PKB, maka get kategori pkb, all, ptsn
+                 */
+                if ($data_user->id_grup == 3) {
+                    $data = DB::table('tbl_pemberitahuan')
+                        ->whereIn('receive_by', [4, 1, $data_user->id_grup])
+                        ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+                        ->select(
+                            'tbl_pemberitahuan.id as id',
+                            'judul',
+                            'waktu_pemberitahuan',
+                            'deskripsi',
+                            'image',
+                            'nama_grup as penerima'
+                        )
+                        ->paginate(10);
+                }
+
+                 /**
+                 * Apabila karyawan adalah PTSN, maka get kategori all dan ptsn
+                 */
+                if ($data_user->id_grup == 1) {
+                    $data = DB::table('tbl_pemberitahuan')
+                        ->whereIn('receive_by', [4, $data_user->id_grup])
+                        ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+                        ->select(
+                            'tbl_pemberitahuan.id as id',
+                            'judul',
+                            'waktu_pemberitahuan',
+                            'deskripsi',
+                            'image',
+                            'nama_grup as penerima'
+                        )
+                        ->paginate(10);
+                }
+
+                  /**
+                 * Apabila karyawan adalah PTSN, maka get kategori all dan ptsn
+                 */
+                if ($data_user->id_grup == 2) {
+                    $data = DB::table('tbl_pemberitahuan')
+                        ->whereIn('receive_by', [4, $data_user->id_grup])
+                        ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+                        ->select(
+                            'tbl_pemberitahuan.id as id',
+                            'judul',
+                            'waktu_pemberitahuan',
+                            'deskripsi',
+                            'image',
+                            'nama_grup as penerima'
+                        )
+                        ->paginate(10);
+                }
+
+            }
 
             foreach ($data as $key => $item) {
                 $item->image = url(asset('/announcement/' . $item->image));
@@ -85,7 +166,7 @@ class PengumumanController extends Controller
                 'message' => 'RESPONSE OK, BERHASIL GET DATA PENGUMUMANS',
                 'data' => $data->items(),
                 'jumlah_data_saat_ini' => count($data->items()),
-                'jumlah_page' => $last_page,
+                'last_page' => $last_page,
                 'sedang_di_page' => $current_page,
                 'link_next_page' => $next_page_url,
                 'link_prev_page' => $prev_page_url,
@@ -98,5 +179,4 @@ class PengumumanController extends Controller
             ], 400);
         }
     }
-
 }

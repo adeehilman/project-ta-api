@@ -14,33 +14,12 @@ class AuthController extends Controller
     public function registrasi(Request $request)
     {
 
-        // if (!$request->employee_no) {
-        //     return response()->json([
-        //         "message" => "Body dibutuhkan!"
-        //     ]);
-        // }
-
-        // if (!$request->tgl_lahir) {
-        //     return response()->json([
-        //         "message" => "Body dibutuhkan!"
-        //     ]);
-        // }
-
-        // if (!$request->password) {
-        //     return response()->json([
-        //         "message" => "Body dibutuhkan!"
-        //     ]);
-        // }
-
         $request->validate([
             "employee_no"   => "required",
             "tgl_lahir"     => "required",
             "password"      => "required",
             "id_question"   => "required",
             "answer"       => "required"
-            // "alamat_lengkap"    => "required",
-            // "kelurahan"         => "required",
-            // "kecamatan"         => "kecamatan",
         ]);
 
         /**
@@ -81,7 +60,8 @@ class AuthController extends Controller
                         "password"  => bcrypt($request->password),
                         "no_hp"     => $request->no_hp ? $request->no_hp : null,
                         "no_hp2"    => $request->no_hp2 ? $request->no_hp2 : null,
-                        "home_telp" => $request->telp ? $request->telp : null
+                        "home_telp" => $request->telp ? $request->telp : null,
+                        "id_grup"   => 1
                     ]);
 
                 // insert ke tabel mms
