@@ -30,6 +30,16 @@ class KritikSaranController extends Controller
         return $data;
     }
 
+    // function get tanggapan 
+    private function getTanggapanKritikSaran($id_kritiksaran){
+        $data = DB::table('tbl_tanggapankritiksaran')
+                        ->select('fullname', 'position_code', 'respon', 'waktu')
+                        ->join('tbl_karyawan', 'tbl_karyawan.badge_id', '=', 'tbl_tanggapankritiksaran.badge_id')
+                        ->where('id_kritik', $id_kritiksaran)
+                        ->get();
+        return $data;
+    }
+
     // function untuk get semua kritik dan saran
     public function getAllKritikDanSaran(Request $request)
     {
@@ -125,11 +135,46 @@ class KritikSaranController extends Controller
         $data->kategori = $this->getKategori($data->kategori);
         $data->file_upload = url(asset('kritiksaran/' . $data->file_upload));
         $data->riwayat_status = $this->getRiwayatKritikSaran($data->id);
+        $data->riwayat_tanggapan = $this->getTanggapanKritikSaran($data->id);
 
         return response()->json([
             "message" => "Response OK",
             "data"    => $data
         ]);
 
+    }
+
+    // insert ke tabel tanggapan kritik saran
+    public function createTanggapan(Request $request){
+        $request->validate([
+            "id_kritiksaran" => "required",
+            "badge_id"       => "required",
+            "respon"         => "required"
+        ]);
+
+        DB::beginTransaction();
+        try {
+
+            DB::table('tbl_tanggapankritiksaran')
+                    ->insert([
+                        "id_kritik" => $request->id_kritiksaran,
+                        "respon"    => $request->respon,
+                        "badge_id"  => $request->badge_id,
+                        "waktu"     => date("Y-m-d H:i:s")
+                    ]);
+            
+            DB::commit();
+
+            return response()->json([
+                "message" => "Response OK, Berhasil insert data tanggapan",
+                "data"    => []
+            ]);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "message" => $th->getMessage(),
+            ], 400);
+        }
     }
 }

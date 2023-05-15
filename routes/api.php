@@ -58,6 +58,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    */
   Route::get('/kritiksaran/me', [KritikSaranController::class, 'getAllKritikDanSaran']);
   Route::post('/kritiksaran/add', [KritikSaranController::class, 'insertKritikSaran']);
+  Route::post('/kritiksaran/tanggapan', [KritikSaranController::class, 'createTanggapan']);
   Route::get('/kritiksaran/detail', [KritikSaranController::class, 'detailKritikSaran']);
 });
 
