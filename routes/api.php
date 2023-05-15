@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\KaryawanController;
+use App\Http\Controllers\API\KecamatanController;
+use App\Http\Controllers\API\KelurahanController;
 use App\Http\Controllers\API\LowonganController;
 use App\Http\Controllers\API\PengumumanController;
 use App\Http\Controllers\API\QuestionsController;
@@ -65,3 +67,13 @@ Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
  * List Questions
  */
 Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
+
+/**
+ * List kecamatan
+ */
+Route::get('/kecamatan', [KecamatanController::class, 'getAllKecamatan']);
+
+/**
+ * List Kelurahan
+ */
+Route::get('/kelurahan', [KelurahanController::class, 'getAllKelurahan']);

@@ -36,6 +36,8 @@ class AuthController extends Controller
             "employee_no"   => "required",
             "tgl_lahir"     => "required",
             "password"      => "required",
+            "id_question"   => "required",
+            "answer"       => "required"
             // "alamat_lengkap"    => "required",
             // "kelurahan"         => "required",
             // "kecamatan"         => "kecamatan",
@@ -98,6 +100,14 @@ class AuthController extends Controller
                             "kelurahan"=> $request->kelurahan ? $request->kelurahan : null,
                             "latitude" => $request->latitude ? $request->latitude : null,
                             "longitude"=> $request->longitude ? $request->longitude : null
+                        ]);
+
+                // insert ke tabel tbl_securityquestion
+                DB::table('tbl_securityquestion')
+                        ->insert([
+                            "badge_id" => $request->employee_no,
+                            "id_question" => $request->id_question,
+                            "answer" => $request->answer
                         ]);
 
                 DB::commit();
