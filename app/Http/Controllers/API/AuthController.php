@@ -14,23 +14,32 @@ class AuthController extends Controller
     public function registrasi(Request $request)
     {
 
-        if (!$request->employee_no) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ]);
-        }
+        // if (!$request->employee_no) {
+        //     return response()->json([
+        //         "message" => "Body dibutuhkan!"
+        //     ]);
+        // }
 
-        if (!$request->tgl_lahir) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ]);
-        }
+        // if (!$request->tgl_lahir) {
+        //     return response()->json([
+        //         "message" => "Body dibutuhkan!"
+        //     ]);
+        // }
 
-        if (!$request->password) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ]);
-        }
+        // if (!$request->password) {
+        //     return response()->json([
+        //         "message" => "Body dibutuhkan!"
+        //     ]);
+        // }
+
+        $request->validate([
+            "employee_no"   => "required",
+            "tgl_lahir"     => "required",
+            "password"      => "required",
+            // "alamat_lengkap"    => "required",
+            // "kelurahan"         => "required",
+            // "kecamatan"         => "kecamatan",
+        ]);
 
         /**
          * lakukan pengecekan terdahulu apakah ada user dengan badge yang direquest
@@ -61,18 +70,35 @@ class AuthController extends Controller
              */
             DB::beginTransaction();
             try {
+
+                // uodate ke tabel karyawan
                 DB::table('tbl_karyawan')
                     ->where('badge_id', $request->employee_no)
                     ->update([
                         "tgl_lahir" => $request->tgl_lahir,
-                        "password"  => bcrypt($request->password)
+                        "password"  => bcrypt($request->password),
+                        "no_hp"     => $request->no_hp ? $request->no_hp : null,
+                        "no_hp2"    => $request->no_hp2 ? $request->no_hp2 : null,
+                        "home_telp" => $request->telp ? $request->telp : null
                     ]);
 
+                // insert ke tabel mms
                 DB::table('tbl_mms')
                     ->insert([
                         "badge_id"  => $request->employee_no,
                         "uuid"      => $request->uuid ? $request->uuid : "N/A"
                     ]);
+
+                // insert ke tabel alamat
+                DB::table('tbl_alamat')
+                        ->insert([
+                            "badge_id" => $request->employee_no,
+                            "alamat"   => $request->alamat ? $request->alamat : null,
+                            "kecamatan"=> $request->kecamatan ? $request->kecamatan : null,
+                            "kelurahan"=> $request->kelurahan ? $request->kelurahan : null,
+                            "latitude" => $request->latitude ? $request->latitude : null,
+                            "longitude"=> $request->longitude ? $request->longitude : null
+                        ]);
 
                 DB::commit();
 
@@ -82,7 +108,6 @@ class AuthController extends Controller
             } catch (\Throwable $th) {
 
                 DB::rollBack();
-                dd($th->getMessage());
                 return response()->json([
                     "message" => "Something went wrong when update data karyawan"
                 ], 400);
