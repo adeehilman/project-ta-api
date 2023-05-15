@@ -198,6 +198,12 @@ class AuthController extends Controller
                 ], 400);
             }
         }
+
+        if(!$data_answer){
+            return response()->json([
+                "message" => "Security answer tidak ditemukan untuk badge " .$request->badge
+            ], 400);
+        }
     }
 
     // change password

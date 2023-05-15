@@ -160,4 +160,101 @@ class KaryawanController extends Controller
             ], 400);
         }
     }
+
+    // function edit profile
+    public function editAlamat(Request $request){
+        $request->validate([
+            "badge_id"      => "required",
+            "alamat"        => "required",
+            "kecamatan"     => "required",
+            "kelurahan"     => "required"
+        ]);
+
+        DB::beginTransaction();
+        try {
+            DB::table('tbl_alamat')
+                    ->where('badge_id', $request->badge_id)
+                    ->update([
+                        "badge_id" => $request->badge_id,
+                        "alamat"   => $request->alamat,
+                        "kecamatan" => $request->kecamatan,
+                        "kelurahan" => $request->kelurahan
+                    ]);
+            DB::commit();
+
+            return response()->json([
+                "message" => "Response OK, Berhasil update data alamat",
+                "data"    => []
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "message" => $th->getMessage(),
+            ], 400);
+        }
+    }
+
+     // function edit profile
+     public function editKontak(Request $request){
+        $request->validate([
+            "badge_id"      => "required",
+            "no_hp"        => "required",
+            "no_hp2"     => "required",
+            "telp"     => "required"
+        ]);
+
+        DB::beginTransaction();
+        try {
+            DB::table('tbl_karyawan')
+                    ->where('badge_id', $request->badge_id)
+                    ->update([
+                        "badge_id" => $request->badge_id,
+                        "no_hp"   => $request->no_hp,
+                        "no_hp2" => $request->no_hp2,
+                        "home_telp" => $request->telp
+                    ]);
+            DB::commit();
+
+            return response()->json([
+                "message" => "Response OK, Berhasil update data kontak",
+                "data"    => []
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "message" => $th->getMessage(),
+            ], 400);
+        }
+    }
+
+    // function edit security 
+    public function editSecurity(Request $request){
+        $request->validate([
+            "badge_id"           => "required",
+            "id_question"        => "required",
+            "answer"             => "required"
+        ]);
+
+        DB::beginTransaction();
+        try {
+            DB::table('tbl_securityquestion')
+                    ->where('badge_id', $request->badge_id)
+                    ->update([
+                        "badge_id" => $request->badge_id,
+                        "id_question"   => $request->id_question,
+                        "answer" => $request->answer
+                    ]);
+            DB::commit();
+
+            return response()->json([
+                "message" => "Response OK, Berhasil update security question",
+                "data"    => []
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "message" => $th->getMessage(),
+            ], 400);
+        }
+    }
 }

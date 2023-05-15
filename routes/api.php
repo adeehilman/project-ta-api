@@ -52,6 +52,9 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   Route::post('cek-jawaban', [AuthController::class, 'checkAnswer']);
   Route::post('forget-password', [AuthController::class, 'forgetPassword']);
   Route::get('profile', [KaryawanController::class, 'profile']);
+  Route::post('profile/edit-alamat', [KaryawanController::class, 'editAlamat']);
+  Route::post('profile/edit-kontak', [KaryawanController::class, 'editKontak']);
+  Route::post('profile/change-security-question', [KaryawanController::class, 'editSecurity']);
 
   /**
    * Kritik dan saran
@@ -60,29 +63,29 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   Route::post('/kritiksaran/add', [KritikSaranController::class, 'insertKritikSaran']);
   Route::post('/kritiksaran/tanggapan', [KritikSaranController::class, 'createTanggapan']);
   Route::get('/kritiksaran/detail', [KritikSaranController::class, 'detailKritikSaran']);
+
+  /**
+   * Karyawan API Service
+   */
+  Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
+
+  /**
+   * List Questions
+   */
+  Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
+
+  /**
+   * List kecamatan
+   */
+  Route::get('/kecamatan', [KecamatanController::class, 'getAllKecamatan']);
+
+  /**
+   * List Kelurahan
+   */
+  Route::get('/kelurahan', [KelurahanController::class, 'getAllKelurahan']);
 });
 
 
 /**
  * di luar middleware
  */
-
-/**
- * Karyawan API Service
- */
-Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
-
-/**
- * List Questions
- */
-Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
-
-/**
- * List kecamatan
- */
-Route::get('/kecamatan', [KecamatanController::class, 'getAllKecamatan']);
-
-/**
- * List Kelurahan
- */
-Route::get('/kelurahan', [KelurahanController::class, 'getAllKelurahan']);
