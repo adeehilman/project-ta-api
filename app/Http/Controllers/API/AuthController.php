@@ -99,7 +99,7 @@ class AuthController extends Controller
 
                 DB::rollBack();
                 return response()->json([
-                    "message" => "Something went wrong when update data karyawan"
+                    "message" => $th->getMessage()
                 ], 400);
             }
         }

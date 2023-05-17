@@ -13,7 +13,7 @@ class KelurahanController extends Controller
     {
         $data = DB::table('tbl_kelurahan')
             ->where('id_kecamatan', $request->id_kecamatan)
-            ->first();
+            ->get();
         return response()->json([
             "message" => "RESPONSE ALL KELURAHAN OK",
             "data"    => $data

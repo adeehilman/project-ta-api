@@ -42,10 +42,16 @@ class PengumumanController extends Controller
                     "message" => "Berhasil insert data pengumuman yang telah dibaca!"
                 ]);
             }
+
+            if($cek_pengumuman){
+                return response()->json([
+                    "message" => "Pengumuman telah dibaca"
+                ], 400);
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                "message" => $th->getMessage()
+                "message" => "something went wrong"
             ], 400);
         }
     }

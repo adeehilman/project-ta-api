@@ -27,8 +27,16 @@ class KaryawanController extends Controller
             ], 400);
         }
 
+        if($check_karyawan){
+            if($check_karyawan->password != null){
+                return response()->json([
+                    "message" => "Badge sudah didaftarkan"
+                ], 400);
+            }
+        }
+
         return response()->json([
-            "message" => "BADGE di TEMUKAN!"
+            "message" => "Badge bisa didaftarkan!"
         ]);
     }
 
@@ -98,7 +106,8 @@ class KaryawanController extends Controller
                     "line_code" => $data_karyawan->line_code,
                     "position_code" => $data_karyawan->position_code, 
                     "tgl_lahir" => $data_karyawan->tgl_lahir,
-                    "img_user" => $data_karyawan->img_user ? url(asset("/avatar/" .$data_karyawan->img_user)) : null
+                    // "img_user" => $data_karyawan->img_user ? url(asset("/avatar/" .$data_karyawan->img_user)) : null
+                    "img_user" => $data_karyawan->img_user ? $data_karyawan->img_user : null
                 ],
                 "kontak_karyawan" => [
                     "no_hp" => $data_karyawan->no_hp,
@@ -132,7 +141,8 @@ class KaryawanController extends Controller
                     "line_code" => $data_karyawan->line_code,
                     "position_code" => $data_karyawan->position_code, 
                     "tgl_lahir" => $data_karyawan->tgl_lahir,
-                    "img_user" => $data_karyawan->img_user ? url(asset("/avatar/" .$data_karyawan->img_user)) : null
+                    //"img_user" => $data_karyawan->img_user ? url(asset("/avatar/" .$data_karyawan->img_user)) : null
+                    "img_user" => $data_karyawan->img_user ? $data_karyawan->img_user : null
                 ],
                 "kontak_karyawan" => [
                     "no_hp" => $data_karyawan->no_hp,
