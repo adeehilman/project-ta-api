@@ -141,6 +141,7 @@ class AuthController extends Controller
                     'name_vlookup as jenis_kelamin',
                     'card_no',
                     'uuid',
+                    'img_user'
                 )
                 ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
             return response()->json([
