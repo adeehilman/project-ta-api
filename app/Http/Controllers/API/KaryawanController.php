@@ -31,7 +31,7 @@ class KaryawanController extends Controller
             if($check_karyawan->password != null){
                 return response()->json([
                     "message" => "Badge sudah didaftarkan"
-                ], 400);
+                ]);
             }
         }
 
@@ -297,6 +297,51 @@ class KaryawanController extends Controller
             return response()->json([
                 "message" => "Something went wrong",
             ], 400);
+        }
+    }
+
+    // function get question 
+    public function getMyQuestion(Request $request){
+        $request->validate([
+            "badge_id" => "required"
+        ]);
+
+        /**
+         * Cek Karyawan ada badge nya atau engga
+         */
+        $karyawan = DB::table('tbl_karyawan')
+                    ->where('badge_id', $request->badge_id)
+                    ->first();
+
+        if(!$karyawan){
+            return response()->json([
+                "message" => "Badge tidak ditemukan!"
+            ], 400);
+        }
+
+        if($karyawan){
+            $data = DB::table('tbl_securityquestion')
+                        ->select(
+                            'badge_id',
+                            'id_question',
+                            'question',
+                        )
+                        ->join('tbl_listquestion', 'tbl_listquestion.id', '=', 'tbl_securityquestion.id')
+                        ->where('badge_id', $request->badge_id)
+                        ->first();
+
+            if($data){
+                return response()->json([
+                    "message" => "Response OK",
+                    "data"    => $data
+                ]);
+            }
+
+            if(!$data){
+                return response()->json([
+                    "message" => "Question tidak ada untuk badge " .$request->badge_id
+                ], 400);
+            }
         }
     }
 }

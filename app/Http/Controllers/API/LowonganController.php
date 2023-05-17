@@ -21,7 +21,7 @@ class LowonganController extends Controller
                 ->paginate(10);
 
             foreach ($data as $key => $item) {
-                $item->file_upload = url(asset('/lokerimg/' . $item->file_upload));
+                $item->file_upload = "http://15.235.187.18:8081/lokerimg/" .$item->file_upload;
             }
 
             $total = $data->total();
