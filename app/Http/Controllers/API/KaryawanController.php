@@ -267,4 +267,36 @@ class KaryawanController extends Controller
             ], 400);
         }
     }
+
+    // function ekios get profile
+    public function getProfileEkios(Request $request){
+        $request->validate([
+            'uuid' => 'required'
+        ]);
+
+        try {
+            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
+                        a.badge_id = b.badge_id AND
+                        a.uuid = '$request->uuid' AND a.status_pendaftaran_mms = 12";
+            $karyawan = DB::select($query);
+            
+            if(count($karyawan) > 0){
+                $karyawan = $karyawan[0];
+                return response()->json([
+                    "message" => "Response OK",
+                    "data" => $karyawan
+                ]);
+            }
+
+            return response()->json([
+                "message" => "Data Tidak di temukan",
+            ], 400);
+
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                "message" => "Something went wrong",
+            ], 400);
+        }
+    }
 }

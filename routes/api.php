@@ -92,3 +92,9 @@ Route::post('forget-password', [AuthController::class, 'forgetPassword']);
  * Cek Jawaban
  */
 Route::post('cek-jawaban', [AuthController::class, 'checkAnswer']);
+
+/**
+ * Ekios check uuid
+ */
+Route::get('ekios/profile', [KaryawanController::class, 'getProfileEkios']);
+
