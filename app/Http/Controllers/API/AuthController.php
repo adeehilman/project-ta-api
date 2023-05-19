@@ -125,7 +125,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $token = JWTAuth::fromUser(Auth::user());
             $data = DB::table('tbl_karyawan')
-                ->join('tbl_mms', 'tbl_mms.badge_id', '=', 'tbl_karyawan.badge_id')
                 ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
                 ->select(
                     'tbl_karyawan.badge_id',
