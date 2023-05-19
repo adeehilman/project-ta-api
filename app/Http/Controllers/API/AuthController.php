@@ -65,11 +65,11 @@ class AuthController extends Controller
                     ]);
 
                 // insert ke tabel mms
-                DB::table('tbl_mms')
-                    ->insert([
-                        "badge_id"  => $request->employee_no,
-                        "uuid"      => $request->uuid ? $request->uuid : "N/A"
-                    ]);
+                // DB::table('tbl_mms')
+                //     ->insert([
+                //         "badge_id"  => $request->employee_no,
+                //         "uuid"      => $request->uuid ? $request->uuid : "N/A"
+                //     ]);
 
                 // insert ke tabel alamat
                 DB::table('tbl_alamat')
