@@ -40,7 +40,7 @@ class KritikSaranController extends Controller
     private function getTanggapanKritikSaran($id_kritiksaran)
     {
         $data = DB::table('tbl_tanggapankritiksaran')
-            ->select('fullname', 'position_code', 'respon', 'waktu')
+            ->select('fullname', 'position_code', 'respon', 'waktu', 'img_user')
             ->join('tbl_karyawan', 'tbl_karyawan.badge_id', '=', 'tbl_tanggapankritiksaran.badge_id')
             ->where('id_kritik', $id_kritiksaran)
             ->get();
