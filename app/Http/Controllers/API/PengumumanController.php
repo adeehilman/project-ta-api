@@ -9,52 +9,52 @@ use Illuminate\Support\Facades\DB;
 class PengumumanController extends Controller
 {
     // pengumuman dibaca
-    public function bacaPengumuman(Request $request)
-    {
-        if (!$request->badge) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ], 400);
-        }
+    // public function bacaPengumuman(Request $request)
+    // {
+    //     if (!$request->badge) {
+    //         return response()->json([
+    //             "message" => "Body dibutuhkan!"
+    //         ], 400);
+    //     }
 
-        if (!$request->id_pengumuman) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ], 400);
-        }
+    //     if (!$request->id_pengumuman) {
+    //         return response()->json([
+    //             "message" => "Body dibutuhkan!"
+    //         ], 400);
+    //     }
 
-        DB::beginTransaction();
-        try {
+    //     DB::beginTransaction();
+    //     try {
 
-            $cek_pengumuman = DB::table('tbl_dibaca')
-                ->where('badge_id', $request->badge)
-                ->where('id_pemberitahuan', $request->id_pengumuman)
-                ->exists();
-            if (!$cek_pengumuman) {
-                DB::table('tbl_dibaca')->insert([
-                    "badge_id" => $request->badge,
-                    "id_pemberitahuan" => $request->id_pengumuman,
-                    "waktu_dibaca" => date('Y-m-d H:i:s')
-                ]);
-                DB::commit();
+    //         $cek_pengumuman = DB::table('tbl_dibaca')
+    //             ->where('badge_id', $request->badge)
+    //             ->where('id_pemberitahuan', $request->id_pengumuman)
+    //             ->exists();
+    //         if (!$cek_pengumuman) {
+    //             DB::table('tbl_dibaca')->insert([
+    //                 "badge_id" => $request->badge,
+    //                 "id_pemberitahuan" => $request->id_pengumuman,
+    //                 "waktu_dibaca" => date('Y-m-d H:i:s')
+    //             ]);
+    //             DB::commit();
 
-                return response()->json([
-                    "message" => "Berhasil insert data pengumuman yang telah dibaca!"
-                ]);
-            }
+    //             return response()->json([
+    //                 "message" => "Berhasil insert data pengumuman yang telah dibaca!"
+    //             ]);
+    //         }
 
-            if($cek_pengumuman){
-                return response()->json([
-                    "message" => "Pengumuman telah dibaca"
-                ], 400);
-            }
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                "message" => "something went wrong"
-            ], 400);
-        }
-    }
+    //         if ($cek_pengumuman) {
+    //             return response()->json([
+    //                 "message" => "Pengumuman telah dibaca"
+    //             ], 400);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             "message" => "something went wrong"
+    //         ], 400);
+    //     }
+    // }
 
     // get all pengumuman
     public function getAllPengumuman(Request $request)
@@ -86,21 +86,21 @@ class PengumumanController extends Controller
                     ->where('badge_id', $request->badge_id)
                     ->first();
 
-                 /**
+                /**
                  * apabila user tidak ada id grup
                  */
                 $data = DB::table('tbl_pemberitahuan')
-                ->whereIn('receive_by', [4])
-                ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
-                ->select(
-                    'tbl_pemberitahuan.id as id',
-                    'judul',
-                    'waktu_pemberitahuan',
-                    'deskripsi',
-                    'image',
-                    'nama_grup as penerima'
-                )
-                ->paginate(10);
+                    ->whereIn('receive_by', [4])
+                    ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+                    ->select(
+                        'tbl_pemberitahuan.id as id',
+                        'judul',
+                        'waktu_pemberitahuan',
+                        'deskripsi',
+                        'image',
+                        'nama_grup as penerima'
+                    )
+                    ->paginate(10);
 
                 /**
                  * Apabila karyawan adalah PKB, maka get kategori pkb, all, ptsn
@@ -120,7 +120,7 @@ class PengumumanController extends Controller
                         ->paginate(10);
                 }
 
-                 /**
+                /**
                  * Apabila karyawan adalah PTSN, maka get kategori all dan ptsn
                  */
                 if ($data_user->id_grup == 1) {
@@ -138,7 +138,7 @@ class PengumumanController extends Controller
                         ->paginate(10);
                 }
 
-                  /**
+                /**
                  * Apabila karyawan adalah PTSN, maka get kategori all dan ptsn
                  */
                 if ($data_user->id_grup == 2) {
@@ -155,11 +155,12 @@ class PengumumanController extends Controller
                         )
                         ->paginate(10);
                 }
-
             }
 
             foreach ($data as $key => $item) {
                 $item->image = url(asset('/announcement/' . $item->image));
+                $plaintext = strip_tags($item->deskripsi);
+                $item->deskripsi = substr($plaintext, 0, 15) . ".....";
             }
 
             $total = $data->total();
@@ -183,6 +184,70 @@ class PengumumanController extends Controller
             return response()->json([
                 "message" => "Something went wrong when get all pengumuman"
             ], 400);
+        }
+    }
+
+    // get detail pengumuman
+    public function detailPengumuman(Request $request)
+    {
+
+        if (!$request->id) {
+            return response()->json([
+                "message" => "Params dibutuhkan"
+            ]);
+        }
+
+        if (!$request->badge) {
+            return response()->json([
+                "message" => "Params dibutuhkan"
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $cek_pengumuman = DB::table('tbl_dibaca')
+                ->where('badge_id', $request->badge)
+                ->where('id_pemberitahuan', $request->id)
+                ->exists();
+            if (!$cek_pengumuman) {
+                DB::table('tbl_dibaca')->insert([
+                    "badge_id" => $request->badge,
+                    "id_pemberitahuan" => $request->id,
+                    "waktu_dibaca" => date('Y-m-d H:i:s')
+                ]);
+                DB::commit();
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+        }
+
+        $data = DB::table('tbl_pemberitahuan')
+            ->select(
+                'tbl_pemberitahuan.id',
+                'judul',
+                'waktu_pemberitahuan',
+                'deskripsi',
+                'nama_grup as penerima',
+                'image'
+            )
+            ->join('tbl_grup', 'tbl_grup.id', '=', 'tbl_pemberitahuan.receive_by')
+            ->where('tbl_pemberitahuan.id', $request->id)
+            ->first();
+
+        if ($data) {
+            $data->image = url(asset('/announcement/' . $data->image));
+            return response()->json([
+                "message" => "Response OK",
+                "data"    => $data
+            ]);
+        }
+
+        if(!$data){
+            return response()->json([
+                "message" => "Tidak ada data",
+                "data"    => []
+            ]);
         }
     }
 }

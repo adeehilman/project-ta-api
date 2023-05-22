@@ -39,11 +39,13 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    */
   Route::post('/pengumuman/baca', [PengumumanController::class, 'bacaPengumuman']);
   Route::get('/pengumuman', [PengumumanController::class, 'getAllPengumuman']);
+  Route::get('/pengumuman/detail', [PengumumanController::class, 'detailPengumuman']);
 
   /**
    * Loker API Service
    */
   Route::get('/loker', [LowonganController::class, 'getAllLoker']);
+  Route::get('/loker/detail', [LowonganController::class, 'getDetailLowongan']);
 
   /**
    * Karyawan API Service
@@ -66,6 +68,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    * Question
    */
   Route::get('questions/my-question', [KaryawanController::class, 'getMyQuestion']);
+  Route::get('/questions/check', [QuestionsController::class, 'checkSecurityQuestion']);
 });
 
 /**

@@ -22,6 +22,8 @@ class LowonganController extends Controller
 
             foreach ($data as $key => $item) {
                 $item->file_upload = "http://15.235.187.18:8081/lokerimg/" .$item->file_upload;
+                $plaintext = strip_tags($item->desc);
+                $item->desc = substr($plaintext, 0, 15) . ".....";
             }
 
             $total = $data->total();
@@ -47,5 +49,47 @@ class LowonganController extends Controller
                 "message" => "Something went wrong when get all pengumuman"
             ], 400);
         }
+    }
+
+    // get detail lowongan
+    public function getDetailLowongan(Request $request){
+        
+        if(!$request->id){
+            return response()->json([
+                "message" => "params dibutuhkan"
+            ]);
+        }
+
+        $data = DB::table('tbl_lowongankerja')
+                        ->select(
+                            'id',
+                            'posisi',
+                            'mulai_berlaku',
+                            'berlaku_sampai',
+                            'url',
+                            'file_upload',
+                            'desc'
+                        )
+                        ->where('id', $request->id)
+                        ->first();
+
+        if($data){
+
+            $data->file_upload = "http://15.235.187.18:8081/lokerimg/" .$data->file_upload;
+
+            return response()->json([
+                "message" => "Response OK",
+                "data"    => $data
+            ]);
+        }
+
+        if(!$data){
+            
+            return response()->json([
+                "message" => "Data Tidak Ada",
+                "data"    => []
+            ]);
+        }
+
     }
 }

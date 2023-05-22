@@ -30,13 +30,15 @@ class KaryawanController extends Controller
         if($check_karyawan){
             if($check_karyawan->password != null){
                 return response()->json([
-                    "message" => "Badge sudah didaftarkan"
+                    "message" => "Badge sudah didaftarkan",
+                    "status_pendaftaran" => 0
                 ]);
             }
         }
 
         return response()->json([
-            "message" => "Badge bisa didaftarkan!"
+            "message" => "Badge bisa didaftarkan!",
+            "status_pendaftaran" => 1
         ]);
     }
 
