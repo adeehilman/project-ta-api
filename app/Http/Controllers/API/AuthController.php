@@ -372,7 +372,7 @@ class AuthController extends Controller
                         $data = [
                             "status_check" => $status_check,
                             "status_code" => 400,
-                            "message" => $message,
+                            "message" => $decypt_text,
                             "data"    => []
                         ];
 

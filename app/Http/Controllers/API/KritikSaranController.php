@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +28,11 @@ class KritikSaranController extends Controller
             ->join('tbl_statuskritiksaran', 'tbl_statuskritiksaran.id', '=', 'tbl_riwayatkritiksaran.status_riwayat')
             ->where('id_kritiksaran', $id_kritiksaran)
             ->get();
+
+        foreach ($data as $key => $item) {
+            $item->createdate = date("Y-m-d H:i", strtotime($item->createdate));
+        }
+
         return $data;
     }
 
@@ -57,6 +63,7 @@ class KritikSaranController extends Controller
             $item->kategori = $this->getKategori($item->kategori);
             $item->file_upload = url(asset('kritiksaran/' . $item->file_upload));
             $item->riwayat_status = $this->getRiwayatKritikSaran($item->id);
+            $item->createdate = date("Y-m-d H:i", strtotime($item->createdate));
         }
 
         return response()->json([
