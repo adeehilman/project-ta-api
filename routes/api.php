@@ -68,6 +68,12 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    * Question
    */
   Route::get('/questions/check', [QuestionsController::class, 'checkSecurityQuestion']);
+
+  /**
+   * First login
+   */
+  Route::get('/first-login', [AuthController::class, 'isFirstLogin']);
+  Route::post('/first-login', [AuthController::class, 'setFirstLogin']);
 });
 
 /**

@@ -444,4 +444,92 @@ class AuthController extends Controller
 
         return $data;
     }
+
+    /**
+     * check apakah user baru pertama kali melakukan login 
+     * untuk pengguna yang lama, atau menghadapi masa transisi dari aplikasi mysatnusa lama
+     * ke mysatnusa baru
+     */
+    public function isFirstLogin(Request $request)
+    {
+
+        $request->validate([
+            "badge_id" => "required"
+        ]);
+
+        $data = DB::table('tbl_karyawan')
+            ->select('is_reset')
+            ->where('badge_id', $request->badge_id)
+            ->first();
+        if ($data) {
+            // apakah user pertama kali login ?
+            if ($data->is_reset == 0) {
+                return response()->json([
+                    "message" => "munculkan dialog, karena return 1",
+                    "isFirstLogin" => 1
+                ]);
+            }
+
+            // apakah user pertama kali login ?
+            if ($data->is_reset == 1) {
+                return response()->json([
+                    "message" => "jangan munculkan dialog, karena return 0",
+                    "isFirstLogin" => 0
+                ]);
+            }
+        }
+
+        if (!$data) {
+            return response()->json([
+                "message" => "badge tidak ditemukan"
+            ], 400);
+        }
+    }
+
+    /**
+     * lakukan insert ke database, apabila user baru portama kali login
+     * user set password, dan user set security question
+     */
+    public function setFirstLogin(Request $request)
+    {
+
+        $request->validate([
+            "badge_id" => "required",
+            "new_password" => "required",
+            "id_question"  => "required",
+            "answer"       => "required"
+        ]);
+
+        /**
+         * lakukan update password ditabel karyawan
+         */
+        DB::beginTransaction();
+        try {
+            DB::table('tbl_karyawan')
+                ->where('badge_id', $request->badge_id)
+                ->update([
+                    "password" => bcrypt($request->new_password)
+                ]);
+
+            // insert ke tabel tbl_securityquestion
+            DB::table('tbl_securityquestion')
+                ->insert([
+                    "badge_id" => $request->badge_id,
+                    "id_question" => $request->id_question,
+                    "answer" => $request->answer
+                ]);
+
+
+            DB::commit();
+            
+            return response()->json([
+                "message" => "Sukses melakukan update password karyawan!"
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "message" => "Something went wrong when change password"
+            ], 400);
+        }
+    }
 }

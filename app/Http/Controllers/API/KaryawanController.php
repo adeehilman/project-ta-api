@@ -23,7 +23,8 @@ class KaryawanController extends Controller
             ->first();
         if (!$check_karyawan) {
             return response()->json([
-                "message" => "Tidak ada badge yang cocok ditemukan!"
+                "message" => "Tidak ada badge yang cocok ditemukan!",
+                "status_pendaftaran" => 0
             ], 400);
         }
 
