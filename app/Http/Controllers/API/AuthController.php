@@ -508,7 +508,8 @@ class AuthController extends Controller
             DB::table('tbl_karyawan')
                 ->where('badge_id', $request->badge_id)
                 ->update([
-                    "password" => bcrypt($request->new_password)
+                    "password" => bcrypt($request->new_password),
+                    "is_reset" => 1
                 ]);
 
             // insert ke tabel tbl_securityquestion
@@ -521,14 +522,14 @@ class AuthController extends Controller
 
 
             DB::commit();
-            
+
             return response()->json([
-                "message" => "Sukses melakukan update password karyawan!"
+                "message" => "Sukses melakukan update password dan set security questoon"
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                "message" => "Something went wrong when change password"
+                "message" => "Kami menemukan user sudah pernah melakukan login pertama kali"
             ], 400);
         }
     }
