@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use DateInterval;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,22 +75,22 @@ class AuthController extends Controller
 
                 // insert ke tabel alamat
                 DB::table('tbl_alamat')
-                        ->insert([
-                            "badge_id" => $request->employee_no,
-                            "alamat"   => $request->alamat ? $request->alamat : null,
-                            "kecamatan"=> $request->kecamatan ? $request->kecamatan : null,
-                            "kelurahan"=> $request->kelurahan ? $request->kelurahan : null,
-                            "latitude" => $request->latitude ? $request->latitude : null,
-                            "longitude"=> $request->longitude ? $request->longitude : null
-                        ]);
+                    ->insert([
+                        "badge_id" => $request->employee_no,
+                        "alamat"   => $request->alamat ? $request->alamat : null,
+                        "kecamatan" => $request->kecamatan ? $request->kecamatan : null,
+                        "kelurahan" => $request->kelurahan ? $request->kelurahan : null,
+                        "latitude" => $request->latitude ? $request->latitude : null,
+                        "longitude" => $request->longitude ? $request->longitude : null
+                    ]);
 
                 // insert ke tabel tbl_securityquestion
                 DB::table('tbl_securityquestion')
-                        ->insert([
-                            "badge_id" => $request->employee_no,
-                            "id_question" => $request->id_question,
-                            "answer" => $request->answer
-                        ]);
+                    ->insert([
+                        "badge_id" => $request->employee_no,
+                        "id_question" => $request->id_question,
+                        "answer" => $request->answer
+                    ]);
 
                 DB::commit();
 
@@ -198,9 +200,9 @@ class AuthController extends Controller
             }
         }
 
-        if(!$data_answer){
+        if (!$data_answer) {
             return response()->json([
-                "message" => "Security answer tidak ditemukan untuk badge " .$request->badge
+                "message" => "Security answer tidak ditemukan untuk badge " . $request->badge
             ], 400);
         }
     }
@@ -209,7 +211,7 @@ class AuthController extends Controller
     public function forgetPassword(Request $request)
     {
 
-        
+
         if (!$request->badge_id) {
             return response()->json([
                 "message" => "Body dibutuhkan!"
@@ -261,12 +263,180 @@ class AuthController extends Controller
             return response()->json([
                 "message" => "Sukses melakukan update password karyawan!"
             ]);
-            
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
                 "message" => "Something went wrong when change password"
             ], 400);
         }
+    }
+
+    // check decrypt password
+    public function decryptQr(Request $request)
+    {
+        $request->validate([
+            "encrypt_code" => "required"
+        ]);
+
+        /**
+         * Proses decrypt data menggunakan Kriptografi AES
+         * KEY ada di .env
+         * Enksripsi di adopsi dari sistem lama MIS
+         */
+        $key = env('AES_KEY');
+        $iv  = env('AES_IV');
+
+        $decryptedData = openssl_decrypt(
+            base64_decode($request->encrypt_code),
+            'AES-256-CBC',
+            $key,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+
+        $data = $this->checkSecurityPhone($decryptedData);
+        return response()->json($data);
+    }
+
+    // private function check security uuid
+    /**
+     * Return nya adalah objek
+     * lewat keluar gerbang satnusa atau enggak
+     */
+    private function checkSecurityPhone($decypt_text)
+    {
+
+        $status_check = 0;
+        $message = "Kesalahan pada sistem!";
+
+        /**
+         * Apabila decrypt text tidak return false dan tidak string kosong
+         */
+        if ($decypt_text != false || $decypt_text != null) {
+
+            // dipishain dulu pertitik koma
+            $array_decrypt = explode(';', $decypt_text);
+            $uuid = $array_decrypt[0];
+            $date = $array_decrypt[1];
+            $hours = (int)$array_decrypt[2];
+
+            // dipisahin dulu per strip utk tanggalnya
+            $array_date = explode('-', $date);
+            $hari  = $array_date[0];
+            $bulan = $array_date[1];
+            $tahun = $array_date[2];
+
+            // lakukan pengeceka uuid apakah ada di tbl_mms
+            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
+                        a.badge_id = b.badge_id AND
+                        a.uuid = '$uuid' AND a.status_pendaftaran_mms = 12";
+            $karyawan = DB::select($query);
+
+            // apabila ditemukan uuid yang sama dan status nya 12 maka lakukan kode dibawah ini
+            if (count($karyawan) > 0) {
+                $karyawan = $karyawan[0];
+
+                // lakukan pengecekan expired qr code yang telah dilempar oleh kodenya
+                /**
+                 * Apabila jam >= 7 dan jam <= 23
+                 */
+                if ($hours >= 7 && $hours <= 23) {
+                    $minHour = $hours - 2;
+                    $maxHour = $hours + 1;
+
+                    // lakukan pengecekan hari dan jam
+                    if (
+                        date('d') == $hari &&
+                        date('m') == $bulan &&
+                        date('Y') == $tahun &&
+                        date('H') >= $minHour &&
+                        date('H') <= $maxHour
+
+                    ) {
+
+                        $status_check = 1;
+                        $message = "DEVICE FOUND";
+
+                        $data = [
+                            "message" => $message,
+                            "status_code" => 200,
+                            "status_check" => $status_check,
+                            "data" => $karyawan
+                        ];
+                        return $data;
+                    } else {
+                        $status_check = 0;
+                        $message = "QR CODE EXPIRED";
+
+                        $data = [
+                            "status_check" => $status_check,
+                            "status_code" => 200,
+                            "message" => $message,
+                            "data"    => []
+                        ];
+
+                        return $data;
+                    }
+                }
+
+                /**
+                 * Apabila jam jam krusial saat ganti hari dan waktu
+                 */
+                if (($hours >= 0 && $hours <= 2) || ($hours >= 23 && $hours <= 24)) {
+                    $hours = $hours == 0 ? 24 : $hours;
+                    $span2 = new DateInterval('PT' . $hours . 'H');
+                    $combineDateNIHour = (new DateTime())->setDate($tahun, $bulan, $hari)->setTime($span2->h, $span2->i, $span2->s);
+                    $minHour = (new DateTime())->sub(new DateInterval('PT2H'));
+                    $maxHour = (new DateTime())->add(new DateInterval('PT1H'));
+
+                    if ($minHour < $combineDateNIHour && $combineDateNIHour < $maxHour) {
+                        $status_check = 1;
+                        $message = "DEVICE FOUND";
+
+                        $data = [
+                            "status_check" => $status_check,
+                            "status_code" => 200,
+                            "message" => $message,
+                            "data"    => $karyawan
+                        ];
+
+                        return $data;
+                    } else {
+                        $status_check = 0;
+                        $message = "QR CODE EXPIRED";
+
+                        $data = [
+                            "status_check" => $status_check,
+                            "status_code" => 200,
+                            "message" => $message,
+                            "data"    => $karyawan
+                        ];
+
+                        return $data;
+                    }
+                }
+            } else {
+                $status_check = 0;
+                $message = "DEVICE NOT REGISTERED";
+
+                $data = [
+                    "message" => $message,
+                    "status_code" => 200,
+                    "status_check" => $status_check,
+                    "data" => $karyawan
+                ];
+
+                return $data;
+            }
+        }
+
+        $data = [
+            "message" => "TIDAK DAPAT MENGURAI DATA QR YANG DIBERIKAN",
+            "status_code" => 200,
+            "status_check" => 0,
+            "data" => []
+        ];
+
+        return $data;
     }
 }

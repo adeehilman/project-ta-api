@@ -67,7 +67,6 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   /**
    * Question
    */
-  Route::get('questions/my-question', [KaryawanController::class, 'getMyQuestion']);
   Route::get('/questions/check', [QuestionsController::class, 'checkSecurityQuestion']);
 });
 
@@ -80,6 +79,7 @@ Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
  * List Questions
  */
 Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
+Route::get('questions/my-question', [KaryawanController::class, 'getMyQuestion']);
 
 /**
  * List kecamatan
@@ -106,3 +106,7 @@ Route::post('cek-jawaban', [AuthController::class, 'checkAnswer']);
  */
 Route::get('ekios/profile', [KaryawanController::class, 'getProfileEkios']);
 
+/**
+ * Decrtypt code
+ */
+Route::post('/decrypt_qr_code', [AuthController::class, 'decryptQr']);

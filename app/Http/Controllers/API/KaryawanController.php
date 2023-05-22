@@ -276,30 +276,51 @@ class KaryawanController extends Controller
             'uuid' => 'required'
         ]);
 
-        try {
-            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
-                        a.badge_id = b.badge_id AND
-                        a.uuid = '$request->uuid' AND a.status_pendaftaran_mms = 12";
-            $karyawan = DB::select($query);
+        echo $request->uuid;
+         /**
+         * Proses decrypt data menggunakan Kriptografi AES
+         * KEY ada di .env
+         * Enksripsi di adopsi dari sistem lama MIS
+         */
+        $key = env('AES_KEY');
+        $iv  = env('AES_IV');
+
+        $decryptedData = openssl_decrypt(
+            base64_decode($request->uuid),
+            'AES-256-CBC',
+            $key,
+            OPENSSL_RAW_DATA,
+            $iv
+        );
+
+        echo $decryptedData;
+        die();
+        $msg = $this->checkSecurityPhone($decryptedData);
+
+        // try {
+        //     $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
+        //                 a.badge_id = b.badge_id AND
+        //                 a.uuid = '$request->uuid' AND a.status_pendaftaran_mms = 12";
+        //     $karyawan = DB::select($query);
             
-            if(count($karyawan) > 0){
-                $karyawan = $karyawan[0];
-                return response()->json([
-                    "message" => "Response OK",
-                    "data" => $karyawan
-                ]);
-            }
+        //     if(count($karyawan) > 0){
+        //         $karyawan = $karyawan[0];
+        //         return response()->json([
+        //             "message" => "Response OK",
+        //             "data" => $karyawan
+        //         ]);
+        //     }
 
-            return response()->json([
-                "message" => "Data Tidak di temukan",
-            ], 400);
+        //     return response()->json([
+        //         "message" => "Data Tidak di temukan",
+        //     ], 400);
 
 
-        } catch (\Throwable $th) {
-            return response()->json([
-                "message" => "Something went wrong",
-            ], 400);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         "message" => "Something went wrong",
+        //     ], 400);
+        // }
     }
 
     // function get question 
@@ -345,5 +366,16 @@ class KaryawanController extends Controller
                 ], 400);
             }
         }
+    }
+
+    /**
+     * Return nya adalah string message apakah sebuah phone boleh 
+     * lewat keluar gerbang satnusa atau enggak
+     */
+    private function checkSecurityPhone($decypt_text){
+        $message = "Kesalahan pada sistem!";
+
+        $array_decrypt = explode(';', $decypt_text);
+        // dd($array_decrypt);
     }
 }
