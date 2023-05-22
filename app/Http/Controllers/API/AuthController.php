@@ -295,7 +295,8 @@ class AuthController extends Controller
         );
 
         $data = $this->checkSecurityPhone($decryptedData);
-        return response()->json($data);
+
+        return response()->json($data, $data['status_code']);
     }
 
     // private function check security uuid
@@ -370,7 +371,7 @@ class AuthController extends Controller
 
                         $data = [
                             "status_check" => $status_check,
-                            "status_code" => 200,
+                            "status_code" => 400,
                             "message" => $message,
                             "data"    => []
                         ];
@@ -407,7 +408,7 @@ class AuthController extends Controller
 
                         $data = [
                             "status_check" => $status_check,
-                            "status_code" => 200,
+                            "status_code" => 400,
                             "message" => $message,
                             "data"    => $karyawan
                         ];
@@ -421,7 +422,7 @@ class AuthController extends Controller
 
                 $data = [
                     "message" => $message,
-                    "status_code" => 200,
+                    "status_code" => 400,
                     "status_check" => $status_check,
                     "data" => $karyawan
                 ];
@@ -432,7 +433,7 @@ class AuthController extends Controller
 
         $data = [
             "message" => "TIDAK DAPAT MENGURAI DATA QR YANG DIBERIKAN",
-            "status_code" => 200,
+            "status_code" => 400,
             "status_check" => 0,
             "data" => []
         ];
