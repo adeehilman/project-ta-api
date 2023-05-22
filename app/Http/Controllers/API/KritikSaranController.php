@@ -57,6 +57,7 @@ class KritikSaranController extends Controller
 
         $data = DB::table('tbl_kritiksaran')
             ->where('badge_id', $request->badge_id)
+            ->orderBy('id', 'desc')
             ->get();
 
         foreach ($data as $key => $item) {
@@ -104,13 +105,16 @@ class KritikSaranController extends Controller
                             "kategori"      => $request->id_kategori,
                             "description"   => $request->description,
                             "file_upload"   => $file_name,
+                            "badge_id"      => $request->badge_id,
                             "area"          => $request->area,
+                            "is_anonymous"  => $request->is_anonymous,
+                            "status_kritiksaran" => 1,
+                            "createdate" => date("Y-m-d H:i:s")
                         ]);
                     if ($id_kritiksaran) {
                         DB::table('tbl_riwayatkritiksaran')
                             ->insert([
                                 "id_kritiksaran" => $id_kritiksaran,
-                                "badge_id"       => $request->badge_id,
                                 "status_riwayat" => 1, // defaultnya 1 diambil dari tbl_statuskritksaran
                                 "createby"       => $request->badge_id,
                                 "createdate"     => date("Y-m-d H:i:s")
@@ -130,12 +134,14 @@ class KritikSaranController extends Controller
                             "file_upload"   => $file_name,
                             "badge_id"      => $request->badge_id,
                             "area"          => $request->area,
+                            "is_anonymous"  => $request->is_anonymous,
+                            "status_kritiksaran" => 1,
+                            "createdate" => date("Y-m-d H:i:s")
                         ]);
                     if ($id_kritiksaran) {
                         DB::table('tbl_riwayatkritiksaran')
                             ->insert([
                                 "id_kritiksaran" => $id_kritiksaran,
-                                "badge_id"       => $request->badge_id,
                                 "status_riwayat" => 1, // defaultnya 1 diambil dari tbl_statuskritksaran
                                 "createby"       => $request->badge_id,
                                 "createdate"     => date("Y-m-d H:i:s")
