@@ -141,7 +141,6 @@ class AuthController extends Controller
                     'tgl_lahir',
                     'name_vlookup as jenis_kelamin',
                     'card_no',
-                    'is_reset',
                     'img_user'
                 )
                 ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
