@@ -141,7 +141,8 @@ class AuthController extends Controller
                     'tgl_lahir',
                     'name_vlookup as jenis_kelamin',
                     'card_no',
-                    'img_user'
+                    'img_user',
+                    'is_reset'
                 )
                 ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
             return response()->json([
@@ -328,9 +329,13 @@ class AuthController extends Controller
             $tahun = $array_date[2];
 
             // lakukan pengeceka uuid apakah ada di tbl_mms
-            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
-                        a.badge_id = b.badge_id AND
-                        a.uuid = '$uuid' AND a.status_pendaftaran_mms = 12";
+            // $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
+            //             a.badge_id = b.badge_id AND
+            //             a.uuid = '$uuid' AND a.status_pendaftaran_mms = 12";
+
+            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, a.status_pendaftaran_mms, c.stat_title, c.stat_desc, b.img_user FROM tbl_mms a, tbl_karyawan b, tbl_statusmms c WHERE 
+                            a.badge_id = b.badge_id AND a.status_pendaftaran_mms = c.id AND a.uuid = '$uuid' ";
+
             $karyawan = DB::select($query);
 
             // apabila ditemukan uuid yang sama dan status nya 12 maka lakukan kode dibawah ini
@@ -372,7 +377,7 @@ class AuthController extends Controller
                         $data = [
                             "status_check" => $status_check,
                             "status_code" => 400,
-                            "message" => $decypt_text,
+                            "message" => $message,
                             "data"    => []
                         ];
 
@@ -423,7 +428,7 @@ class AuthController extends Controller
                 $data = [
                     "message" => $message,
                     "status_code" => 400,
-                    "status_check" => $status_check,
+                    "status_check" => $message,
                     "data" => $karyawan
                 ];
 
