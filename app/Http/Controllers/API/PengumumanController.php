@@ -8,53 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class PengumumanController extends Controller
 {
-    // pengumuman dibaca
-    // public function bacaPengumuman(Request $request)
-    // {
-    //     if (!$request->badge) {
-    //         return response()->json([
-    //             "message" => "Body dibutuhkan!"
-    //         ], 400);
-    //     }
-
-    //     if (!$request->id_pengumuman) {
-    //         return response()->json([
-    //             "message" => "Body dibutuhkan!"
-    //         ], 400);
-    //     }
-
-    //     DB::beginTransaction();
-    //     try {
-
-    //         $cek_pengumuman = DB::table('tbl_dibaca')
-    //             ->where('badge_id', $request->badge)
-    //             ->where('id_pemberitahuan', $request->id_pengumuman)
-    //             ->exists();
-    //         if (!$cek_pengumuman) {
-    //             DB::table('tbl_dibaca')->insert([
-    //                 "badge_id" => $request->badge,
-    //                 "id_pemberitahuan" => $request->id_pengumuman,
-    //                 "waktu_dibaca" => date('Y-m-d H:i:s')
-    //             ]);
-    //             DB::commit();
-
-    //             return response()->json([
-    //                 "message" => "Berhasil insert data pengumuman yang telah dibaca!"
-    //             ]);
-    //         }
-
-    //         if ($cek_pengumuman) {
-    //             return response()->json([
-    //                 "message" => "Pengumuman telah dibaca"
-    //             ], 400);
-    //         }
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             "message" => "something went wrong"
-    //         ], 400);
-    //     }
-    // }
 
     // get all pengumuman
     public function getAllPengumuman(Request $request)
@@ -76,6 +29,7 @@ class PengumumanController extends Controller
                     'image',
                     'nama_grup as penerima'
                 )
+                ->orderBy('id', 'desc')
                 ->paginate(10);
 
             if ($request->badge_id) {
@@ -100,6 +54,7 @@ class PengumumanController extends Controller
                         'image',
                         'nama_grup as penerima'
                     )
+                    ->orderBy('id', 'desc')
                     ->paginate(10);
 
                 /**
@@ -117,6 +72,7 @@ class PengumumanController extends Controller
                             'image',
                             'nama_grup as penerima'
                         )
+                        ->orderBy('id', 'desc')
                         ->paginate(10);
                 }
 
@@ -135,6 +91,7 @@ class PengumumanController extends Controller
                             'image',
                             'nama_grup as penerima'
                         )
+                        ->orderBy('id', 'desc')
                         ->paginate(10);
                 }
 
@@ -153,12 +110,15 @@ class PengumumanController extends Controller
                             'image',
                             'nama_grup as penerima'
                         )
+                        ->orderBy('id', 'desc')
                         ->paginate(10);
                 }
             }
 
             foreach ($data as $key => $item) {
-                $item->image = url(asset('/announcement/' . $item->image));
+                // $item->image = env('URL_PENGUMUMAN') . $item->image;
+                // $file_image = file_get_contents($item->image);
+                // $item->image = 'data:image/jpg;base64,' .base64_encode($file_image);
                 $plaintext = strip_tags($item->deskripsi);
                 $item->deskripsi = substr($plaintext, 0, 15) . ".....";
             }
@@ -182,7 +142,7 @@ class PengumumanController extends Controller
             return response()->json($response);
         } catch (\Throwable $th) {
             return response()->json([
-                "message" => "Something went wrong when get all pengumuman"
+                "message" => "something went wrong"
             ], 400);
         }
     }
@@ -236,7 +196,13 @@ class PengumumanController extends Controller
             ->first();
 
         if ($data) {
-            $data->image = url(asset('/announcement/' . $data->image));
+
+            if($data->image != null){
+                $data->image = env('URL_PENGUMUMAN') . $data->image;
+                $file_image = file_get_contents($data->image);
+                $data->image = 'data:image/jpg;base64,' .base64_encode($file_image);
+            }
+
             return response()->json([
                 "message" => "Response OK",
                 "data"    => $data

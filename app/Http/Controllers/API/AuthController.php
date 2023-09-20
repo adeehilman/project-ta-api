@@ -63,15 +63,9 @@ class AuthController extends Controller
                         "no_hp"     => $request->no_hp ? $request->no_hp : null,
                         "no_hp2"    => $request->no_hp2 ? $request->no_hp2 : null,
                         "home_telp" => $request->telp ? $request->telp : null,
-                        "id_grup"   => 1
+                        "id_grup"   => 1,
+                        "is_reset"  => 1
                     ]);
-
-                // insert ke tabel mms
-                // DB::table('tbl_mms')
-                //     ->insert([
-                //         "badge_id"  => $request->employee_no,
-                //         "uuid"      => $request->uuid ? $request->uuid : "N/A"
-                //     ]);
 
                 // insert ke tabel alamat
                 DB::table('tbl_alamat')
@@ -80,8 +74,8 @@ class AuthController extends Controller
                         "alamat"   => $request->alamat ? $request->alamat : null,
                         "kecamatan" => $request->kecamatan ? $request->kecamatan : null,
                         "kelurahan" => $request->kelurahan ? $request->kelurahan : null,
-                        "latitude" => $request->latitude ? $request->latitude : null,
-                        "longitude" => $request->longitude ? $request->longitude : null
+                        // "latitude" => $request->latitude ? $request->latitude : null,
+                        // "longitude" => $request->longitude ? $request->longitude : null
                     ]);
 
                 // insert ke tabel tbl_securityquestion
@@ -101,7 +95,7 @@ class AuthController extends Controller
 
                 DB::rollBack();
                 return response()->json([
-                    "message" => $th->getMessage()
+                    "message" => "Something went wrong"
                 ], 400);
             }
         }
@@ -110,48 +104,233 @@ class AuthController extends Controller
     // function login
     public function login(Request $request)
     {
-        if (!$request->badge_id) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ]);
-        }
 
-        if (!$request->password) {
-            return response()->json([
-                "message" => "Body dibutuhkan!"
-            ]);
-        }
+        $request->validate([
+            "badge_id" => "required",
+            "password" => "required",
+            "uuid_new" => "required",
+            "tipe_hp"  => "required",
+            "merek_hp" => "required",
+            "os"       => "required",
+            "versi_aplikasi" => "required"
+        ]);
+
 
         $credentials = $request->only('badge_id', 'password');
-        // dd($credentials);
-        if (Auth::attempt($credentials)) {
-            $token = JWTAuth::fromUser(Auth::user());
-            $data = DB::table('tbl_karyawan')
-                ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
-                ->select(
-                    'tbl_karyawan.badge_id',
-                    'email',
-                    'fullname',
-                    'dept_code',
-                    'line_code',
-                    'position_code',
-                    'id_grup',
-                    'pt',
-                    'tempat_lahir',
-                    'tgl_lahir',
-                    'name_vlookup as jenis_kelamin',
-                    'card_no',
-                    'img_user'
-                )
-                ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
+
+        try {
+            if (Auth::attempt($credentials)) {
+                $token = JWTAuth::fromUser(Auth::user());
+                $data = DB::table('tbl_karyawan')
+                    ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
+                    ->select(
+                        'tbl_karyawan.badge_id',
+                        'email',
+                        'fullname',
+                        'dept_code',
+                        'line_code',
+                        'position_code',
+                        'id_grup',
+                        'pt',
+                        'tempat_lahir',
+                        'tgl_lahir',
+                        'name_vlookup as jenis_kelamin',
+                        'card_no',
+                        'img_user',
+                        'is_active'
+                    )
+                    ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
+    
+                /**
+                 * apabila is_actice nya adalah 0 maka tidak boleh login
+                 */
+                if ($data->is_active == '0') {
+                    return response()->json([
+                        "message" => "Akun anda sudah di non-aktifkan, anda tidak bisa login ke aplikasi ini!",
+                    ], 400);
+                }
+    
+    
+                /**
+                 * logic kak fara start
+                 * Pengecekan untuk uuid lama, di app mysatnusa baru
+                 * apabila sama bolehkan pengguna login
+                 */
+                $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' AND is_active = '1' LIMIT 1");
+    
+                if (count($isUUIDMatching) > 0) {
+    
+                    // lakukan update is_new_uuid agar tidak di timpa device lain. apabila is_new_uuid nya adalah 0
+                    if ($isUUIDMatching[0]->is_new_uuid == '0') {
+                        // atau org yg iseng
+                        DB::beginTransaction();
+                        try {
+                            // update is new uuid di tabel mms
+                            DB::table('tbl_mms')
+                                ->where('badge_id', $request->badge_id)
+                                ->where('uuid', $request->uuid_new)
+                                ->update([
+                                    "is_new_uuid" => '1',
+                                    "versi_aplikasi" => $request->versi_aplikasi,
+                                    "player_id" => $request->player_id
+                                ]);
+    
+                            DB::commit();
+                        } catch (\Throwable $th) {
+                            DB::rollBack();
+                        }
+                    }
+    
+                    // update is new uuid di tabel mms
+                    DB::table('tbl_mms')
+                        ->where('badge_id', $request->badge_id)
+                        ->where('uuid', $request->uuid_new)
+                        ->update([
+                            "versi_aplikasi" => $request->versi_aplikasi,
+                            "player_id" => $request->player_id
+                        ]);
+    
+                    DB::commit();
+    
+                    return response()->json([
+                        "message" => "Berhasil Login",
+                        "data"    => $data,
+                        "token"   => $token
+                    ]);
+                }
+                /**
+                 * logic kak fara end
+                 */
+    
+    
+                /**
+                 * Lakukan pengecekan ke tabel mms
+                 * untuk mendapatkan data device user yang terdaftar.
+                 * 
+                 * apabila device yang ditemukan hanya 1 phone
+                 * maka replace uuid yang lama dengan uuid yang baru dari aplokasi mysatnusa DOT
+                 * 
+                 * apabila device yang ditemukan lebih dari 1
+                 * maka return can't not login, butuh patching oleh TIM DOT
+                 */
+                // $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' ");
+                $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' AND is_new_uuid = '0' ");
+    
+    
+                // apabila list device karyawan lebih dari 1, return can't not login, butuh patching oleh TIM DOT
+                if ($list_device_karyawan[0]->jlh > 0) {
+                    /**
+                     * dan masukkan ke tabel logs login apabila user gagal
+                     * login karena device nya lebih dari 1 perangkat
+                     */
+    
+                    DB::beginTransaction();
+                    try {
+    
+                        DB::table('tbl_device_temp')
+                            ->insert([
+                                "badge_id" => $request->badge_id,
+                                "uuid_new" => $request->uuid_new,
+                                "tipe_hp"  => $request->tipe_hp,
+                                "merek_hp" => $request->merek_hp,
+                                "os"       => $request->os,
+                                "versi_aplikasi" => $request->versi_aplikasi,
+                                "createdate" => date("Y-m-d H:i:s")
+                            ]);
+    
+                        DB::commit();
+    
+                        return response()->json([
+                            "message" => "Kamu belum bisa login, ada hp lama kamu yang belum di pairing, kami akan bantu kamu agar bisa login, silahkan login kembali selama 2 X 24 Jam",
+                        ], 400);
+                    } catch (\Throwable $th) {
+    
+    
+                        DB::rollBack();
+                        return response()->json([
+                            "message" => "Something went wrong, when insert logs login",
+                        ], 400);
+                    }
+                }
+    
+                /**
+                 * Apabila enggak dan hanya 1 device maka lakukan update uuid,
+                 * atau timpa uuid lama dengan yang baru, yang diperoleh dari aplikasi mysatnusa baru
+                 * kondisi ini sudah di make sure bahwa uuid itu adalah value yg tidak berubah
+                 * meskipun app satnusa baru di uninstall, dan di clear data/cache
+                 */
+    
+                DB::beginTransaction();
+                try {
+    
+                    /**
+                     * cek terlebih dahulu apakah pengguna membawa uuid yang lama dan itu mathcing dengan database nya
+                     * kalau iya boleh login
+                     */
+                    $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' LIMIT 1");
+                    if ($isUUIDMatching) {
+                        // DB::rollBack();
+    
+                        DB::table('tbl_mms')
+                            ->where('badge_id', $request->badge_id)
+                            ->where('uuid', $request->uuid_new)
+                            ->update([
+                                "versi_aplikasi" => $request->versi_aplikasi,
+                                "player_id" => $request->player_id
+                            ]);
+    
+                        DB::commit();
+    
+    
+                        return response()->json([
+                            "message" => "Berhasil Login",
+                            "data"    => $data,
+                            "token"   => $token
+                        ]);
+                    }
+    
+                    /**
+                     * cek apakah uuid yang dilempar dari login
+                     * sudah pernah digunakan di device lain atau enggak
+                     */
+                    $existsUUID = DB::table('tbl_mms')
+                        ->where('uuid', $request->uuid_new)
+                        ->exists();
+                    if ($existsUUID) {
+                        DB::rollBack();
+                        return response()->json([
+                            "message" => "Gagal login, UUID " . $request->uuid_new . " telah didaftarkan sebelumnya, silahkan ke HRD untuk validasi",
+                        ], 400);
+                    }
+    
+                    // insert ke tabel temp uuid, dengan nilai badge_id, uuid, dan versi aplikasi harusnya
+                    DB::table("tbl_temp_uuid")
+                        ->insert([
+                            "badge_id" => $request->badge_id,
+                            "uuid"     => $request->uuid_new
+                        ]);
+    
+                    DB::commit();
+    
+                    return response()->json([
+                        "message" => "Berhasil Login",
+                        "data"    => $data,
+                        "token"   => $token
+                    ]);
+                } catch (\Throwable $th) {
+                    DB::rollBack();
+                    return response()->json([
+                        "message" => "Terjadi kesalahan saat login",
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    "message" => "Gagal login, harap periksa badge dan password anda!",
+                ], 400);
+            }
+        } catch (\Throwable $th) {
             return response()->json([
-                "message" => "Berhasil Login",
-                "data"    => $data,
-                "token"   => $token
-            ]);
-        } else {
-            return response()->json([
-                "message" => "Gagal login, harap periksa badge dan password anda!",
+                "message" => "Something went wrong!",
             ], 400);
         }
     }
@@ -275,7 +454,8 @@ class AuthController extends Controller
     public function decryptQr(Request $request)
     {
         $request->validate([
-            "encrypt_code" => "required"
+            "encrypt_code" => "required",
+            "status_toggle" => "required"
         ]);
 
         /**
@@ -294,9 +474,17 @@ class AuthController extends Controller
             $iv
         );
 
-        $data = $this->checkSecurityPhone($decryptedData);
+        $data = $this->checkSecurityPhone($decryptedData, $request->status_toggle);
+        // apabila AES kriptografi berhasil
+        if ($data) {
+            return response()->json($data, $data['status_code']);
+        }
 
-        return response()->json($data, $data['status_code']);
+        // apabila tidak berhasil, maka baca barcode label
+        if (!$data) {
+            $data = $this->checkBarcodeLabelNew($request->encrypt_code, $request->status_toggle);
+            return response()->json($data, $data['status_code']);
+        }
     }
 
     // private function check security uuid
@@ -304,7 +492,7 @@ class AuthController extends Controller
      * Return nya adalah objek
      * lewat keluar gerbang satnusa atau enggak
      */
-    private function checkSecurityPhone($decypt_text)
+    private function checkSecurityPhone($decypt_text, $status_toggle)
     {
 
         $status_check = 0;
@@ -328,12 +516,13 @@ class AuthController extends Controller
             $tahun = $array_date[2];
 
             // lakukan pengeceka uuid apakah ada di tbl_mms
-            // $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, b.img_user FROM tbl_mms a, tbl_karyawan b WHERE 
-            //             a.badge_id = b.badge_id AND
-            //             a.uuid = '$uuid' AND a.status_pendaftaran_mms = 12";
-
-            $query = "SELECT b.fullname, a.badge_id, b.position_code, b.dept_code, a.uuid,a.img_dpn, a.img_blk, a.status_pendaftaran_mms, c.stat_title, c.stat_desc, b.img_user FROM tbl_mms a, tbl_karyawan b, tbl_statusmms c WHERE 
-                            a.badge_id = b.badge_id AND a.status_pendaftaran_mms = c.id AND a.uuid = '$uuid' ";
+            // $query = "SELECT a.badge_id,  b.fullname, uuid, status_pendaftaran_mms, dept_code, position_code, img_dpn, img_blk, img_user FROM tbl_mms  AS a JOIN tbl_karyawan AS b ON b.badge_id = a.badge_id WHERE (UUID = '$uuid' OR imei1 = '$uuid' OR imei2 = '$uuid' ) AND a.is_active = '1' LIMIT 1";
+            $query = "SELECT a.badge_id,  b.fullname, UUID, status_pendaftaran_mms, dept_code, position_code, img_dpn, img_blk, img_user, c.stat_title AS STATUS
+            FROM tbl_mms  AS a 
+            JOIN tbl_karyawan AS b ON b.badge_id = a.badge_id 
+            JOIN tbl_statusmms AS c ON c.id = a.status_pendaftaran_mms
+            WHERE (UUID = '$uuid' OR imei1 = '$uuid' OR imei2 = '$uuid' ) 
+            AND a.is_active = '1' LIMIT 1";
 
             $karyawan = DB::select($query);
 
@@ -341,11 +530,14 @@ class AuthController extends Controller
             if (count($karyawan) > 0) {
                 $karyawan = $karyawan[0];
 
+                $karyawan->position_name = $this->printPositionName($karyawan->position_code) ? $this->printPositionName($karyawan->position_code) : '';
+                $karyawan->dept_name = $this->printDeptnName($karyawan->dept_code) ? $this->printDeptnName($karyawan->dept_code) : '';
+
                 // lakukan pengecekan expired qr code yang telah dilempar oleh kodenya
                 /**
                  * Apabila jam >= 7 dan jam <= 23
                  */
-                if ($hours >= 7 && $hours <= 23) {
+                if ($hours > 2 && $hours < 23) {
                     $minHour = $hours - 2;
                     $maxHour = $hours + 1;
 
@@ -359,8 +551,34 @@ class AuthController extends Controller
 
                     ) {
 
+                        // apabila belum ada masukkan ke tabel 
+                        DB::beginTransaction();
+                        try {
+                            DB::table("tbl_scanlog")
+                                ->insert([
+                                    "unique_key_device" => $uuid,
+                                    "createdate" => date("Y-m-d H:i:s"),
+                                    "indicator" => $status_toggle
+                                ]);
+                            DB::commit();
+                        } catch (\Throwable $th) {
+                            DB::rollBack();
+                            $status_check = 0;
+                            $message = "SERVER ERROR";
+                            $data = [
+                                "message" => $message,
+                                "status_code" => 400,
+                                "status_check" => $status_check,
+                                "data" => []
+                            ];
+                            return $data;
+                        }
+
                         $status_check = 1;
                         $message = "DEVICE FOUND";
+
+                        $karyawan->img_dpn =  $karyawan->img_dpn;
+                        $karyawan->img_blk =  $karyawan->img_blk;
 
                         $data = [
                             "message" => $message,
@@ -391,12 +609,42 @@ class AuthController extends Controller
                     $hours = $hours == 0 ? 24 : $hours;
                     $span2 = new DateInterval('PT' . $hours . 'H');
                     $combineDateNIHour = (new DateTime())->setDate($tahun, $bulan, $hari)->setTime($span2->h, $span2->i, $span2->s);
+                    if ($hours == 24) {
+                        $combineDateNIHour = (new DateTime())->setDate($tahun, $bulan, $hari - 1)->setTime($span2->h, $span2->i, $span2->s);
+                    }
                     $minHour = (new DateTime())->sub(new DateInterval('PT2H'));
                     $maxHour = (new DateTime())->add(new DateInterval('PT1H'));
 
                     if ($minHour < $combineDateNIHour && $combineDateNIHour < $maxHour) {
+
+                        // masukkan ke data tabel scan log
+                        DB::beginTransaction();
+                        try {
+                            DB::table("tbl_scanlog")
+                                ->insert([
+                                    "unique_key_device" => $uuid,
+                                    "createdate" => date("Y-m-d H:i:s"),
+                                    "indicator" => $status_toggle
+                                ]);
+                            DB::commit();
+                        } catch (\Throwable $th) {
+                            DB::rollBack();
+                            $status_check = 0;
+                            $message = "SERVER ERROR";
+                            $data = [
+                                "message" => $message,
+                                "status_code" => 400,
+                                "status_check" => $status_check,
+                                "data" => []
+                            ];
+                            return $data;
+                        }
+
                         $status_check = 1;
                         $message = "DEVICE FOUND";
+
+                        $karyawan->img_dpn = $karyawan->img_dpn;
+                        $karyawan->img_blk = $karyawan->img_blk;
 
                         $data = [
                             "status_check" => $status_check,
@@ -408,7 +656,7 @@ class AuthController extends Controller
                         return $data;
                     } else {
                         $status_check = 0;
-                        $message = "QR CODE EXPIRED";
+                        $message =  "QR CODE EXPIRED";
 
                         $data = [
                             "status_check" => $status_check,
@@ -421,8 +669,33 @@ class AuthController extends Controller
                     }
                 }
             } else {
+
+                // apabila belum ada masukkan ke tabel 
+                DB::beginTransaction();
+                try {
+                    DB::table("tbl_scanlog")
+                        ->insert([
+                            "unique_key_device" => $uuid,
+                            "createdate" => date("Y-m-d H:i:s"),
+                            "indicator" => 'NOT FOUND'
+                        ]);
+                    DB::commit();
+                } catch (\Throwable $th) {
+                    DB::rollBack();
+                    // dd($th->getMessage());
+                    $status_check = 0;
+                    $message = "SERVER ERROR";
+                    $data = [
+                        "message" => $message,
+                        "status_code" => 400,
+                        "status_check" => $status_check,
+                        "data" => []
+                    ];
+                    return $data;
+                }
+
                 $status_check = 0;
-                $message = "DEVICE NOT REGISTERED";
+                $message = "DEVICE NOT REGISTERED OR NOT ACTIVE";
 
                 $data = [
                     "message" => $message,
@@ -435,16 +708,8 @@ class AuthController extends Controller
             }
         }
 
-        $data = [
-            "message" => "TIDAK DAPAT MENGURAI DATA QR YANG DIBERIKAN",
-            "status_code" => 400,
-            "status_check" => 0,
-            "data" => []
-        ];
-
-        return $data;
+        return false;
     }
-
     /**
      * check apakah user baru pertama kali melakukan login 
      * untuk pengguna yang lama, atau menghadapi masa transisi dari aplikasi mysatnusa lama
@@ -531,6 +796,298 @@ class AuthController extends Controller
             return response()->json([
                 "message" => "Kami menemukan user sudah pernah melakukan login pertama kali"
             ], 400);
+        }
+    }
+
+    /**
+     * function untuk cek barcode label dari tbl_mms dan tbl_lms
+     */
+    private function checkBarcodeLabelNew($barcode, $status_toggle)
+    {
+
+        $check_mms = DB::select("SELECT COUNT(*) as jlh FROM tbl_mms WHERE barcode_label = '$barcode'");
+        $jlh = $check_mms[0]->jlh;
+
+        // apabila ada di mms
+        if ($jlh > 0) {
+
+            // eksekusi mms
+            $query_mms = "SELECT a.badge_id, fullname, dept_code, position_code, img_dpn, img_blk, img_user, stat_title AS STATUS FROM tbl_mms AS a
+                                        JOIN tbl_karyawan AS b ON a.badge_id = b.badge_id
+                                        JOIN tbl_statusmms AS c ON a.status_pendaftaran_mms = c.id
+                                        WHERE barcode_label = '$barcode'  AND a.is_active = '1' LIMIT 1";
+
+            $data_mms = DB::select($query_mms);
+
+            if ($data_mms) {
+                // apabila belum ada masukkan ke tabel 
+                DB::beginTransaction();
+                try {
+                    DB::table("tbl_scanlog")
+                        ->insert([
+                            "unique_key_device" => $barcode,
+                            "createdate" => date("Y-m-d H:i:s"),
+                            "indicator" => $status_toggle
+                        ]);
+                    DB::commit();
+                } catch (\Throwable $th) {
+                    DB::rollBack();
+                    $status_check = 0;
+                    $message = "SERVER ERROR";
+                    $data = [
+                        "message" => $message,
+                        "status_code" => 400,
+                        "status_check" => $status_check,
+                        "data" => []
+                    ];
+                    return $data;
+                }
+
+                // rebuild response
+                $data_mms[0]->dept_code =  $data_mms[0]->dept_code ?  $data_mms[0]->dept_code : '';
+                $data_mms[0]->dept_name = $this->printDeptnName($data_mms[0]->dept_code) ? $this->printDeptnName($data_mms[0]->dept_code) : '';
+                $data_mms[0]->position_code =  $data_mms[0]->position_code ?  $data_mms[0]->position_code : '';
+                $data_mms[0]->position_name = $this->printPositionName($data_mms[0]->position_code) ? $this->printPositionName($data_mms[0]->position_code) : '';
+
+                $status_check = 1;
+                $message = "DEVICE FOUND";
+                $data = [
+                    "message" => $message,
+                    "status_code" => 200,
+                    "status_check" => $status_check,
+                    "data" => $data_mms[0] ? $data_mms[0] : []
+                ];
+                return $data;
+            }
+
+            // masukin ke scan log apabila ada error
+            DB::beginTransaction();
+            try {
+                DB::table("tbl_scanlog")
+                    ->insert([
+                        "unique_key_device" => $barcode,
+                        "createdate" => date("Y-m-d H:i:s"),
+                        "indicator" => 'NOT FOUND'
+                    ]);
+                DB::commit();
+            } catch (\Throwable $th) {
+                // dd($th->getMessage());  
+                DB::rollBack();
+                $status_check = 0;
+                $message = "SERVER ERROR";
+                $data = [
+                    "message" => $message,
+                    "status_code" => 400,
+                    "status_check" => $status_check,
+                    "data" => []
+                ];
+                return $data;
+            }
+
+            // apabila tidak ada korelasi 
+            $status_check = 1;
+            $message = "DEVICE FOUND, BUT KARYAWAN NOT FOUND";
+            $data = [
+                "message" => $message,
+                "status_code" => 400,
+                "status_check" => $status_check,
+                "data" => []
+            ];
+            return $data;
+        }
+
+        // apabila ada di lms
+        if ($jlh ==  0) {
+
+            // eksekusi ke tabel lms
+
+            $today = date('Y-m-d');
+
+            // $query_lms = "SELECT a.badge_id, fullname, dept_code, position_code, img_dpn, img_blk, img_user, end_date, stat_title AS STATUS FROM tbl_lms AS a
+            // JOIN tbl_karyawan AS b ON a.badge_id = b.badge_id
+            // JOIN tbl_statuslms AS c ON a.status_pendaftaran_lms = c.id
+            // WHERE barcode_label = '$barcode' AND a.is_active = 1 LIMIT 1";
+
+            $query_lms = "SELECT a.badge_id, fullname, dept_code, position_code, img_dpn, img_blk, img_user, end_date, stat_title AS STATUS FROM tbl_lms AS a
+            JOIN tbl_karyawan AS b ON a.badge_id = b.badge_id
+            JOIN tbl_statuslms AS c ON a.status_pendaftaran_lms = c.id
+            WHERE barcode_label = '$barcode' LIMIT 1";
+
+            $data_lms = DB::select($query_lms);
+
+            if ($data_lms) {
+
+                // cek apakah enddate nya sudah expired 
+                $end_date = $data_lms[0]->end_date ? $data_lms[0]->end_date : null;
+                if ($end_date != null) {
+                    if ($end_date < $today) {
+                        $status_check = 0;
+                        $message = "DEVICE PERMISSION EXPIRED";
+                        $data = [
+                            "message" => $message,
+                            "status_code" => 400,
+                            "status_check" => $status_check,
+                            "data" => []
+                        ];
+                        return $data;
+                    }
+                }
+
+                // insialisasi 
+                $data_lms[0]->dept_code =  $data_lms[0]->dept_code ?  $data_lms[0]->dept_code : '';
+                $data_lms[0]->dept_name = $this->printDeptnName($data_lms[0]->dept_code) ? $this->printDeptnName($data_lms[0]->dept_code) : '';
+                $data_lms[0]->position_code =  $data_lms[0]->position_code ?  $data_lms[0]->position_code : '';
+                $data_lms[0]->position_name = $this->printPositionName($data_lms[0]->position_code) ? $this->printPositionName($data_lms[0]->position_code) : '';
+
+                $data_scanlogs = DB::table("tbl_scanlog")
+                    ->where("unique_key_device", $barcode)
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                // apabila data scan logs ada
+                if ($data_scanlogs) {
+                    // apabila data scanlogs ada
+                    /**
+                     * seandainya karyawan terakhir scan keluar
+                     * dan ketika satpam mau scan, tapi terpilih toggle out
+                     */
+                    if ($data_scanlogs->indicator == "OUT" && $status_toggle == "OUT") {
+                        $status_check = 0;
+                        $message = "SCAN IN HARUS DI LAKUKAN TERLEBIH DAHULU";
+                        $data = [
+                            "message" => $message,
+                            "status_code" => 400,
+                            "status_check" => $status_check,
+                            "data" => []
+                        ];
+                        return $data;
+                    }
+
+                    if ($data_scanlogs->indicator == "IN" && $status_toggle == "IN") {
+                        $status_check = 0;
+                        $message = "SCAN OUT HARUS DI LAKUKAN TERLEBIH DAHULU";
+                        $data = [
+                            "message" => $message,
+                            "status_code" => 400,
+                            "status_check" => $status_check,
+                            "data" => []
+                        ];
+                        return $data;
+                    }
+                }
+
+                /**
+                 * apabila laptop belum ada di insert sama sekali, harusnya 
+                 * laptop melakukan login terlebih dahulu
+                 */
+                if (!$data_scanlogs && $status_toggle == "OUT") {
+                    $status_check = 0;
+                    $message = "SCAN IN HARUS DI LAKUKAN TERLEBIH DAHULU";
+                    $data = [
+                        "message" => $message,
+                        "status_code" => 400,
+                        "status_check" => $status_check,
+                        "data" => []
+                    ];
+                    return $data;
+                }
+
+                // apabila belum ada masukkan ke tabel 
+                DB::beginTransaction();
+                try {
+                    DB::table("tbl_scanlog")
+                        ->insert([
+                            "unique_key_device" => $barcode,
+                            "createdate" => date("Y-m-d H:i:s"),
+                            "indicator" => $status_toggle
+                        ]);
+                    DB::commit();
+                } catch (\Throwable $th) {
+                    DB::rollBack();
+                    $status_check = 0;
+                    $message = "SERVER ERROR";
+                    $data = [
+                        "message" => $message,
+                        "status_code" => 400,
+                        "status_check" => $status_check,
+                        "data" => []
+                    ];
+                    return $data;
+                }
+
+                // lakukan cek ke tabel log
+                $status_check = 1;
+                $message = "DEVICE FOUND";
+                $data = [
+                    "message" => $message,
+                    "status_code" => 200,
+                    "status_check" => $status_check,
+                    "data" => $data_lms[0]
+                ];
+                return $data;
+            }
+
+            // input ke tabel logs
+            DB::beginTransaction();
+            try {
+                DB::table("tbl_scanlog")
+                    ->insert([
+                        "unique_key_device" => $barcode,
+                        "createdate" => date("Y-m-d H:i:s"),
+                        "indicator" => 'NOT FOUND'
+                    ]);
+                DB::commit();
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                // dd($th->getMessage());
+                $status_check = 0;
+                $message = "SERVER ERROR";
+                $data = [
+                    "message" => $message,
+                    "status_code" => 400,
+                    "status_check" => $status_check,
+                    "data" => []
+                ];
+                return $data;
+            }
+
+            $status_check = 0;
+            $message = "DEVICE NOT FOUND";
+            $data = [
+                "message" => $message,
+                "status_code" => 400,
+                "status_check" => $status_check,
+                "data" => []
+            ];
+            return $data;
+        }
+    }
+
+    /**
+     * function print position name
+     */
+    private function printPositionName($posistion_code)
+    {
+        $data = DB::table('tbl_position')
+            ->where('position_code', $posistion_code)
+            ->first();
+
+        if ($data) {
+            return $data->position_name;
+        }
+    }
+
+    /**
+     * function print departement name
+     */
+    private function printDeptnName($dept_code)
+    {
+        $data = DB::table('tbl_deptcode')
+            ->where('dept_code', $dept_code)
+            ->first();
+
+        if ($data) {
+            return $data->dept_name;
         }
     }
 }

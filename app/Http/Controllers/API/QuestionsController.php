@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class QuestionsController extends Controller
@@ -13,7 +14,27 @@ class QuestionsController extends Controller
         /**
          * get semua all questions
          */
-        $data = DB::table('tbl_listquestion')->get();
+
+        // Cache::forget('all_questions');
+
+        // cek apakah ada cache atau enggak
+        if(Cache::has('all_questions')){
+            // ambil data dari cache
+            $data = Cache::get("all_questions");
+        }
+        else {
+
+            // second * minute * hour * day  
+            $times = 60 * 60 * 24 * 1;
+
+            $data = DB::table('tbl_listquestion')->get();
+
+            // letakkan di cache
+            Cache::put('all_questions', $data, $times); // 60 second
+        }
+
+        // $data = DB::table('tbl_listquestion')->get();
+       
         return response()->json([
             "message" => "Response OK",
             "data"    => $data

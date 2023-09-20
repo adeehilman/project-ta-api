@@ -1,13 +1,23 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\CronJobController;
+use App\Http\Controllers\API\DurationBreakController;
+use App\Http\Controllers\API\ImageHelperController;
+use App\Http\Controllers\API\KalenderController;
 use App\Http\Controllers\API\KaryawanController;
 use App\Http\Controllers\API\KecamatanController;
 use App\Http\Controllers\API\KelurahanController;
 use App\Http\Controllers\API\KritikSaranController;
+use App\Http\Controllers\API\LmsController;
 use App\Http\Controllers\API\LowonganController;
+use App\Http\Controllers\API\MeetingRoomController;
+use App\Http\Controllers\API\MmsController;
 use App\Http\Controllers\API\PengumumanController;
+use App\Http\Controllers\API\PlatformController;
+use App\Http\Controllers\API\PlayStoreController;
 use App\Http\Controllers\API\QuestionsController;
+use App\Http\Controllers\API\UserRoleController;
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\PemberitahuanController;
 use App\Http\Controllers\KritikController;
@@ -55,6 +65,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   Route::post('profile/edit-alamat', [KaryawanController::class, 'editAlamat']);
   Route::post('profile/edit-kontak', [KaryawanController::class, 'editKontak']);
   Route::post('profile/change-security-question', [KaryawanController::class, 'editSecurity']);
+  Route::post('profile/change-password', [KaryawanController::class, 'changePassword']);
 
   /**
    * Kritik dan saran
@@ -74,6 +85,34 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    */
   Route::get('/first-login', [AuthController::class, 'isFirstLogin']);
   Route::post('/first-login', [AuthController::class, 'setFirstLogin']);
+
+  /**
+   * durarion break time
+   */
+  Route::get('/breaktime/getdurationbreak', [DurationBreakController::class, 'getDurationBreak']);
+
+  /**
+   * lms API 
+   */
+  Route::post('/lms/pengajuan', [LmsController::class, 'insertPengajuan']);
+  Route::post('/lms/tanggapan', [LmsController::class, 'beriTanggapan']);
+  Route::get('/lms/list', [LmsController::class, 'listLms']);
+  Route::get('/lms/detail', [LmsController::class, 'detailLMS']);
+
+  /**
+   * MMS API
+   */
+  Route::get('/mms/list', [MmsController::class, 'listmms']);
+  Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
+  Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
+  Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
+
+  /**
+   * User Role
+   */
+  Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
+
+  
 });
 
 /**
@@ -86,6 +125,7 @@ Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
  */
 Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
 Route::get('questions/my-question', [KaryawanController::class, 'getMyQuestion']);
+
 
 /**
  * List kecamatan
@@ -116,3 +156,69 @@ Route::get('ekios/profile', [KaryawanController::class, 'getProfileEkios']);
  * Decrtypt code
  */
 Route::post('/decrypt_qr_code', [AuthController::class, 'decryptQr']);
+
+/**
+ * Play store kebutuhan
+ */
+Route::get('karyawan/delete', [PlayStoreController::class, 'deletedUser']);
+
+/**
+ * get all brand laptop
+ */
+Route::get('/lms/brandlaptop', [LmsController::class, 'getBrandLaptop']);
+
+/**
+ * get all hari libur kalender
+ */
+Route::get('/kalender', [KalenderController::class, 'getAllList']);
+
+/**
+ * get all brand handphone
+ */
+Route::get('/mms/brandsmartphone', [MmsController::class, 'getBrandSmartphone']);
+
+/**
+ * Task Schedule -- START
+ */
+Route::get('/taskschedule/getsisacuti', [CronJobController::class, 'getSisaCuti']);
+Route::get('/taskschedule/getaccessdoor', [CronJobController::class, 'getAccessDoor']);
+
+
+/**
+* Meeting Room
+*/
+
+Route::group(['middleware' => 'api','prefix' => 'meeting'], function ($router) {
+  Route::post('login', [MeetingRoomController::class, 'login']);
+  Route::post('logout', [MeetingRoomController::class, 'logout']);
+  Route::post('test', [MeetingRoomController::class, 'test']);
+  Route::get('all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
+  Route::get('image/room', [ImageHelperController::class, 'getImageRoom']);
+  Route::get('search-room', [MeetingRoomController::class, 'searchRoom']);
+  Route::get('schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
+  // Route::get('/meeting/all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
+  // Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
+  // Route::get('meeting/image/room', [ImageHelperController::class, 'getImageRoom']);
+  // Route::get('/meeting/search-room', [MeetingRoomController::class, 'searchRoom']);
+  // Route::get('/meeting/schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
+  Route::get('search-user', [MeetingRoomController::class, 'searchUser']);
+  Route::post('insert_meeting', [MeetingRoomController::class, 'insertMeeting']);
+  Route::post('update-meeting', [MeetingRoomController::class, 'updateMeeting']);
+  Route::post('cancel-meeting', [MeetingRoomController::class, 'cancelMeeting']);
+  Route::post('beri-tanggapan', [MeetingRoomController::class, 'beriTanggapan']);
+  Route::get('my-meeting', [MeetingRoomController::class, 'myMeeting']);
+  Route::get('detail-meeting-saya', [MeetingRoomController::class, 'detailMeetingSaya']);
+
+});
+
+Route::group(['prefix' => 'digitalsop'], function ($router){
+  Route::post('kirim-notif', [PlatformController::class, 'sendNotif']);
+  Route::get('get-user', [PlatformController::class, 'getUserInfo']);
+});
+
+Route::group(['prefix' => 'platform'], function($router){
+  Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
+});
+
+Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
+Route::get('/meeting/send-notif', [MeetingRoomController::class, 'sendNotif']);
