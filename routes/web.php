@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 */
 
  Route::get('/', function(){
-    echo "Running...";
+    echo "My Satnusa Mobile App Service Running ...";
  });
 
 
