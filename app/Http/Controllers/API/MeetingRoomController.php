@@ -519,6 +519,7 @@ class MeetingRoomController extends Controller
             $meetParticipant = $request->data_participant ? $request->data_participant : [];
             $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
             $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
+            $ext_no          = $request->ext;
 
             $category_meeting = 0;
             if ($jumlah_tamu > 0) {
@@ -538,7 +539,8 @@ class MeetingRoomController extends Controller
                 'booking_date'      => date("Y-m-d H:i:s"),
                 'category_meeting'  => $category_meeting,
                 'jumlah_tamu'       => $jumlah_tamu,
-                'createby'          => $booking_by
+                'createby'          => $booking_by,
+                'ext'               => $ext_no
             ];
 
             /**
@@ -828,6 +830,7 @@ class MeetingRoomController extends Controller
                 $meetParticipant    = $request->data_participant ? $request->data_participant : [];
                 $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
                 $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
+                $ext_no          = $request->ext;
 
                 $category_meeting = 0;
                 if ($jumlah_tamu > 0) {
@@ -848,7 +851,8 @@ class MeetingRoomController extends Controller
                             'category_meeting'  => $category_meeting,
                             'jumlah_tamu'       => $jumlah_tamu,
                             'update_date'       => date('Y-m-d H:i:s'),
-                            'updateby'          => $badge_pembuat
+                            'updateby'          => $badge_pembuat,
+                            'ext'               => $ext_no
                         ]);
 
                     // delete tabel participant utk insert ulang
@@ -928,6 +932,7 @@ class MeetingRoomController extends Controller
         $meetParticipant    = $request->data_participant ? $request->data_participant : [];
         $meetFasilitas      = $request->data_fasilitas ? $request->data_fasilitas : [];
         $jumlah_tamu        = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
+        $ext_no             = $request->ext;
 
         $category_meeting = 0;
         if ($jumlah_tamu > 0) {
@@ -951,7 +956,8 @@ class MeetingRoomController extends Controller
                     'statusmeeting_id'  => 3,
                     'category_meeting'  => $category_meeting,
                     'jumlah_tamu'       => $jumlah_tamu,
-                    'update_date'       => date('Y-m-d H:i:s')
+                    'update_date'       => date('Y-m-d H:i:s'),
+                    'ext'               => $ext_no
                 ]);
 
             DB::table('tbl_riwayatmeeting')
