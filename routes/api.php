@@ -222,3 +222,4 @@ Route::group(['prefix' => 'platform'], function($router){
 
 Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
 Route::get('/meeting/send-notif', [MeetingRoomController::class, 'sendNotif']);
+Route::get('/meeting/fasilitas', [MeetingRoomController::class, 'getListFasilitas']);

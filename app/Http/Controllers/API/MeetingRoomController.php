@@ -1299,5 +1299,27 @@ class MeetingRoomController extends Controller
      */
     public function getListFasilitas()
     {
+        $query_get_fasilitas = "SELECT 
+                                    id as Id,
+                                    fasilitas as Nama_Fasilitas
+                                FROM tbl_meetingfasilitas";
+        $data_fasilitas      = DB::select($query_get_fasilitas);
+
+        if(COUNT($data_fasilitas) > 0){
+            return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS",
+                "DATA"          => $data_fasilitas
+            ]);
+        }
+
+        return response()->json([
+            "MESSAGETYPE"   => "E",
+            "MESSAGE" => "Something when wrong",
+        ], 400)->header(
+            "Accept",
+            "application/json"
+        );
     }
 }
