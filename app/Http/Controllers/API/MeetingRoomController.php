@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -505,6 +506,8 @@ class MeetingRoomController extends Controller
             $meetDesc = $request->description;
             $booking_by = $request->booking_by;
             $meetParticipant = $request->data_participant ? $request->data_participant : [];
+            $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
+
 
             $dataMeeting = [
                 'roommeeting_id'    => $meetingId,
@@ -531,6 +534,7 @@ class MeetingRoomController extends Controller
             $newIdMeeting = DB::table('tbl_meeting')
                 ->insertGetId($dataMeeting);
 
+            // handle to insert partisipan
             if (count($meetParticipant) > 0) {
                 for ($i = 0; $i < count($meetParticipant); $i++) {
                     $dp = array(
@@ -539,6 +543,17 @@ class MeetingRoomController extends Controller
                         'optional' => $meetParticipant[$i]['optional']
                     );
                     DB::table('tbl_participant')->insert($dp);
+                }
+            }
+
+            // handle to insert tabel meetingfasilitasdetail
+            if(COUNT($meetFasilitas) > 0){
+                foreach ($meetFasilitas as $key => $idFasiltas) {
+                    DB::table('tbl_meetingfasilitasdetail')
+                            ->insert([
+                                "meeting_id" => $newIdMeeting,
+                                "meetingfasilitas_id" => $idFasiltas
+                            ]);
                 }
             }
 
@@ -565,8 +580,6 @@ class MeetingRoomController extends Controller
             // send notif with hardcode 
 
             $formattedDate = date('d F Y', strtotime($meetDate));
-            // $this->sendNotifKeResepsionis("200040", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
-            // $this->sendNotifKeResepsionis("200195", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
             $this->sendNotifKeResepsionis("200400", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             $this->sendNotifKeResepsionis("038720", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
 
@@ -1220,77 +1233,19 @@ class MeetingRoomController extends Controller
      */
     public function sendNotifKeResepsionis($badgeid, $message, $subMessage)
     {
+        // URL API tujuan
+        $apiUrl = 'http://webapi.satnusa.com/api/meeting/send-notif';
 
-        $badge_id = $badgeid;
-        $message  = $message;
-        $sub_message = $subMessage;
+        // Membuat instance Client Guzzle
+        $client = new Client();
 
-        /**
-         * query untuk send notif
-         */
-        $query_player_id = "SELECT player_id FROM tbl_mms WHERE badge_id = '$badge_id'";
-        $data_player_id = DB::select($query_player_id);
-
-        $arr_playerId = [];
-        foreach ($data_player_id as $key => $value) {
-            if ($value->player_id != null) {
-                array_push($arr_playerId, $value->player_id);
-            }
-        }
-
-        // URL Endpoint API OneSignal
-        $url = 'https://onesignal.com/api/v1/notifications';
-
-        // Data untuk dikirim dalam permintaan
-        $data = [
-            'app_id' => 'ef44a0e1-1de9-48a0-b4c5-9e045d45c0cf',
-            'include_player_ids' => $arr_playerId,
-            'headings' => [
-                'en' => $message,
+        // Mengirim permintaan GET ke API dengan parameter badge_id, message, dan sub_message
+        $client->get($apiUrl, [
+            'query' => [
+                'badge_id' =>$badgeid,
+                'message' => $message,
+                'sub_message' => $subMessage,
             ],
-            'contents' => [
-                'en' => $sub_message
-            ],
-            'data' => [
-                'Category' => 'MEETING_ROOM'
-            ],
-        ];
-
-        // Konversi data ke format JSON
-        $dataJson = json_encode($data);
-
-        // Pengaturan opsi cURL
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Basic NmQ2ODI0YjEtNjZhYy00ZDA3LWJkMDEtY2ViZDJjZWNmMTk5',
-            'Content-Type: application/json'
-        ]);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $dataJson);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // Eksekusi permintaan cURL
-        $response = curl_exec($ch);
-
-        // Periksa jika ada kesalahan dalam permintaan
-        if (curl_errno($ch)) {
-            $error = curl_error($ch);
-            // Lakukan penanganan kesalahan yang sesuai
-            // ...
-        }
-
-        // Mendapatkan informasi respons
-        $info = curl_getinfo($ch);
-        $httpCode = $info['http_code'];
-
-        // Menutup koneksi cURL
-        curl_close($ch);
-
-        return response()->json([
-            "RESPONSE"      => 200,
-            "MESSAGETYPE"   => "S",
-            "MESSAGE"       => "SUCCESS"
         ]);
     }
 
