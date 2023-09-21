@@ -309,6 +309,8 @@ class MeetingRoomController extends Controller
                 (SELECT capacity FROM tbl_roommeeting WHERE id = a.roommeeting_id) AS Capacity,
                 a.booking_by as Booking_By,
                 a.reason as Reason,
+                a.category_meeting as Category_Meeting,
+                a.jumlah_tamu as Jumlah_Tamu,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
@@ -322,6 +324,7 @@ class MeetingRoomController extends Controller
                 $dataMeeting[0]->Reason = '-';
             }
 
+            // get participant
             $query_user = "SELECT 
                                 participant, 
                                 optional,
@@ -346,13 +349,21 @@ class MeetingRoomController extends Controller
                 }
             }
 
+            // get fasilitas by detail
+            $query_fasilitas = "SELECT
+                                    meetingfasilitas_id AS Id,
+                                    (SELECT fasilitas FROM tbl_meetingfasilitas WHERE id = meetingfasilitas_id ) AS Nama_Fasilitas
+                                FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
+            $data_fasilitas  = DB::select($query_fasilitas);
+
             return response()->json([
                 "RESPONSE"      => 200,
                 "MESSAGETYPE"   => "S",
                 "MESSAGE"       => "SUCCESS",
                 "DATA"    => [
                     "Info_Meeting"     => $dataMeeting[0],
-                    "List_Participant" => $list_user
+                    "List_Participant" => $list_user,
+                    "List_Fasilitas"   => $data_fasilitas ? $data_fasilitas : [] 
                 ]
             ]);
         }
@@ -507,6 +518,12 @@ class MeetingRoomController extends Controller
             $booking_by = $request->booking_by;
             $meetParticipant = $request->data_participant ? $request->data_participant : [];
             $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
+            $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
+            
+            $category_meeting = 0;
+            if($jumlah_tamu > 0){
+                $category_meeting = 1;
+            }
 
 
             $dataMeeting = [
@@ -518,7 +535,9 @@ class MeetingRoomController extends Controller
                 'statusmeeting_id'  => 2,
                 'description'       => $meetDesc,
                 'booking_by'        => $booking_by,
-                'booking_date'      => date("Y-m-d H:i:s")
+                'booking_date'      => date("Y-m-d H:i:s"),
+                'category_meeting'  => $category_meeting,
+                'jumlah_tamu'       => $jumlah_tamu
             ];
 
             /**
@@ -1088,6 +1107,8 @@ class MeetingRoomController extends Controller
                 (SELECT capacity FROM tbl_roommeeting WHERE id = a.roommeeting_id) AS Capacity,
                 a.booking_by as Booking_By,
                 a.reason as Reason,
+                a.category_meeting as Category_Meeting,
+                a.jumlah_tamu as Jumlah_Tamu,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
