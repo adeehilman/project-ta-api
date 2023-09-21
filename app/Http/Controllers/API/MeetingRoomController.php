@@ -121,6 +121,7 @@ class MeetingRoomController extends Controller
                     a.meeting_start,
                     a.meeting_end,
                     a.statusmeeting_id,
+                    a.booking_by,
                     (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_ina,
                     (SELECT status_name_eng FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_eng,
                     COALESCE((SELECT COUNT(*) FROM tbl_participant WHERE meeting_id = a.id), 0) AS jumlah_partisipan
@@ -163,6 +164,7 @@ class MeetingRoomController extends Controller
                         'Title_Meeting'             => $r->title_meeting,
                         'Room_Meeting_Id'           => $r->roommeeting_id,
                         'Room_Name'                 => $r->room_name,
+                        'Booking_By'                => $r->booking_by,
                         'Meeting_Date'              => $r->meeting_date,
                         'Meeting_Start'             => substr($r->meeting_start, 0, 5),
                         'Meeting_End'               => substr($r->meeting_end, 0, 5),
@@ -513,8 +515,18 @@ class MeetingRoomController extends Controller
                 'statusmeeting_id'  => 2,
                 'description'       => $meetDesc,
                 'booking_by'        => $booking_by,
-                'booking_date'      => date("Y-m-d")
+                'booking_date'      => date("Y-m-d H:i:s")
             ];
+
+            /**
+             * query get name by booking by
+             */
+            $query_nama = "SELECT fullname FROM tbl_karyawan WHERE badge_id = '$booking_by' ";
+            $data_nama  = DB::select($query_nama);
+            $nama = "";
+            if (COUNT($data_nama) > 0) {
+                $nama = $data_nama[0]->fullname;
+            }
 
             $newIdMeeting = DB::table('tbl_meeting')
                 ->insertGetId($dataMeeting);
@@ -531,12 +543,20 @@ class MeetingRoomController extends Controller
             }
 
             for ($i = 1; $i <= 2; $i++) {
+
+                $remark = "";
+                if ($i == 1) {
+                    $remark = "Meeting room has been booked by " . $nama;
+                }
+
+
                 DB::table('tbl_riwayatmeeting')
                     ->insert([
                         'meeting_id'            => $newIdMeeting,
                         'statusmeeting_id'      => $i,
                         'createby'              => $booking_by,
-                        'createdate'            => date("Y-m-d H:i:s")
+                        'createdate'            => date("Y-m-d H:i:s"),
+                        'remark'                => $remark
                     ]);
             }
 
@@ -707,6 +727,8 @@ class MeetingRoomController extends Controller
      */
     public function updateMeeting(Request $request)
     {
+
+
         try {
             $token = $request->header('Authorization');
             $validateToken = JWTAuth::parseToken()->authenticate();
@@ -730,6 +752,11 @@ class MeetingRoomController extends Controller
 
             $query_meeting = "SELECT * FROM tbl_meeting WHERE id = '$request->id_meeting' ";
             $data_meeeting = DB::select($query_meeting)[0];
+            $badge_pembuat  = $data_meeeting->booking_by;
+
+            $query_karyawan = "SELECT fullname FROM tbl_karyawan WHERE badge_id = '$badge_pembuat' ";
+            $data_karyawan  = DB::select($query_karyawan);
+            $nama_pembuat   = $data_karyawan[0]->fullname;
 
             if (
                 ($data_meeeting->roommeeting_id != $request->roommeeting_id) ||
@@ -832,8 +859,6 @@ class MeetingRoomController extends Controller
             );
         }
 
-
-
         // apabila ada perubahan pada date, room, start time, dan end time
         $idMeeting          = $request->id_meeting;
         $roomMeetingId      = $request->roommeeting_id;
@@ -859,6 +884,15 @@ class MeetingRoomController extends Controller
                     'meeting_end'       => $endTime,
                     'description'       => $description,
                     'statusmeeting_id'  => 3
+                ]);
+
+            DB::table('tbl_riwayatmeeting')
+                ->insert([
+                    'meeting_id'            => $idMeeting,
+                    'statusmeeting_id'      => 3,
+                    'createby'              => $badge_pembuat,
+                    'createdate'            => date("Y-m-d H:i:s"),
+                    'remark'                => $nama_pembuat . " has just rescheduled the Meeting Schedule"
                 ]);
 
             // delete tabel participant utk insert ulang
@@ -923,21 +957,23 @@ class MeetingRoomController extends Controller
                     'meeting_id'            => $idMeeting,
                     'statusmeeting_id'      => 6,
                     'createby'              => $badge_id,
-                    'createdate'            => date("Y-m-d H:i:s")
+                    'createdate'            => date("Y-m-d H:i:s"),
+                    'remark'                => $reason
                 ]);
+
 
             $query_meeting_get = "SELECT title_meeting FROM tbl_meeting WHERE id = '$idMeeting'";
             $data_meeting      = DB::select($query_meeting_get);
             $title_meeting         = '';
-            if(COUNT($data_meeting) > 0){
+            if (COUNT($data_meeting) > 0) {
                 $title_meeting     = $data_meeting[0]->title_meeting;
             }
 
             DB::commit();
 
             // send update notif ke resepsionis
-            $this->sendNotifKeResepsionis("200400", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("038720", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("200400", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("038720", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
 
             return response()->json([
                 "RESPONSE"      => 200,
@@ -1256,5 +1292,12 @@ class MeetingRoomController extends Controller
             "MESSAGETYPE"   => "S",
             "MESSAGE"       => "SUCCESS"
         ]);
+    }
+
+    /**
+     * function get fasilitas
+     */
+    public function getListFasilitas()
+    {
     }
 }
