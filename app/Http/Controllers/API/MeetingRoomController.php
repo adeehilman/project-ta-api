@@ -311,6 +311,7 @@ class MeetingRoomController extends Controller
                 a.reason as Reason,
                 a.category_meeting as Category_Meeting,
                 a.jumlah_tamu as Jumlah_Tamu,
+                a.ext as Ext,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
@@ -1166,6 +1167,7 @@ class MeetingRoomController extends Controller
                 a.reason as Reason,
                 a.category_meeting as Category_Meeting,
                 a.jumlah_tamu as Jumlah_Tamu,
+                a.ext as Ext,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
