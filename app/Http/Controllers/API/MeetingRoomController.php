@@ -1203,15 +1203,25 @@ class MeetingRoomController extends Controller
                 }
             }
 
-            $query_tanggapan = "SELECT id as Id, tanggapan as Tanggapan, createdate as Create_Date, createby as Create_By FROM tbl_tanggapanmeeting WHERE meeting_id = '$idMeeting' ORDER BY id DESC";
+            $query_tanggapan = "SELECT 
+                                    id as Id, 
+                                    tanggapan as Tanggapan, 
+                                    createdate as Create_Date, 
+                                    createby as Create_By,
+                                    (SELECT fullname FROM tbl_karyawan WHERE badge_id = Create_By ) as Full_Name,
+                                    (SELECT position_code FROM tbl_karyawan WHERE badge_id = Create_By ) as Position_Code
+                                FROM tbl_tanggapanmeeting WHERE meeting_id = '$idMeeting' ORDER BY id DESC";
             $data_tanggapan  = DB::select($query_tanggapan);
+            foreach ($data_tanggapan as $key => $value) {
+                $value->Image = "http://webapi.satnusa.com/EmplFoto/" . $value->Create_By . ".JPG"; 
+            }
 
             // get fasilitas by detail
             $query_fasilitas = "SELECT
-             meetingfasilitas_id AS Id,
-             (SELECT fasilitas FROM tbl_meetingfasilitas WHERE id = meetingfasilitas_id ) AS Nama_Fasilitas
-         FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
-            $data_fasilitas  = DB::select($query_fasilitas);
+                    meetingfasilitas_id AS Id,
+                    (SELECT fasilitas FROM tbl_meetingfasilitas WHERE id = meetingfasilitas_id ) AS Nama_Fasilitas
+                FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
+                    $data_fasilitas  = DB::select($query_fasilitas);
 
             return response()->json([
                 "RESPONSE"      => 200,
