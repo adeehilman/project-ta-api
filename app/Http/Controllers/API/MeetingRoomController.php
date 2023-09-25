@@ -540,7 +540,6 @@ class MeetingRoomController extends Controller
                 'booking_date'      => date("Y-m-d H:i:s"),
                 'category_meeting'  => $category_meeting,
                 'jumlah_tamu'       => $jumlah_tamu,
-                'createby'          => $booking_by,
                 'ext'               => $ext_no
             ];
 
@@ -980,7 +979,7 @@ class MeetingRoomController extends Controller
             if (count($meetParticipant) > 0) {
                 for ($i = 0; $i < count($meetParticipant); $i++) {
                     $dp = array(
-                        'meeting_id' => $idMeeting, 
+                        'meeting_id' => $idMeeting,
                         'participant' => $meetParticipant[$i]['participant'],
                         'optional' => $meetParticipant[$i]['optional']
                     );
@@ -988,8 +987,8 @@ class MeetingRoomController extends Controller
                 }
             }
 
-             // handle to insert tabel meetingfasilitasdetail
-             if (COUNT($meetFasilitas) > 0) {
+            // handle to insert tabel meetingfasilitasdetail
+            if (COUNT($meetFasilitas) > 0) {
                 foreach ($meetFasilitas as $key => $idFasiltas) {
                     DB::table('tbl_meetingfasilitasdetail')
                         ->insert([
@@ -1207,6 +1206,13 @@ class MeetingRoomController extends Controller
             $query_tanggapan = "SELECT id as Id, tanggapan as Tanggapan, createdate as Create_Date, createby as Create_By FROM tbl_tanggapanmeeting WHERE meeting_id = '$idMeeting' ORDER BY id DESC";
             $data_tanggapan  = DB::select($query_tanggapan);
 
+            // get fasilitas by detail
+            $query_fasilitas = "SELECT
+             meetingfasilitas_id AS Id,
+             (SELECT fasilitas FROM tbl_meetingfasilitas WHERE id = meetingfasilitas_id ) AS Nama_Fasilitas
+         FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
+            $data_fasilitas  = DB::select($query_fasilitas);
+
             return response()->json([
                 "RESPONSE"      => 200,
                 "MESSAGETYPE"   => "S",
@@ -1214,7 +1220,8 @@ class MeetingRoomController extends Controller
                 "DATA"    => [
                     "Info_Meeting"     => $dataMeeting[0],
                     "List_Participant" => $list_user,
-                    "List_Tanggapan"   => $data_tanggapan
+                    "List_Tanggapan"   => $data_tanggapan,
+                    "List_Fasilitas"   => $data_fasilitas ? $data_fasilitas : []
                 ]
             ]);
         }
