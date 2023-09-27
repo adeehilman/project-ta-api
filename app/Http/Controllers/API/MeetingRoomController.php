@@ -137,8 +137,11 @@ class MeetingRoomController extends Controller
                 $q .= "AND a.roommeeting_id IN ($roomId)";
             }
 
+            $q .= ' ORDER BY a.meeting_start ASC';
+
             $list_schedule = DB::select($q);
             $arrData = array();
+            $arrData2 = array();
 
             if ($list_schedule) {
                 foreach ($list_schedule as $r) {
@@ -160,30 +163,56 @@ class MeetingRoomController extends Controller
                         }
                     }
 
-                    $d = array(
-                        'Id'                        => $id,
-                        'Title_Meeting'             => $r->title_meeting,
-                        'Room_Meeting_Id'           => $r->roommeeting_id,
-                        'Room_Name'                 => $r->room_name,
-                        'Booking_By'                => $r->booking_by,
-                        'Meeting_Date'              => $r->meeting_date,
-                        'Meeting_Start'             => substr($r->meeting_start, 0, 5),
-                        'Meeting_End'               => substr($r->meeting_end, 0, 5),
-                        'Status_Meeting_Id'         => $r->statusmeeting_id,
-                        'Status_Meeting_Name_Ina'   => $r->status_meeting_name_ina,
-                        'Status_Meeting_Name_Eng'   => $r->status_meeting_name_eng,
-                        'Count_Participant'         => $r->jumlah_partisipan,
-                        'Participant'               => $arrParticipant
-                    );
-                    array_push($arrData, $d);
+                    if($r->statusmeeting_id != 5){
+                        $d = array(
+                            'Id'                        => $id,
+                            'Title_Meeting'             => $r->title_meeting,
+                            'Room_Meeting_Id'           => $r->roommeeting_id,
+                            'Room_Name'                 => $r->room_name,
+                            'Booking_By'                => $r->booking_by,
+                            'Meeting_Date'              => $r->meeting_date,
+                            'Meeting_Start'             => substr($r->meeting_start, 0, 5),
+                            'Meeting_End'               => substr($r->meeting_end, 0, 5),
+                            'Status_Meeting_Id'         => $r->statusmeeting_id,
+                            'Status_Meeting_Name_Ina'   => $r->status_meeting_name_ina,
+                            'Status_Meeting_Name_Eng'   => $r->status_meeting_name_eng,
+                            'Count_Participant'         => $r->jumlah_partisipan,
+                            'Participant'               => $arrParticipant
+                        );
+                        array_push($arrData, $d);
+                    }
+
+                    if($r->statusmeeting_id == 5){
+                        $d = array(
+                            'Id'                        => $id,
+                            'Title_Meeting'             => $r->title_meeting,
+                            'Room_Meeting_Id'           => $r->roommeeting_id,
+                            'Room_Name'                 => $r->room_name,
+                            'Booking_By'                => $r->booking_by,
+                            'Meeting_Date'              => $r->meeting_date,
+                            'Meeting_Start'             => substr($r->meeting_start, 0, 5),
+                            'Meeting_End'               => substr($r->meeting_end, 0, 5),
+                            'Status_Meeting_Id'         => $r->statusmeeting_id,
+                            'Status_Meeting_Name_Ina'   => $r->status_meeting_name_ina,
+                            'Status_Meeting_Name_Eng'   => $r->status_meeting_name_eng,
+                            'Count_Participant'         => $r->jumlah_partisipan,
+                            'Participant'               => $arrParticipant
+                        );
+                        array_push($arrData2, $d);
+                    }
+
+                    
                 }
             }
+
+            // gabungin array 1 dan array 2, agar yang complete menjadi paling bawah
+            $array_gabungan = array_merge($arrData, $arrData2);
 
             return response()->json([
                 "RESPONSE"      => 200,
                 "MESSAGETYPE"   => "S",
                 "MESSAGE"       => "SUCCESS",
-                "DATA"          => $arrData
+                "DATA"          => $array_gabungan
             ]);
         } catch (\Throwable $th) {
             dd($th);
