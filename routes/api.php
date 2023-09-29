@@ -208,7 +208,7 @@ Route::group(['middleware' => 'api','prefix' => 'meeting'], function ($router) {
   Route::post('beri-tanggapan', [MeetingRoomController::class, 'beriTanggapan']);
   Route::get('my-meeting', [MeetingRoomController::class, 'myMeeting']);
   Route::get('detail-meeting-saya', [MeetingRoomController::class, 'detailMeetingSaya']);
-
+  Route::post('aksi-kehadiran', [MeetingRoomController::class, 'aksiKehadiran']);
 });
 
 Route::group(['prefix' => 'digitalsop'], function ($router){

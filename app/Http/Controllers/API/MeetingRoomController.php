@@ -163,7 +163,7 @@ class MeetingRoomController extends Controller
                         }
                     }
 
-                    if($r->statusmeeting_id != 5){
+                    if ($r->statusmeeting_id != 5) {
                         $d = array(
                             'Id'                        => $id,
                             'Title_Meeting'             => $r->title_meeting,
@@ -182,7 +182,7 @@ class MeetingRoomController extends Controller
                         array_push($arrData, $d);
                     }
 
-                    if($r->statusmeeting_id == 5){
+                    if ($r->statusmeeting_id == 5) {
                         $d = array(
                             'Id'                        => $id,
                             'Title_Meeting'             => $r->title_meeting,
@@ -200,8 +200,6 @@ class MeetingRoomController extends Controller
                         );
                         array_push($arrData2, $d);
                     }
-
-                    
                 }
             }
 
@@ -374,7 +372,7 @@ class MeetingRoomController extends Controller
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
                         'Position' => $item->position_name,
-                        'Kehadiran'=> $item->kehadiran,
+                        'Kehadiran' => $item->kehadiran,
                         'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG",
                     ];
                     array_push($list_user, $arrItem);
@@ -1228,7 +1226,7 @@ class MeetingRoomController extends Controller
                         'Badge_Id' => $item->participant,
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
-                        'Kehadiran'=> $item->kehadiran,
+                        'Kehadiran' => $item->kehadiran,
                         'Position' => $item->position_name,
                         'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
                     ];
@@ -1246,7 +1244,7 @@ class MeetingRoomController extends Controller
                                 FROM tbl_tanggapanmeeting WHERE meeting_id = '$idMeeting' ORDER BY id DESC";
             $data_tanggapan  = DB::select($query_tanggapan);
             foreach ($data_tanggapan as $key => $value) {
-                $value->Image = "http://webapi.satnusa.com/EmplFoto/" . $value->Create_By . ".JPG"; 
+                $value->Image = "http://webapi.satnusa.com/EmplFoto/" . $value->Create_By . ".JPG";
             }
 
             // get fasilitas by detail
@@ -1254,7 +1252,7 @@ class MeetingRoomController extends Controller
                     meetingfasilitas_id AS Id,
                     (SELECT fasilitas FROM tbl_meetingfasilitas WHERE id = meetingfasilitas_id ) AS Nama_Fasilitas
                 FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
-                    $data_fasilitas  = DB::select($query_fasilitas);
+            $data_fasilitas  = DB::select($query_fasilitas);
 
             return response()->json([
                 "RESPONSE"      => 200,
@@ -1406,5 +1404,82 @@ class MeetingRoomController extends Controller
             "Accept",
             "application/json"
         );
+    }
+
+    /**
+     * function untuk presensi kehadiran meeting
+     */
+    public function aksiKehadiran(Request $request)
+    {
+        try {
+            $token = $request->header('Authorization');
+            $validateToken = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json([
+                "RESPONSE_CODE" => 401,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'UNAUTHORIZED',
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+
+        $meetParticipant = $request->data_participant ? $request->data_participant : [];
+        $idMeeting       = $request->id_meeting;
+        $mode            = strtoupper($request->mode);
+
+        // apabila mode yang didapat adalah SINGLE maka,
+        // flow yang dilakukan adalah update
+        if ($mode == 'SINGLE') {
+            if (COUNT($meetParticipant) > 0) {
+                $soloParticipant = $meetParticipant[0];
+
+                $badgeId = $soloParticipant['participant'];
+                $kehadiran = $soloParticipant['kehadiran'];
+
+                // cek partipant dgn badge diatas, apakah sudah ada record ?
+                $query_participant_cek = "SELECT id FROM tbl_participant WHERE participant = '$badgeId' AND meeting_id = '$idMeeting' ";
+                $data_partisipan       = DB::select($query_participant_cek);
+                if (COUNT($data_partisipan) > 0) {
+                    DB::table('tbl_participant')
+                        ->where('id', $data_partisipan[0]->id)
+                        ->update([
+                            'kehadiran' => $kehadiran
+                        ]);
+                }
+            }
+            return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS",
+                'MEEETING_ID'   => $idMeeting
+            ]);
+        }
+
+        // apabila mode yang didapat adalah ALL maka,
+        // flow yang dilakukan adalah delete all dan insert new list participant
+        if($mode == 'ALL'){
+            if(COUNT($meetParticipant) > 0){
+                // delete all participant
+                DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+
+                for ($i = 0; $i < count($meetParticipant); $i++) {
+                    $dp = array(
+                        'meeting_id' => $idMeeting,
+                        'participant' => $meetParticipant[$i]['participant'],
+                        'optional' => $meetParticipant[$i]['optional'],
+                        'kehadiran' => $meetParticipant[$i]['kehadiran']
+                    );
+                    DB::table('tbl_participant')->insert($dp);
+                }
+            }
+            return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS",
+                'MEEETING_ID'   => $idMeeting
+            ]);
+        }
     }
 }
