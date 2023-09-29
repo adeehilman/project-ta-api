@@ -885,21 +885,22 @@ class MeetingRoomController extends Controller
                         ]);
 
                     // delete tabel participant utk insert ulang
-                    DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+                    // DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+
                     // delete tabel 
                     DB::table('tbl_meetingfasilitasdetail')->where('meeting_id', $idMeeting)->delete();
 
                     // insert ke tabel participant
-                    if (count($meetParticipant) > 0) {
-                        for ($i = 0; $i < count($meetParticipant); $i++) {
-                            $dp = array(
-                                'meeting_id' => $idMeeting,
-                                'participant' => $meetParticipant[$i]['participant'],
-                                'optional' => $meetParticipant[$i]['optional']
-                            );
-                            DB::table('tbl_participant')->insert($dp);
-                        }
-                    }
+                    // if (count($meetParticipant) > 0) {
+                    //     for ($i = 0; $i < count($meetParticipant); $i++) {
+                    //         $dp = array(
+                    //             'meeting_id' => $idMeeting,
+                    //             'participant' => $meetParticipant[$i]['participant'],
+                    //             'optional' => $meetParticipant[$i]['optional']
+                    //         );
+                    //         DB::table('tbl_participant')->insert($dp);
+                    //     }
+                    // }
 
                     // handle to insert tabel meetingfasilitasdetail
                     if (COUNT($meetFasilitas) > 0) {
@@ -999,22 +1000,23 @@ class MeetingRoomController extends Controller
                 ]);
 
             // delete tabel participant utk insert ulang
-            DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+            // DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+
             // delete tabel meeting fasulitas detail 
             DB::table('tbl_meetingfasilitasdetail')->where('meeting_id', $idMeeting)->delete();
 
 
             // insert ke tabel participant
-            if (count($meetParticipant) > 0) {
-                for ($i = 0; $i < count($meetParticipant); $i++) {
-                    $dp = array(
-                        'meeting_id' => $idMeeting,
-                        'participant' => $meetParticipant[$i]['participant'],
-                        'optional' => $meetParticipant[$i]['optional']
-                    );
-                    DB::table('tbl_participant')->insert($dp);
-                }
-            }
+            // if (count($meetParticipant) > 0) {
+            //     for ($i = 0; $i < count($meetParticipant); $i++) {
+            //         $dp = array(
+            //             'meeting_id' => $idMeeting,
+            //             'participant' => $meetParticipant[$i]['participant'],
+            //             'optional' => $meetParticipant[$i]['optional']
+            //         );
+            //         DB::table('tbl_participant')->insert($dp);
+            //     }
+            // }
 
             // handle to insert tabel meetingfasilitasdetail
             if (COUNT($meetFasilitas) > 0) {
@@ -1348,6 +1350,10 @@ class MeetingRoomController extends Controller
 
         // Menutup koneksi cURL
         curl_close($ch);
+
+        // notifikasi insert
+        $notifikasi = new Notifikasi($message,  $sub_message, $badge_id, 'MEETING');
+        $notifikasi->insertNotifikasi();
 
         return response()->json([
             "RESPONSE"      => 200,
