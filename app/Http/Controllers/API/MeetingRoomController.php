@@ -358,6 +358,7 @@ class MeetingRoomController extends Controller
             $query_user = "SELECT 
                                 participant, 
                                 optional,
+                                kehadiran,
                                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.participant ) as fullname,
                                 (SELECT position_name FROM tbl_position WHERE position_code = (SELECT position_code FROM tbl_karyawan WHERE badge_id = a.participant)) AS position_name
                             FROM tbl_participant a WHERE meeting_id = '$idMeeting' ";
@@ -373,7 +374,8 @@ class MeetingRoomController extends Controller
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
                         'Position' => $item->position_name,
-                        'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
+                        'Kehadiran'=> $item->kehadiran,
+                        'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG",
                     ];
                     array_push($list_user, $arrItem);
                 }
@@ -1211,6 +1213,7 @@ class MeetingRoomController extends Controller
             $query_user = "SELECT 
                                 participant,  
                                 optional,
+                                kehadiran,
                                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.participant ) as fullname,
                                 (SELECT position_name FROM tbl_position WHERE position_code = (SELECT position_code FROM tbl_karyawan WHERE badge_id = a.participant)) AS position_name
                             FROM tbl_participant a WHERE meeting_id = '$idMeeting' ";
@@ -1225,6 +1228,7 @@ class MeetingRoomController extends Controller
                         'Badge_Id' => $item->participant,
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
+                        'Kehadiran'=> $item->kehadiran,
                         'Position' => $item->position_name,
                         'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
                     ];
