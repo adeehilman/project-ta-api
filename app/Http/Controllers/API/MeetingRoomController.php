@@ -213,7 +213,6 @@ class MeetingRoomController extends Controller
                 "DATA"          => $array_gabungan
             ]);
         } catch (\Throwable $th) {
-            dd($th);
             return response()->json([
                 "MESSAGETYPE"   => "E",
                 "MESSAGE" => "Something when wrong",
@@ -1233,8 +1232,14 @@ class MeetingRoomController extends Controller
                         'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
                     ];
                     array_push($list_user, $arrItem);
+                    $index = array_search($dataMeeting[0]->Booking_By, array_column($list_user, 'Badge_Id'));
+                    if($index != false){
+                        $element = array_splice($list_user, $index, 1);
+                        array_unshift($list_user, $element[0]);
+                    }
                 }
             }
+            
 
             $query_tanggapan = "SELECT 
                                     id as Id, 
@@ -1494,6 +1499,21 @@ class MeetingRoomController extends Controller
      */
     public function editPartisipan(Request $request)
     {
+
+        try {
+            $token = $request->header('Authorization');
+            $validateToken = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json([
+                "RESPONSE_CODE" => 401,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'UNAUTHORIZED',
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+
         /**
          * ini akan melakukan reset partisipan
          */

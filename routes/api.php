@@ -13,6 +13,7 @@ use App\Http\Controllers\API\LmsController;
 use App\Http\Controllers\API\LowonganController;
 use App\Http\Controllers\API\MeetingRoomController;
 use App\Http\Controllers\API\MmsController;
+use App\Http\Controllers\API\NotifikasiController;
 use App\Http\Controllers\API\PengumumanController;
 use App\Http\Controllers\API\PlatformController;
 use App\Http\Controllers\API\PlayStoreController;
@@ -183,6 +184,7 @@ Route::get('/mms/brandsmartphone', [MmsController::class, 'getBrandSmartphone'])
 Route::get('/taskschedule/getsisacuti', [CronJobController::class, 'getSisaCuti']);
 Route::get('/taskschedule/getaccessdoor', [CronJobController::class, 'getAccessDoor']);
 
+Route::get('list-notifikasi', [NotifikasiController::class, 'getListNotifikasi']);
 
 /**
 * Meeting Room
