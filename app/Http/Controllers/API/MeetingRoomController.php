@@ -1459,8 +1459,8 @@ class MeetingRoomController extends Controller
 
         // apabila mode yang didapat adalah ALL maka,
         // flow yang dilakukan adalah delete all dan insert new list participant
-        if($mode == 'ALL'){
-            if(COUNT($meetParticipant) > 0){
+        if ($mode == 'ALL') {
+            if (COUNT($meetParticipant) > 0) {
                 // delete all participant
                 DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
 
@@ -1481,5 +1481,38 @@ class MeetingRoomController extends Controller
                 'MEEETING_ID'   => $idMeeting
             ]);
         }
+    }
+
+    /**
+     * function untuk edit participant
+     */
+    public function editPartisipan(Request $request)
+    {
+        /**
+         * ini akan melakukan reset partisipan
+         */
+        $meetParticipant = $request->data_participant ? $request->data_participant : [];
+        $idMeeting       = $request->id_meeting;
+
+        if (COUNT($meetParticipant) > 0) {
+            // delete all participant
+            DB::table('tbl_participant')->where('meeting_id', $idMeeting)->delete();
+
+            for ($i = 0; $i < count($meetParticipant); $i++) {
+                $dp = array(
+                    'meeting_id' => $idMeeting,
+                    'participant' => $meetParticipant[$i]['participant'],
+                    'optional' => $meetParticipant[$i]['optional'],
+                    'kehadiran' => $meetParticipant[$i]['kehadiran']
+                );
+                DB::table('tbl_participant')->insert($dp);
+            }
+        }
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS",
+            'MEEETING_ID'   => $idMeeting
+        ]);
     }
 }
