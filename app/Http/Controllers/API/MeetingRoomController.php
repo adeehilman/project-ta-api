@@ -338,6 +338,7 @@ class MeetingRoomController extends Controller
                 a.category_meeting as Category_Meeting,
                 a.jumlah_tamu as Jumlah_Tamu,
                 a.ext as Ext,
+                a.project_name as Project_Name,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
@@ -549,6 +550,7 @@ class MeetingRoomController extends Controller
             $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
             $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
             $ext_no          = $request->ext;
+            $project_name    = $request->project_name;
 
             $category_meeting = 0;
             if ($jumlah_tamu > 0) {
@@ -568,7 +570,8 @@ class MeetingRoomController extends Controller
                 'booking_date'      => date("Y-m-d H:i:s"),
                 'category_meeting'  => $category_meeting,
                 'jumlah_tamu'       => $jumlah_tamu,
-                'ext'               => $ext_no
+                'ext'               => $ext_no,
+                'project_name'      => $project_name
             ];
 
             /**
@@ -856,9 +859,10 @@ class MeetingRoomController extends Controller
                 $endTime            = $request->meeting_end;
                 $description        = $request->description;
                 $meetParticipant    = $request->data_participant ? $request->data_participant : [];
-                $meetFasilitas   = $request->data_fasilitas ? $request->data_fasilitas : [];
-                $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
-                $ext_no          = $request->ext;
+                $meetFasilitas      = $request->data_fasilitas ? $request->data_fasilitas : [];
+                $jumlah_tamu        = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
+                $ext_no             = $request->ext;
+                $project_name       = $request->project_name;
 
                 $category_meeting = 0;
                 if ($jumlah_tamu > 0) {
@@ -880,7 +884,8 @@ class MeetingRoomController extends Controller
                             'jumlah_tamu'       => $jumlah_tamu,
                             'update_date'       => date('Y-m-d H:i:s'),
                             'updateby'          => $badge_pembuat,
-                            'ext'               => $ext_no
+                            'ext'               => $ext_no,
+                            'project_name'      => $project_name
                         ]);
 
                     // delete tabel participant utk insert ulang
@@ -888,18 +893,6 @@ class MeetingRoomController extends Controller
 
                     // delete tabel 
                     DB::table('tbl_meetingfasilitasdetail')->where('meeting_id', $idMeeting)->delete();
-
-                    // insert ke tabel participant
-                    // if (count($meetParticipant) > 0) {
-                    //     for ($i = 0; $i < count($meetParticipant); $i++) {
-                    //         $dp = array(
-                    //             'meeting_id' => $idMeeting,
-                    //             'participant' => $meetParticipant[$i]['participant'],
-                    //             'optional' => $meetParticipant[$i]['optional']
-                    //         );
-                    //         DB::table('tbl_participant')->insert($dp);
-                    //     }
-                    // }
 
                     // handle to insert tabel meetingfasilitasdetail
                     if (COUNT($meetFasilitas) > 0) {
@@ -951,6 +944,9 @@ class MeetingRoomController extends Controller
         }
 
         // apabila ada perubahan pada date, room, start time, dan end time
+        /**
+         * maka akan melakukan reschdule
+         */
         $idMeeting          = $request->id_meeting;
         $roomMeetingId      = $request->roommeeting_id;
         $titleMeeting       = $request->title_meeting;
@@ -962,6 +958,7 @@ class MeetingRoomController extends Controller
         $meetFasilitas      = $request->data_fasilitas ? $request->data_fasilitas : [];
         $jumlah_tamu        = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
         $ext_no             = $request->ext;
+        $project_name       = $request->project_name;
 
         $category_meeting = 0;
         if ($jumlah_tamu > 0) {
@@ -986,7 +983,8 @@ class MeetingRoomController extends Controller
                     'category_meeting'  => $category_meeting,
                     'jumlah_tamu'       => $jumlah_tamu,
                     'update_date'       => date('Y-m-d H:i:s'),
-                    'ext'               => $ext_no
+                    'ext'               => $ext_no,
+                    'project_name'      => $project_name
                 ]);
 
             DB::table('tbl_riwayatmeeting')
@@ -1003,19 +1001,6 @@ class MeetingRoomController extends Controller
 
             // delete tabel meeting fasulitas detail 
             DB::table('tbl_meetingfasilitasdetail')->where('meeting_id', $idMeeting)->delete();
-
-
-            // insert ke tabel participant
-            // if (count($meetParticipant) > 0) {
-            //     for ($i = 0; $i < count($meetParticipant); $i++) {
-            //         $dp = array(
-            //             'meeting_id' => $idMeeting,
-            //             'participant' => $meetParticipant[$i]['participant'],
-            //             'optional' => $meetParticipant[$i]['optional']
-            //         );
-            //         DB::table('tbl_participant')->insert($dp);
-            //     }
-            // }
 
             // handle to insert tabel meetingfasilitasdetail
             if (COUNT($meetFasilitas) > 0) {
@@ -1197,6 +1182,7 @@ class MeetingRoomController extends Controller
                 a.category_meeting as Category_Meeting,
                 a.jumlah_tamu as Jumlah_Tamu,
                 a.ext as Ext,
+                a.project_name as Project_Name,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
