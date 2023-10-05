@@ -241,7 +241,7 @@ class MeetingRoomController extends Controller
                             floor as Floor, 
                             $txFilter 
                             capacity as Capacity
-                          FROM tbl_roommeeting ORDER BY Room_Name ASC";
+                          FROM tbl_roommeeting ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name";
         $data_allRoom  = DB::select($query_allRoom);
 
         if (COUNT($data_allRoom) > 0) {
