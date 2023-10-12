@@ -185,6 +185,7 @@ Route::get('/taskschedule/getsisacuti', [CronJobController::class, 'getSisaCuti'
 Route::get('/taskschedule/getaccessdoor', [CronJobController::class, 'getAccessDoor']);
 
 Route::get('list-notifikasi', [NotifikasiController::class, 'getListNotifikasi']);
+Route::get('baca-notifikasi', [NotifikasiController::class, 'bacaNotif']);
 
 /**
 * Meeting Room
@@ -227,4 +228,8 @@ Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
 Route::get('/meeting/send-notif', [MeetingRoomController::class, 'sendNotif']);
 Route::get('/meeting/fasilitas', [MeetingRoomController::class, 'getListFasilitas']);
 
+// Kirim Notifikasi
 Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
+
+// 15 Menit sebelum Meeting dimulai
+Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);

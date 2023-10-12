@@ -1219,13 +1219,13 @@ class MeetingRoomController extends Controller
                     ];
                     array_push($list_user, $arrItem);
                     $index = array_search($dataMeeting[0]->Booking_By, array_column($list_user, 'Badge_Id'));
-                    if($index != false){
+                    if ($index != false) {
                         $element = array_splice($list_user, $index, 1);
                         array_unshift($list_user, $element[0]);
                     }
                 }
             }
-            
+
 
             $query_tanggapan = "SELECT 
                                     id as Id, 
@@ -1525,6 +1525,54 @@ class MeetingRoomController extends Controller
             "MESSAGETYPE"   => "S",
             "MESSAGE"       => "SUCCESS",
             'MEEETING_ID'   => $idMeeting
+        ]);
+    }
+
+    /**
+     * function untuk agar crobjob pak ali bisa
+     * memberikan notifikasi kepada partisipan terkait
+     * 15 menit sebelum meeting dimulai
+     */
+    public function reminderMeeting(Request $request)
+    {
+
+        $id_meeting = $request->id_meeting;
+
+        $query = "SELECT participant FROM tbl_participant WHERE meeting_id = '$id_meeting' ";
+        $data_participant  = DB::select($query);
+
+        $query_meeting = "SELECT * FROM tbl_meeting WHERE id = '$id_meeting'";
+        $data_meeting  = DB::select($query_meeting);
+
+        $title_meeting = $data_meeting[0]->title_meeting;
+
+        // Proses Looping  Participant
+        foreach ($data_participant as $key => $item) {
+            try {
+                $client = new Client();
+                $data   = [
+                    'badge_id' => $item->participant,
+                    'message'  => "Rapat " . $title_meeting . " akan segera dimulai",
+                    'sub_message' => "tap untuk informasi lebih lanjut",
+                    'category'    => "MEETING",
+                    'tag'         => 'Meeting'
+                ];
+                $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
+                    'json' => $data,
+                ]);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    "RESPONSE"      => 400,
+                    "MESSAGETYPE"   => "E",
+                    "MESSAGE"       => "FAILED"
+                ], 400);
+            }
+        }
+
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS"
         ]);
     }
 }
