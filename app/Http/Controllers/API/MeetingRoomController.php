@@ -248,9 +248,9 @@ class MeetingRoomController extends Controller
 
             if ($img == true) {
                 foreach ($data_allRoom as $key => $item) {
-                    $item->Room_Image_1 = "http://192.168.88.60:7004/RoomMeetingFoto/" . $item->Room_Image_1;
-                    $item->Room_Image_2 = "http://192.168.88.60:7004/RoomMeetingFoto/" . $item->Room_Image_2;
-                    $item->Room_Image_3 = "http://192.168.88.60:7004/RoomMeetingFoto/" . $item->Room_Image_3;
+                    $item->Room_Image_1 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_1;
+                    $item->Room_Image_2 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_2;
+                    $item->Room_Image_3 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_3;
                 }
             }
 
@@ -1559,7 +1559,7 @@ class MeetingRoomController extends Controller
                     'category'    => "MEETING",
                     'tag'         => 'Meeting'
                 ];
-                $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
+                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
                     'json' => $data,
                 ]);
             } catch (\Throwable $th) {
