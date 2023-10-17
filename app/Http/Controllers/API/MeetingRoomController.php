@@ -150,13 +150,17 @@ class MeetingRoomController extends Controller
 
                     $id = $r->id;
 
-                    $dataParticipant = DB::table('tbl_participant')->where('meeting_id', $id)->get();
-                    if ($dataParticipant) {
+                    // $dataParticipant = DB::table('tbl_participant')->where('meeting_id', $id)->get();
+                    $query_participant = "SELECT id, meeting_id, participant, (SELECT fullname FROM tbl_karyawan WHERE badge_id = participant) as participant_name FROM tbl_participant WHERE meeting_id = '$id' ";
+                    $dataParticipant   = DB::select($query_participant);
+
+                    if (COUNT($dataParticipant) > 0) {
                         foreach ($dataParticipant as $rp) {
                             $dp = array(
                                 'Id' => $rp->id,
                                 'Meeting_Id' => $rp->meeting_id,
                                 'Participant' => $rp->participant,
+                                'Participan_Name' => $rp->participant_name,
                                 'Participant_Image' => "http://webapi.satnusa.com/EmplFoto/" . $rp->participant . ".JPG"
                             );
                             array_push($arrParticipant, $dp);
