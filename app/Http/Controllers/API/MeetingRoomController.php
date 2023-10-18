@@ -151,7 +151,13 @@ class MeetingRoomController extends Controller
                     $id = $r->id;
 
                     // $dataParticipant = DB::table('tbl_participant')->where('meeting_id', $id)->get();
-                    $query_participant = "SELECT id, meeting_id, participant, (SELECT fullname FROM tbl_karyawan WHERE badge_id = participant) as participant_name FROM tbl_participant WHERE meeting_id = '$id' ";
+                    $query_participant = "SELECT 
+                                                id, 
+                                                meeting_id, 
+                                                participant, 
+                                                (SELECT fullname FROM tbl_karyawan WHERE badge_id = participant) as participant_name, 
+                                                (SELECT dept_code FROM tbl_karyawan WHERE badge_id = participant) as dept_code    
+                                            FROM tbl_participant WHERE meeting_id = '$id' ";
                     $dataParticipant   = DB::select($query_participant);
 
                     if (COUNT($dataParticipant) > 0) {
@@ -161,6 +167,7 @@ class MeetingRoomController extends Controller
                                 'Meeting_Id' => $rp->meeting_id,
                                 'Participant' => $rp->participant,
                                 'Participan_Name' => $rp->participant_name,
+                                'Dept_Code' => $rp->dept_code ? $rp->dept_code : 'N/A',
                                 'Participant_Image' => "http://webapi.satnusa.com/EmplFoto/" . $rp->participant . ".JPG"
                             );
                             array_push($arrParticipant, $dp);
