@@ -1347,8 +1347,8 @@ class MeetingRoomController extends Controller
         curl_close($ch);
 
         // notifikasi insert
-        // $notifikasi = new Notifikasi($message,  $sub_message, $badge_id, 'MEETING');
-        // $notifikasi->insertNotifikasi();
+        $notifikasi = new Notifikasi($message,  $sub_message, $badge_id, 'MEETING');
+        $notifikasi->insertNotifikasi();
 
         return response()->json([
             "RESPONSE"      => 200,
