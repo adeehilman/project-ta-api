@@ -62,6 +62,13 @@ class NotifikasiController extends Controller
                 "application/json"
             );
         }
+
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS",
+            "DATA"          => []
+        ]);
     }
 
     // send notifikasi 
