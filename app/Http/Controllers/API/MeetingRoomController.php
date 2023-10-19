@@ -1550,6 +1550,13 @@ class MeetingRoomController extends Controller
     {
 
         $id_meeting = $request->id_meeting;
+        if($id_meeting == ''){
+            return response()->json([
+                "RESPONSE"      => 400,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => "FAILED, ID MEETING STRING KOSONG"
+            ], 400);
+        }
 
         $query = "SELECT participant FROM tbl_participant WHERE meeting_id = '$id_meeting' ";
         $data_participant  = DB::select($query);
