@@ -1564,8 +1564,11 @@ class MeetingRoomController extends Controller
         $query_meeting = "SELECT * FROM tbl_meeting WHERE id = '$id_meeting'";
         $data_meeting  = DB::select($query_meeting);
 
-        $title_meeting = $data_meeting[0]->title_meeting;
-
+        $title_meeting = "";
+        if(COUNT($data_meeting) > 0){
+            $title_meeting = $data_meeting[0]->title_meeting;
+        }
+       
         // Proses Looping  Participant
         foreach ($data_participant as $key => $item) {
             try {
