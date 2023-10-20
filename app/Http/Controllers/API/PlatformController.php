@@ -193,7 +193,6 @@ class PlatformController extends Controller
      */
     public function listUserBy(Request $req)
     {
-        $badge_id = $req->badge_id;
         $query    = "SELECT badge_id, fullname, dept_code FROM tbl_karyawan
                         WHERE badge_id LIKE '%$req->user%' OR fullname LIKE '%$req->user%' LIMIT 100";
         $data     = DB::select($query);
@@ -202,7 +201,7 @@ class PlatformController extends Controller
             "RESPONSE"      => 200,
             "MESSAGETYPE"   => "S",
             "MESSAGE"       => "SUCCESS",
-            "DATA"          => $data[0]
+            "DATA"          => $data
         ]);
     }
 }

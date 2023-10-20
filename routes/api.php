@@ -235,4 +235,4 @@ Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
 Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);
 
 // get list user by name or badge
-Route::get('/listUserBy', [MeetingRoomController::class, 'listUserBy']);
+Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
