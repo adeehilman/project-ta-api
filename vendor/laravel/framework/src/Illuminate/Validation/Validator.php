@@ -296,6 +296,13 @@ class Validator implements ValidatorContract
     protected $exception = ValidationException::class;
 
     /**
+     * The custom callback to determine if an exponent is within allowed range.
+     *
+     * @var callable|null
+     */
+    protected $ensureExponentWithinAllowedRangeUsing;
+
+    /**
      * Create a new Validator instance.
      *
      * @param  \Illuminate\Contracts\Translation\Translator  $translator
@@ -383,11 +390,19 @@ class Validator implements ValidatorContract
     /**
      * Add an after validation callback.
      *
-     * @param  callable|string  $callback
+     * @param  callable|array|string  $callback
      * @return $this
      */
     public function after($callback)
     {
+        if (is_array($callback) && ! is_callable($callback)) {
+            foreach ($callback as $rule) {
+                $this->after(method_exists($rule, 'after') ? $rule->after(...) : $rule);
+            }
+
+            return $this;
+        }
+
         $this->after[] = fn () => $callback($this);
 
         return $this;
@@ -422,14 +437,18 @@ class Validator implements ValidatorContract
                 $this->validateAttribute($attribute, $rule);
 
                 if ($this->shouldBeExcluded($attribute)) {
-                    $this->removeAttribute($attribute);
-
                     break;
                 }
 
                 if ($this->shouldStopValidating($attribute)) {
                     break;
                 }
+            }
+        }
+
+        foreach ($this->rules as $attribute => $rules) {
+            if ($this->shouldBeExcluded($attribute)) {
+                $this->removeAttribute($attribute);
             }
         }
 
@@ -1479,6 +1498,19 @@ class Validator implements ValidatorContract
         }
 
         $this->exception = $exception;
+
+        return $this;
+    }
+
+    /**
+     * Ensure exponents are within range using the given callback.
+     *
+     * @param  callable(int $scale, string $attribute, mixed $value)  $callback
+     * @return $this
+     */
+    public function ensureExponentWithinAllowedRangeUsing($callback)
+    {
+        $this->ensureExponentWithinAllowedRangeUsing = $callback;
 
         return $this;
     }

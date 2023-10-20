@@ -38,7 +38,7 @@ class Application extends Container implements ApplicationContract, CachesConfig
      *
      * @var string
      */
-    const VERSION = '10.7.1';
+    const VERSION = '10.28.0';
 
     /**
      * The base path for the Laravel installation.
@@ -529,6 +529,10 @@ class Application extends Container implements ApplicationContract, CachesConfig
      */
     public function storagePath($path = '')
     {
+        if (isset($_ENV['LARAVEL_STORAGE_PATH'])) {
+            return $this->joinPaths($this->storagePath ?: $_ENV['LARAVEL_STORAGE_PATH'], $path);
+        }
+
         return $this->joinPaths($this->storagePath ?: $this->basePath('storage'), $path);
     }
 
@@ -1218,7 +1222,7 @@ class Application extends Container implements ApplicationContract, CachesConfig
     public function abort($code, $message = '', array $headers = [])
     {
         if ($code == 404) {
-            throw new NotFoundHttpException($message);
+            throw new NotFoundHttpException($message, null, 0, $headers);
         }
 
         throw new HttpException($code, $message, null, $headers);
