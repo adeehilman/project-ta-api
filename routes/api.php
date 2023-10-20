@@ -93,7 +93,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
   Route::get('/breaktime/getdurationbreak', [DurationBreakController::class, 'getDurationBreak']);
 
   /**
-   * lms API 
+   * lms API
    */
   Route::post('/lms/pengajuan', [LmsController::class, 'insertPengajuan']);
   Route::post('/lms/tanggapan', [LmsController::class, 'beriTanggapan']);
@@ -113,7 +113,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
    */
   Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 
-  
+
 });
 
 /**
@@ -233,3 +233,6 @@ Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
 
 // 15 Menit sebelum Meeting dimulai
 Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);
+
+// get list user by name or badge
+Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);

@@ -57,6 +57,7 @@ class ServeCommand extends Command
      */
     public static $passthroughVariables = [
         'APP_ENV',
+        'IGNITION_LOCAL_SITES_PATH',
         'LARAVEL_SAIL',
         'PATH',
         'PHP_CLI_SERVER_WORKERS',
@@ -200,6 +201,13 @@ class ServeCommand extends Command
      */
     protected function getHostAndPort()
     {
+        if (preg_match('/(\[.*\]):?([0-9]+)?/', $this->input->getOption('host'), $matches) !== false) {
+            return [
+                $matches[1] ?? $this->input->getOption('host'),
+                $matches[2] ?? null,
+            ];
+        }
+
         $hostParts = explode(':', $this->input->getOption('host'));
 
         return [
@@ -296,6 +304,8 @@ class ServeCommand extends Command
         $regex = env('PHP_CLI_SERVER_WORKERS', 1) > 1
             ? '/^\[\d+]\s\[([a-zA-Z0-9: ]+)\]/'
             : '/^\[([^\]]+)\]/';
+
+        $line = str_replace('  ', ' ', $line);
 
         preg_match($regex, $line, $matches);
 
