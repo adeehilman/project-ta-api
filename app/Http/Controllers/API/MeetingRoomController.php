@@ -1575,7 +1575,7 @@ class MeetingRoomController extends Controller
                 $client = new Client();
                 $data   = [
                     'badge_id' => $item->participant,
-                    'message'  => "Rapat " . $title_meeting . " akan segera dimulai",
+                    'message'  => "Rapat " . $title_meeting . " akan mulai dalam 15 menit",
                     'sub_message' => "tap untuk informasi lebih lanjut",
                     'category'    => "MEETING",
                     'tag'         => 'Meeting'
