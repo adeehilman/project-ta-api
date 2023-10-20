@@ -1089,8 +1089,8 @@ class MeetingRoomController extends Controller
             DB::commit();
 
             // send update notif ke resepsionis
-            $this->sendNotifKeResepsionis("200400", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("038720", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
 
             return response()->json([
                 "RESPONSE"      => 200,
