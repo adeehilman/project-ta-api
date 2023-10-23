@@ -10,9 +10,18 @@ use Illuminate\Support\Facades\DB;
 class KecamatanController extends Controller
 {
     // get all kecamatan 
+    /**
+     * ini adlaah sebuah fungsi untuk
+     * melakukan get list all kecamatamn
+     * dari tabel kecamaran
+     */
     public function getAllKecamatan()
     {
 
+        /**
+         * apabila memiliki cache, maka ambil datanya
+         * dari cache apabila tidak ambil dari tabel kecamatan
+         */
         if (Cache::has('all_kecamatan')) {
             $data = Cache::get('all_kecamatan');
         } else {

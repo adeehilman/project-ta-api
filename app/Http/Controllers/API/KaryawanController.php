@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Hash;
 class KaryawanController extends Controller
 {
     // function cek badge
+    /**
+     * ini adalah fungsi melakukan pengcekan data badge
+     * pada tbl_karyawan dimana pengguna ketika melakukan
+     * proses registrasi ada masukkan badge, dan endpoint inilah 
+     * yang melakukan proses cek badge dari badge yang telah 
+     * di inputkan 
+     */
     public function cekBadge(Request $request)
     {
 
@@ -21,6 +28,12 @@ class KaryawanController extends Controller
             ]);
         }
 
+        /**
+         * apabila proses pengecekan yang dilakukakan 
+         * data karyawannya tidak terdeteksi maka lakukan
+         * response tidak ada badge yang tidak ditemukan atau
+         * cocok
+         */
         $check_karyawan = DB::table('tbl_karyawan')
             ->where('badge_id', $request->badge)
             ->first();
@@ -31,6 +44,11 @@ class KaryawanController extends Controller
             ], 400);
         }
 
+        /**
+         * apabila telah didaftarkan maka
+         * berikan response bahwa badge
+         * telah didaftarkan
+         */
         if ($check_karyawan) {
             if ($check_karyawan->password != null) {
                 return response()->json([
@@ -40,6 +58,11 @@ class KaryawanController extends Controller
             }
         }
 
+        /**
+         * apabila badge tersebut ada dan memang sekali belum pernah di daftarkan
+         * maka berikan response bahwa badge tersebut sudah
+         * bisa di daftarakan
+         */
         return response()->json([
             "message" => "Badge bisa didaftarkan!",
             "status_pendaftaran" => 1
@@ -47,6 +70,12 @@ class KaryawanController extends Controller
     }
 
     // function cek mms
+    /**
+     * fungsi ini adalah terkait penggunaan cek mms
+     * dimana ada proses bisnis pengecekan ke tabel mms
+     * apakah pengguna sudah melakukan pendaftaran mms 
+     * untuk yang pertama kalinya
+     */
     public function cekMMS(Request $request)
     {
         if (!$request->badge) {
@@ -75,8 +104,16 @@ class KaryawanController extends Controller
     }
 
     // function profile
+    /**
+     * ini adalah fungsi dimana pengguna mendapatkan 
+     * informasi bioadata dirinya, dimana request dari
+     * user adalah dengan membawa badge
+     */
     public function profile(Request $request)
     {
+        /**
+         * apabila tidak ada params badge
+         */
         if (!$request->badge) {
             return response()->json([
                 "message" => "Params dibutuhkan!"
@@ -202,6 +239,10 @@ class KaryawanController extends Controller
     }
 
     // function edit profile
+    /**
+     * secara spesifik ini adalah fungsi untuk melakukan 
+     * perubahan pada edit alamat
+     */
     public function editAlamat(Request $request)
     {
         $request->validate([
@@ -258,6 +299,11 @@ class KaryawanController extends Controller
     }
 
     // function edit profile
+    /**
+     * secara spesifik ini adalah endpoint
+     * agar kontak bisa diubah, dengan mengirim
+     * badge id dan no hp
+     */
     public function editKontak(Request $request)
     {
         $request->validate([
@@ -265,6 +311,10 @@ class KaryawanController extends Controller
             "no_hp"        => "required",
         ]);
 
+        /**
+         * lakukan proses update
+         * ke tabel karyawan
+         */
         DB::beginTransaction();
         try {
             DB::table('tbl_karyawan')
@@ -290,6 +340,11 @@ class KaryawanController extends Controller
     }
 
     // function edit security 
+    /**
+     * dimana endpoint ini adalah endpoint untuk melakukan 
+     * proses ini adalah untulk mengganti dari secruity question
+     * dan jawaban dari sisi aplikasi mobile
+     */
     public function editSecurity(Request $request)
     {
         $request->validate([
@@ -376,6 +431,11 @@ class KaryawanController extends Controller
     }
 
     // function get question 
+    /**
+     * ini meruopakan sebuah fungsi untuk mendapatkan 
+     * pertanyaan dari pengguna, seperti apa makanan favoritmu
+     * ddalam proses ketika pengguna lupa password
+     */
     public function getMyQuestion(Request $request)
     {
         $request->validate([
@@ -389,12 +449,25 @@ class KaryawanController extends Controller
             ->where('badge_id', $request->badge_id)
             ->first();
 
+        // Apabila tidak ditemukan badge yang di input
         if (!$karyawan) {
             return response()->json([
                 "message" => "Badge tidak ditemukan!"
             ], 400);
         }
 
+        // Apabila badge ditemukan
+        /**
+         * maka lakukan pengecekan di tabel security question
+         * dengan melempar badge, id question, dan question
+         * dan di join dengan list question 
+         * 
+         * dan apabila datanya ada maka bisa melakukan 
+         * forge password
+         * 
+         * apabila tidak ada maka tidak bisa menggunakan
+         * security question
+         */
         if ($karyawan) {
             $data = DB::table('tbl_securityquestion')
                 ->select(

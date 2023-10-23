@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class LowonganController extends Controller
 {
-    // get semua all loker, ini belum ada cache
+    // get semua all loker
     public function getAllLoker(Request $request)
     {
         try {
@@ -21,10 +21,16 @@ class LowonganController extends Controller
 
             // Cache::flush();
 
+            // insialisasi data array kosong
             $result = [];
 
+            // lalu create tanggal hari ini
             $today = date('Y-m-d');
 
+            /**
+             * lakukan query dengan tabel lowongan kerja
+             * dimana dari tanggalnya berlaku
+             */
             $data = DB::table('tbl_lowongankerja')
                 ->where(function ($query) use ($today) {
                     $query->where('mulai_berlaku', '<=', $today)
@@ -57,6 +63,9 @@ class LowonganController extends Controller
             $next_page_url = $data->nextPageUrl();
             $prev_page_url = $data->previousPageUrl();
 
+            /**
+             * Kemudian response diberikan dengan pagination
+             */
             $response = [
                 'message' => 'RESPONSE OK, BERHASIL GET DATA LOWONGAN KERJA',
                 // 'data' => $data->items(),
@@ -77,6 +86,8 @@ class LowonganController extends Controller
     }
 
     // get semua all loker, yang ini pakai cache
+    // ini adalah fungsi denga menggunakan cache, secara logic sama
+    // fungsi kode diatas
     public function getAllLokerBaru(Request $request)
     {
         try {

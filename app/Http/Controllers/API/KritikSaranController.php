@@ -12,6 +12,11 @@ class KritikSaranController extends Controller
 {
 
     // functio get kategori kritik
+    /**
+     * ini sebuah fungsi helper untuk mendapatkan kategori 
+     * dari tabel vlookup dimana kamu dapat melempar sebuah
+     * parameter pada id_kategori 
+     */
     private function getKategori($id_kategori)
     {
         $data = DB::table('tbl_vlookup')
@@ -22,6 +27,11 @@ class KritikSaranController extends Controller
     }
 
     // function get status kritik
+    /**
+     * ini merupakan fungsi untuk mendapatkan riwatar status 
+     * kritik dan saran dari tabel riwayat kritrik saran
+     * dan di join dengan tbl_statuskritiksaran 
+     */
     private function getRiwayatKritikSaran($id_kritiksaran)
     {
         $data = DB::table('tbl_riwayatkritiksaran')
@@ -39,6 +49,13 @@ class KritikSaranController extends Controller
     }
 
     // function get tanggapan 
+    /**
+     * Dalam fitur di aplikasi mysatnusa
+     * terdapar tanggapan kritik saran dimana
+     * pengguna dapat memberikan komentar pada menu tanggapan
+     * dimana fungsi ini didapatkan dari tgl_getTanggapanKritikSaran
+     * artinya ini adalah sebuah list
+     */
     private function getTanggapanKritikSaran($id_kritiksaran)
     {
         $data = DB::table('tbl_tanggapankritiksaran')
@@ -50,13 +67,22 @@ class KritikSaranController extends Controller
     }
 
     // function untuk get semua kritik dan saran
+    /**
+     * fungsi ini merupakan get all kritik saran 
+     * dari kritik dan saran yang telah dibuat oleh pengguna
+     * disini kita mengirimkan badge sebagai parameter
+     */
     public function getAllKritikDanSaran(Request $request)
     {
-
+        // ini adalah validasi badge id dibutuhkan
         $request->validate([
             "badge_id" => "required"
         ]);
 
+        /**
+         * dan dari sini dapat dilihat tabel 
+         * kritiksaran dimana badge id adalah 
+         */
         $data = DB::table('tbl_kritiksaran')
             ->where('badge_id', $request->badge_id)
             ->orderBy('id', 'desc')
@@ -79,6 +105,10 @@ class KritikSaranController extends Controller
     }
 
     // ambil value kritik dan saran
+    /**
+     * ini adalah fungsi untuk melihat status krtik saran
+     * berdasarkan id yang di lempar
+     */
     private function statusKritikSaran($id)
     {
         $data = DB::table('tbl_statuskritiksaran')
@@ -89,6 +119,13 @@ class KritikSaranController extends Controller
     }
 
     // insert ke database kritik saran
+    /**
+     * Ini merupakan sebuah fungsi untuk melakukan sebuah
+     * insert kritik dan saran dalam aplikasi dengan memberikan 
+     * sebuah request diantarannya adalah
+     * kategori, description, badge_id, area, is_anonymous,
+     * status_kritiksaran, createdate
+     */
     public function insertKritikSaran(Request $request)
     {
 
@@ -97,6 +134,12 @@ class KritikSaranController extends Controller
          * apabila $request->file_upload == null
          */
         if ($request->file_upload == null) {
+            
+            /**
+             * insert ke tabel kritik saran 
+             * ke tbl_riwayatkritiksaran
+             */
+
             DB::beginTransaction();
             try {
                 /**
@@ -393,12 +436,21 @@ class KritikSaranController extends Controller
     }
 
     // get detail kritik dan saran
+    /**
+     * ini adalah endpoint agar mobile ketika klik detail
+     * dari kritik saran mendapatkan inforamsi kritik saran
+     * dari kritik saran yang telah diberikan.
+     */
     public function detailKritikSaran(Request $request)
     {
         $request->validate([
             "id" => "required",
         ]);
 
+        /**
+         * ambil data dari tabel kritiksaran
+         * dimana id yg di lempar disini
+         */
         $data = DB::table('tbl_kritiksaran')
             ->where("id", $request->id)
             ->first();
@@ -417,6 +469,12 @@ class KritikSaranController extends Controller
     }
 
     // insert ke tabel tanggapan kritik saran
+    /**
+     * ini adalah endpoint untuk membuat create tanggapan
+     * dimana request tanggapan nya ada 
+     * id_kritiksaran, badge_id, respon
+     * 
+     */
     public function createTanggapan(Request $request)
     {
         $request->validate([
@@ -447,7 +505,9 @@ class KritikSaranController extends Controller
             }
 
             // dd($data_kritiksaran);
-
+            /**
+             * lalu masukkan ke tabel tanggapankritiksaran
+             */
             DB::table('tbl_tanggapankritiksaran')
                 ->insert([
                     "id_kritik" => $request->id_kritiksaran,
