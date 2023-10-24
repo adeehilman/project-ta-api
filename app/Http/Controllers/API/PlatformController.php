@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+
+/**
+ * ini merupakan sebuah class yang melakukan handle
+ * sharing endpoint kepada aplikasi lainnya.
+ * mislakan aplikasi digital sop ingin mendapatkan credentials login
+ * maka buat saja fungsi dari hal tersbeut disini.
+ * 
+ */
 class PlatformController extends Controller
 {
 
