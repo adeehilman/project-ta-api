@@ -715,6 +715,10 @@ class MeetingRoomController extends Controller
             // $this->sendNotifKeResepsionis("200195", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
             $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("039264", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("033861", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+
 
             return response()->json([
                 "RESPONSE"      => 200,
@@ -1007,6 +1011,10 @@ class MeetingRoomController extends Controller
                     // send update notif ke resepsionis
                     $this->sendNotifKeResepsionis("200040", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
                     $this->sendNotifKeResepsionis("200195", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("036834", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("039264", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("033861", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+
 
 
                     return response()->json([
@@ -1186,6 +1194,10 @@ class MeetingRoomController extends Controller
             // send update notif ke resepsionis
             $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
             $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("036834", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("039264", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("033861", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            
 
             return response()->json([
                 "RESPONSE"      => 200,
