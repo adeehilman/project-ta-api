@@ -711,8 +711,11 @@ class MeetingRoomController extends Controller
             // send notif with hardcode 
 
             $formattedDate = date('d F Y', strtotime($meetDate));
-            $this->sendNotifKeResepsionis("200400", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
-            $this->sendNotifKeResepsionis("038720", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("039264", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("033861", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
 
             return response()->json([
                 "RESPONSE"      => 200,
@@ -1003,9 +1006,11 @@ class MeetingRoomController extends Controller
                     DB::commit();
 
                     // send update notif ke resepsionis
-                    $this->sendNotifKeResepsionis("200400", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-                    $this->sendNotifKeResepsionis("038720", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-
+                    $this->sendNotifKeResepsionis("200040", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("200195", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("036834", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("039264", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("033861", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
 
                     return response()->json([
                         "RESPONSE"      => 200,
@@ -1182,8 +1187,11 @@ class MeetingRoomController extends Controller
             DB::commit();
 
             // send update notif ke resepsionis
-            $this->sendNotifKeResepsionis("200400", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("038720", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("036834", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("039264", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("033861", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
 
             return response()->json([
                 "RESPONSE"      => 200,
