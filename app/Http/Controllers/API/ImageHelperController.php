@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class ImageHelperController extends Controller
 {
-    // function untuk get api image
+    /**
+     * Ini adalah fungsi untuk mendapatkan informasi
+     * gambar dari ruangan meeting
+     */
     public function getImageRoom(Request $request){
 
         $jumlahImg = $request->images;

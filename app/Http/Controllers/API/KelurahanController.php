@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 class KelurahanController extends Controller
 {
     // get all kelurahan
+    /**
+     * ini adalah sebuah fungsi untuk mendapatkan 
+     * seluruh list kelurahan yang berasal dari tabel kelurahan.
+     */
     public function getAllKelurahan(Request $request)
     {
         // $data = DB::table('tbl_kelurahan')
