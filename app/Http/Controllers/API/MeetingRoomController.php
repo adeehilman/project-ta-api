@@ -539,6 +539,24 @@ class MeetingRoomController extends Controller
             );
         }
 
+        /**
+         * Apabila exstention number tidak ada maka munculkan pesan error
+         * dengan return message 400.
+         * ini untuk mencegah aplikasi lama add meeting berulang-ulang, jadi pengguna akan
+         * di berikan pesan error dan harus update
+         */
+        if (!request()->has('ext')) {
+            return response()->json([
+                "RESPONSE_CODE" => 400,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'SUSPECT APLIKASI LAMA, SILAHKAN UPDATE',
+
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+
         try {
             /**
              * Jangan ganti key response message nya
