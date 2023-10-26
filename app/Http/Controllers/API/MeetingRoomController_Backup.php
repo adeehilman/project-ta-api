@@ -609,8 +609,8 @@ class MeetingRoomController extends Controller
                 )
                 ->where('a.booking_by', $badge_id)
                 ->whereIn('a.statusmeeting_id', [2, 3, 4])
-                ->orderBy('a.meeting_date', 'ASC')
-                ->orderBy('a.meeting_start', 'ASC')
+                ->orderBy('a.meeting_date', 'DESC')
+                ->orderBy('a.meeting_start', 'DESC')
                 ->paginate(10);
         }
 
@@ -631,8 +631,8 @@ class MeetingRoomController extends Controller
                 )
                 ->where('a.booking_by', $badge_id)
                 ->whereIn('a.statusmeeting_id', [5, 6])
-                ->orderBy('a.meeting_date', 'ASC')
-                ->orderBy('a.meeting_start', 'ASC')
+                ->orderBy('a.meeting_date', 'DESC')
+                ->orderBy('a.meeting_start', 'DESC')
                 ->paginate(10);
         }
 
