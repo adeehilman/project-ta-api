@@ -73,7 +73,7 @@ class MeetingRoomController extends Controller
     }
 
     /**
-     * untuk get list meeeting      
+     * untuk get list meeeting
      */
     public function getAllSchedule(Request $request)
     {
@@ -112,8 +112,8 @@ class MeetingRoomController extends Controller
             }
 
 
-            $q = "SELECT 
-                    a.id, 
+            $q = "SELECT
+                    a.id,
                     a.title_meeting,
                     a.roommeeting_id,
                     (SELECT room_name FROM tbl_roommeeting WHERE id = roommeeting_id) AS room_name,
@@ -207,10 +207,10 @@ class MeetingRoomController extends Controller
         }
 
         $query_allRoom = "SELECT
-                            id as Id, 
-                            room_name as Room_Name, 
-                            floor as Floor, 
-                            $txFilter 
+                            id as Id,
+                            room_name as Room_Name,
+                            floor as Floor,
+                            $txFilter
                             capacity as Capacity
                           FROM tbl_roommeeting ORDER BY Room_Name ASC";
         $data_allRoom  = DB::select($query_allRoom);
@@ -253,10 +253,10 @@ class MeetingRoomController extends Controller
             $search = "%%";
         }
 
-        $query = "SELECT 
-                    id as Id, 
-                    room_name as Room_Name, 
-                    floor as Floor, 
+        $query = "SELECT
+                    id as Id,
+                    room_name as Room_Name,
+                    floor as Floor,
                     capacity as Capacity
         FROM tbl_roommeeting WHERE room_name LIKE '$search' ";
 
@@ -299,7 +299,7 @@ class MeetingRoomController extends Controller
                 a.title_meeting as Title_Meeting,
                 a.meeting_date as Meeting_Date,
                 a.meeting_start as Meeting_Start,
-                a.meeting_end as Meeting_End, 
+                a.meeting_end as Meeting_End,
                 description as Description,
                 (SELECT room_name FROM tbl_roommeeting WHERE id = a.roommeeting_id ) AS Room_Name,
                 (SELECT FLOOR FROM tbl_roommeeting WHERE id = a.roommeeting_id) AS Floor,
@@ -309,7 +309,7 @@ class MeetingRoomController extends Controller
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
-            FROM tbl_meeting a WHERE id = '$idMeeting'         
+            FROM tbl_meeting a WHERE id = '$idMeeting'
         ";
         $dataMeeting = DB::select($query);
 
@@ -319,8 +319,8 @@ class MeetingRoomController extends Controller
                 $dataMeeting[0]->Reason = '-';
             }
 
-            $query_user = "SELECT 
-                                participant, 
+            $query_user = "SELECT
+                                participant,
                                 optional,
                                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.participant ) as fullname,
                                 (SELECT position_name FROM tbl_position WHERE position_code = (SELECT position_code FROM tbl_karyawan WHERE badge_id = a.participant)) AS position_name
@@ -441,8 +441,8 @@ class MeetingRoomController extends Controller
              * karena trigger dari mobile menggunakan value tsb
              */
             $query_cek = "SELECT COUNT(*) AS count_meetings FROM tbl_meeting
-                            WHERE 
-                                meeting_date = '$request->meeting_date' AND 
+                            WHERE
+                                meeting_date = '$request->meeting_date' AND
                             (TIME('$request->meeting_start') + INTERVAL 1 MINUTE) <= meeting_end AND (TIME('$request->meeting_end') - INTERVAL 1 MINUTE) >= meeting_start
                             AND (roommeeting_id = '$request->roommeeting_id') AND (statusmeeting_id <> '6')";
 
@@ -609,7 +609,8 @@ class MeetingRoomController extends Controller
                 )
                 ->where('a.booking_by', $badge_id)
                 ->whereIn('a.statusmeeting_id', [2, 3, 4])
-                ->orderBy('a.id', 'ASC')
+                ->orderBy('a.meeting_date', 'ASC')
+                ->orderBy('a.meeting_start', 'ASC')
                 ->paginate(10);
         }
 
@@ -630,7 +631,8 @@ class MeetingRoomController extends Controller
                 )
                 ->where('a.booking_by', $badge_id)
                 ->whereIn('a.statusmeeting_id', [5, 6])
-                ->orderBy('a.id', 'ASC')
+                ->orderBy('a.meeting_date', 'ASC')
+                ->orderBy('a.meeting_start', 'ASC')
                 ->paginate(10);
         }
 
@@ -686,12 +688,12 @@ class MeetingRoomController extends Controller
                 ($data_meeeting->roommeeting_id != $request->roommeeting_id) ||
                 ($data_meeeting->meeting_date != $request->meeting_date) ||
                 ($data_meeeting->meeting_start != $request->meeting_start .":00") ||
-                $data_meeeting->meeting_end != $request->meeting_end .":00" 
+                $data_meeeting->meeting_end != $request->meeting_end .":00"
             ) {
                 // lakukan pengecekan apakah available untuk ruangan tersebut
                 $query_cek = "SELECT COUNT(*) AS count_meetings FROM tbl_meeting
-                                WHERE 
-                          meeting_date = '$request->meeting_date' AND 
+                                WHERE
+                          meeting_date = '$request->meeting_date' AND
                           ((TIME('$request->meeting_start') + INTERVAL 1 MINUTE) <= meeting_end AND (TIME('$request->meeting_end') - INTERVAL 1 MINUTE) >= meeting_start) AND
                           (id <> $request->id_meeting) AND (roommeeting_id = $request->roommeeting_id)";
                 $data      = DB::select($query_cek);
@@ -897,7 +899,7 @@ class MeetingRoomController extends Controller
     }
 
     /**
-     * function beri tanggapan 
+     * function beri tanggapan
      */
     public function beriTanggapan(Request $request)
     {
@@ -969,7 +971,7 @@ class MeetingRoomController extends Controller
                 a.title_meeting as Title_Meeting,
                 a.meeting_date as Meeting_Date,
                 a.meeting_start as Meeting_Start,
-                a.meeting_end as Meeting_End, 
+                a.meeting_end as Meeting_End,
                 description as Description,
                 (SELECT room_name FROM tbl_roommeeting WHERE id = a.roommeeting_id ) AS Room_Name,
                 (SELECT FLOOR FROM tbl_roommeeting WHERE id = a.roommeeting_id) AS Floor,
@@ -979,7 +981,7 @@ class MeetingRoomController extends Controller
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
-            FROM tbl_meeting a WHERE id = '$idMeeting' AND a.booking_by = '$badgeId'  
+            FROM tbl_meeting a WHERE id = '$idMeeting' AND a.booking_by = '$badgeId'
         ";
 
         $dataMeeting = DB::select($query);
@@ -988,8 +990,8 @@ class MeetingRoomController extends Controller
                 $dataMeeting[0]->Reason = '-';
             }
 
-            $query_user = "SELECT 
-                                participant,  
+            $query_user = "SELECT
+                                participant,
                                 optional,
                                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.participant ) as fullname,
                                 (SELECT position_name FROM tbl_position WHERE position_code = (SELECT position_code FROM tbl_karyawan WHERE badge_id = a.participant)) AS position_name
@@ -1029,7 +1031,7 @@ class MeetingRoomController extends Controller
     }
 
     /**
-     * function untuk send notif 
+     * function untuk send notif
      */
     public function sendNotif(Request $request)
     {
