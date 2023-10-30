@@ -19,6 +19,7 @@ use App\Http\Controllers\API\PlatformController;
 use App\Http\Controllers\API\PlayStoreController;
 use App\Http\Controllers\API\QuestionsController;
 use App\Http\Controllers\API\UserRoleController;
+use App\Http\Controllers\API\MenuAccessController;
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\PemberitahuanController;
 use App\Http\Controllers\KritikController;
@@ -43,77 +44,74 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'registrasi']);
 Route::post('/login', [AuthController::class, 'login']);
 
-
 Route::group(['middleware' => ['api', 'auth:api']], function () {
-  /**
-   * Pengumuman API Service
-   */
-  Route::post('/pengumuman/baca', [PengumumanController::class, 'bacaPengumuman']);
-  Route::get('/pengumuman', [PengumumanController::class, 'getAllPengumuman']);
-  Route::get('/pengumuman/detail', [PengumumanController::class, 'detailPengumuman']);
+    /**
+     * Pengumuman API Service
+     */
+    Route::post('/pengumuman/baca', [PengumumanController::class, 'bacaPengumuman']);
+    Route::get('/pengumuman', [PengumumanController::class, 'getAllPengumuman']);
+    Route::get('/pengumuman/detail', [PengumumanController::class, 'detailPengumuman']);
 
-  /**
-   * Loker API Service
-   */
-  Route::get('/loker', [LowonganController::class, 'getAllLoker']);
-  Route::get('/loker/detail', [LowonganController::class, 'getDetailLowongan']);
+    /**
+     * Loker API Service
+     */
+    Route::get('/loker', [LowonganController::class, 'getAllLoker']);
+    Route::get('/loker/detail', [LowonganController::class, 'getDetailLowongan']);
 
-  /**
-   * Karyawan API Service
-   */
-  Route::get('check-mms', [KaryawanController::class, 'cekMMS']);
-  Route::get('profile', [KaryawanController::class, 'profile']);
-  Route::post('profile/edit-alamat', [KaryawanController::class, 'editAlamat']);
-  Route::post('profile/edit-kontak', [KaryawanController::class, 'editKontak']);
-  Route::post('profile/change-security-question', [KaryawanController::class, 'editSecurity']);
-  Route::post('profile/change-password', [KaryawanController::class, 'changePassword']);
+    /**
+     * Karyawan API Service
+     */
+    Route::get('check-mms', [KaryawanController::class, 'cekMMS']);
+    Route::get('profile', [KaryawanController::class, 'profile']);
+    Route::post('profile/edit-alamat', [KaryawanController::class, 'editAlamat']);
+    Route::post('profile/edit-kontak', [KaryawanController::class, 'editKontak']);
+    Route::post('profile/change-security-question', [KaryawanController::class, 'editSecurity']);
+    Route::post('profile/change-password', [KaryawanController::class, 'changePassword']);
 
-  /**
-   * Kritik dan saran
-   */
-  Route::get('/kritiksaran/me', [KritikSaranController::class, 'getAllKritikDanSaran']);
-  Route::post('/kritiksaran/add', [KritikSaranController::class, 'insertKritikSaran']);
-  Route::post('/kritiksaran/tanggapan', [KritikSaranController::class, 'createTanggapan']);
-  Route::get('/kritiksaran/detail', [KritikSaranController::class, 'detailKritikSaran']);
+    /**
+     * Kritik dan saran
+     */
+    Route::get('/kritiksaran/me', [KritikSaranController::class, 'getAllKritikDanSaran']);
+    Route::post('/kritiksaran/add', [KritikSaranController::class, 'insertKritikSaran']);
+    Route::post('/kritiksaran/tanggapan', [KritikSaranController::class, 'createTanggapan']);
+    Route::get('/kritiksaran/detail', [KritikSaranController::class, 'detailKritikSaran']);
 
-  /**
-   * Question
-   */
-  Route::get('/questions/check', [QuestionsController::class, 'checkSecurityQuestion']);
+    /**
+     * Question
+     */
+    Route::get('/questions/check', [QuestionsController::class, 'checkSecurityQuestion']);
 
-  /**
-   * First login
-   */
-  Route::get('/first-login', [AuthController::class, 'isFirstLogin']);
-  Route::post('/first-login', [AuthController::class, 'setFirstLogin']);
+    /**
+     * First login
+     */
+    Route::get('/first-login', [AuthController::class, 'isFirstLogin']);
+    Route::post('/first-login', [AuthController::class, 'setFirstLogin']);
 
-  /**
-   * durarion break time
-   */
-  Route::get('/breaktime/getdurationbreak', [DurationBreakController::class, 'getDurationBreak']);
+    /**
+     * durarion break time
+     */
+    Route::get('/breaktime/getdurationbreak', [DurationBreakController::class, 'getDurationBreak']);
 
-  /**
-   * lms API 
-   */
-  Route::post('/lms/pengajuan', [LmsController::class, 'insertPengajuan']);
-  Route::post('/lms/tanggapan', [LmsController::class, 'beriTanggapan']);
-  Route::get('/lms/list', [LmsController::class, 'listLms']);
-  Route::get('/lms/detail', [LmsController::class, 'detailLMS']);
+    /**
+     * lms API
+     */
+    Route::post('/lms/pengajuan', [LmsController::class, 'insertPengajuan']);
+    Route::post('/lms/tanggapan', [LmsController::class, 'beriTanggapan']);
+    Route::get('/lms/list', [LmsController::class, 'listLms']);
+    Route::get('/lms/detail', [LmsController::class, 'detailLMS']);
 
-  /**
-   * MMS API
-   */
-  Route::get('/mms/list', [MmsController::class, 'listmms']);
-  Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
-  Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
-  Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
+    /**
+     * MMS API
+     */
+    Route::get('/mms/list', [MmsController::class, 'listmms']);
+    Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
+    Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
+    Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
 
-  /**
-   * User Role
-   */
-  Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
-
-  
+    /**
+     * User Role
+     */
+    Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 });
 
 /**
@@ -126,7 +124,6 @@ Route::get('cek-badge', [KaryawanController::class, 'cekBadge']);
  */
 Route::get('/questions', [QuestionsController::class, 'getAllQuestions']);
 Route::get('questions/my-question', [KaryawanController::class, 'getMyQuestion']);
-
 
 /**
  * List kecamatan
@@ -188,40 +185,42 @@ Route::get('list-notifikasi', [NotifikasiController::class, 'getListNotifikasi']
 Route::get('baca-notifikasi', [NotifikasiController::class, 'bacaNotif']);
 
 /**
-* Meeting Room
-*/
+ * Meeting Room
+ */
 
-Route::group(['middleware' => 'api','prefix' => 'meeting'], function ($router) {
-  Route::post('login', [MeetingRoomController::class, 'login']);
-  Route::post('logout', [MeetingRoomController::class, 'logout']);
-  Route::post('test', [MeetingRoomController::class, 'test']);
-  Route::get('all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
-  Route::get('image/room', [ImageHelperController::class, 'getImageRoom']);
-  Route::get('search-room', [MeetingRoomController::class, 'searchRoom']);
-  Route::get('schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
-  // Route::get('/meeting/all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
-  // Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
-  // Route::get('meeting/image/room', [ImageHelperController::class, 'getImageRoom']);
-  // Route::get('/meeting/search-room', [MeetingRoomController::class, 'searchRoom']);
-  // Route::get('/meeting/schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
-  Route::get('search-user', [MeetingRoomController::class, 'searchUser']);
-  Route::post('insert_meeting', [MeetingRoomController::class, 'insertMeeting']);
-  Route::post('update-meeting', [MeetingRoomController::class, 'updateMeeting']);
-  Route::post('cancel-meeting', [MeetingRoomController::class, 'cancelMeeting']);
-  Route::post('beri-tanggapan', [MeetingRoomController::class, 'beriTanggapan']);
-  Route::get('my-meeting', [MeetingRoomController::class, 'myMeeting']);
-  Route::get('detail-meeting-saya', [MeetingRoomController::class, 'detailMeetingSaya']);
-  Route::post('aksi-kehadiran', [MeetingRoomController::class, 'aksiKehadiran']);
-  Route::post('edit-partisipan', [MeetingRoomController::class, 'editPartisipan']);
+Route::post('/mobile/useraccess', [MenuAccessController::class, 'getMenuAccess']);
+
+Route::group(['middleware' => 'api', 'prefix' => 'meeting'], function ($router) {
+    Route::post('login', [MeetingRoomController::class, 'login']);
+    Route::post('logout', [MeetingRoomController::class, 'logout']);
+    Route::post('test', [MeetingRoomController::class, 'test']);
+    Route::get('all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
+    Route::get('image/room', [ImageHelperController::class, 'getImageRoom']);
+    Route::get('search-room', [MeetingRoomController::class, 'searchRoom']);
+    Route::get('schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
+    // Route::get('/meeting/all-schedule', [MeetingRoomController::class, 'getAllSchedule']);
+    // Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
+    // Route::get('meeting/image/room', [ImageHelperController::class, 'getImageRoom']);
+    // Route::get('/meeting/search-room', [MeetingRoomController::class, 'searchRoom']);
+    // Route::get('/meeting/schedule/detail', [MeetingRoomController::class, 'detailSchedule']);
+    Route::get('search-user', [MeetingRoomController::class, 'searchUser']);
+    Route::post('insert_meeting', [MeetingRoomController::class, 'insertMeeting']);
+    Route::post('update-meeting', [MeetingRoomController::class, 'updateMeeting']);
+    Route::post('cancel-meeting', [MeetingRoomController::class, 'cancelMeeting']);
+    Route::post('beri-tanggapan', [MeetingRoomController::class, 'beriTanggapan']);
+    Route::get('my-meeting', [MeetingRoomController::class, 'myMeeting']);
+    Route::get('detail-meeting-saya', [MeetingRoomController::class, 'detailMeetingSaya']);
+    Route::post('aksi-kehadiran', [MeetingRoomController::class, 'aksiKehadiran']);
+    Route::post('edit-partisipan', [MeetingRoomController::class, 'editPartisipan']);
 });
 
-Route::group(['prefix' => 'digitalsop'], function ($router){
-  Route::post('kirim-notif', [PlatformController::class, 'sendNotif']);
-  Route::get('get-user', [PlatformController::class, 'getUserInfo']);
+Route::group(['prefix' => 'digitalsop'], function ($router) {
+    Route::post('kirim-notif', [PlatformController::class, 'sendNotif']);
+    Route::get('get-user', [PlatformController::class, 'getUserInfo']);
 });
 
-Route::group(['prefix' => 'platform'], function($router){
-  Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
+Route::group(['prefix' => 'platform'], function ($router) {
+    Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
 });
 
 Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
