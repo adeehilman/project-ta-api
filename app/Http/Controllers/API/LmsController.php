@@ -71,6 +71,12 @@ class LmsController extends Controller
             $endDate   = null;
         }
 
+        /**
+         * disini adalah proses transaksi untuk melakukan insert
+         * ke tabel lms dimana data yang disimpan
+         * pada badgeid, tipe_laptop, dan key lainnya yang
+         * dapat kamu lihat pada kode dibawah ini.
+         */
         DB::beginTransaction();
         try {
             $idLms = DB::table('tbl_lms')->insertGetId([

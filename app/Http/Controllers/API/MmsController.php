@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 class MmsController extends Controller
 {
     // get all brand smartphone
+    /**
+     * pada tampilan mobile ada sebuah tampilan dimana
+     * pengguna dilihatkan hasil dari dropwdown
+     * dan ini merupakan fungsi untuk mendapatkan merk merk 
+     * smartphone dari tbl_vlookup
+     */
     public function getBrandSmartphone()
     {
         $query = "SELECT * FROM tbl_vlookup WHERE category = 'BRD'";
@@ -21,13 +27,19 @@ class MmsController extends Controller
     }
 
     // list pengajuan mms saya
+    /**
+     * ini merupakan sebuah fungsi untuk mendapatkan
+     * tampilan dari mms atau perangkat karyawan 
+     * mobile yang telah terdaftar (dapat di scan)
+     * dan diambil dari tbl_mms
+     */
     public function listMMS(Request $request)
     {
         $request->validate([
             "badge_id" => "required"
         ]);
 
-        // query
+        // query sql 
         $query = "SELECT a.id, merek_hp, jenis_permohonan, tipe_hp, waktu_pengajuan, status_pendaftaran_mms FROM tbl_mms a
                         JOIN tbl_statusmms b ON a.status_pendaftaran_mms = b.id
                         WHERE badge_id = '$request->badge_id' ";
@@ -37,6 +49,7 @@ class MmsController extends Controller
         $hari_ini = date("Y-m-d", time());
         $kemarin  = date("Y-m-d", strtotime("-1 day"));
 
+        // Cek kategori  permohonan
         foreach ($data as $key => $item) {
 
             if ($item->merek_hp == null) {
@@ -91,6 +104,12 @@ class MmsController extends Controller
     }
 
     // insert tambah HP baru
+    /**
+     * ini adalah fungsi dimana karyawan baru
+     * ataupun lama ingin mendaftarkan perangkat 
+     * smartphone nya di aplikasi mysatnusa
+     * agar bisa di scan oleh aplikasi e-kios
+     */
     public function pengajuan(Request $request)
     {
         $request->validate([
@@ -254,7 +273,11 @@ class MmsController extends Controller
     }
 
     /**
-     * Con`vert gambar jadi base64
+     * Convert gambar jadi base64
+     * merupakan sebuah fungsi yang dapat digunakan
+     * untuk melakukan konversi image biasa ke
+     * base64 format, untuk disimpan kedalam
+     * dataabase 
      */
     private function convertImgToBase64($img)
     {
@@ -326,6 +349,8 @@ class MmsController extends Controller
 
     /**
      * get name brand laptop
+     * ini merupakan sebuah fungsi untuk mendapatkan
+     * dari sisi mobile 
      */
     private function getBrand($brand)
     {

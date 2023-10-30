@@ -32,6 +32,8 @@ class NotifikasiController extends Controller
 
         try {
             // lakukan query untuk get list notifikasi
+            // Di sini, kita melakukan query ke database untuk mengambil data notifikasi berdasarkan badge_id tertentu.
+            // Data notifikasi ini kemudian akan digunakan untuk memberikan respons kepada pengguna melalui API.
             $query = "SELECT 
                     id as Id,
                     title as Title,
@@ -62,11 +64,44 @@ class NotifikasiController extends Controller
                 "application/json"
             );
         }
+
+        /**
+         * - "RESPONSE": Digunakan untuk menyampaikan status respons HTTP. Dalam kasus ini, nilai 200 digunakan untuk
+         *   mengindikasikan bahwa operasi telah berhasil. Status respons adalah bagian penting dari respons HTTP, dan
+         *   200 OK adalah salah satu kode yang paling umum digunakan untuk menunjukkan kesuksesan.
+         *
+         * - "MESSAGETYPE": Jenis pesan digunakan untuk memberikan kategori atau jenis respons. Dalam kode ini, "S" mungkin
+         *   mengacu pada "Success" (kesuksesan). Ini membantu klien memahami jenis pesan yang mereka terima tanpa harus
+         *   menguraikan pesan dalam teks.
+         *
+         * - "MESSAGE": Pesan ini memberikan deskripsi lebih lanjut tentang hasil operasi. Dalam hal ini, "SUCCESS" digunakan
+         *   untuk memberikan konfirmasi bahwa operasi yang diminta berhasil. Pesan ini dapat disesuaikan dengan kebutuhan
+         *   aplikasi dan operasi yang dilakukan.
+         *
+         * - "DATA": Bagian ini dapat digunakan untuk mengirimkan data tambahan dalam respons. Dalam contoh ini, respons tidak
+         *   mengandung data tambahan, sehingga disetel ke array kosong. Namun, ini adalah tempat yang sesuai untuk mengirimkan
+         *   hasil operasi, daftar objek, atau informasi tambahan yang relevan.
+         *
+         */
+
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS",
+            "DATA"          => []
+        ]);
     }
 
     // send notifikasi 
     /**
-     * function untuk send notif 
+     * function untuk send notif dimana fungsi ini
+     * dibuat secara flexibel yaitu terkait message title
+     * dan message detailnya. dimana menggunakan one signal 
+     * nantinya akan dikirimkan di perangkat pengguna.
+     * 
+     * setelah itu juga dimasukkan kedalam sebuah tabel notfikasi 
+     * yang nantinya akan ditampilkan kedalam list notifikasi 
+     * poda aplikasi mobile 
      */
     public function sendNotif(Request $request)
     {
@@ -76,6 +111,26 @@ class NotifikasiController extends Controller
             $message = "";
         }
 
+        /**
+         * - $badge_id: Variabel ini digunakan untuk menyimpan "badge_id" yang dikirim dalam permintaan. Biasanya,
+         *   ini adalah ID badge yang digunakan untuk mengidentifikasi jenis atau kategori tertentu yang terkait dengan permintaan.
+         *
+         * - $message: Variabel ini berisi nilai "message" dari permintaan. Nilai ini dapat berupa pesan yang akan ditampilkan
+         *   kepada pengguna atau informasi yang akan disimpan dalam database.
+         *
+         * - $category: Nilai "category" dari permintaan disimpan dalam variabel ini. Biasanya, ini merujuk pada kategori atau jenis
+         *   yang terkait dengan data atau operasi yang akan dilakukan.
+         *
+         * - $sub_message: Variabel ini berisi data yang diterima dengan nama "sub_message" dalam permintaan. Data ini bisa berupa
+         *   pesan tambahan atau informasi spesifik yang relevan dengan operasi yang akan dilakukan.
+         *
+         * - $tag: Nilai "tag" dari permintaan disimpan dalam variabel ini. Biasanya, ini digunakan untuk memberi penanda atau label
+         *   pada data atau entitas tertentu dalam aplikasi.
+         *
+         * Mengambil data dari permintaan HTTP adalah langkah penting dalam pengembangan web dan aplikasi, karena memungkinkan
+         * pengembang untuk berinteraksi dengan klien dan menggunakan informasi yang mereka kirimkan. Data ini akan menjadi dasar
+         * untuk proses selanjutnya dalam aplikasi, seperti validasi, pemrosesan, penyimpanan, atau pengiriman respons.
+         */
 
         $badge_id = $request->badge_id;
         $message  = $request->message;
@@ -86,6 +141,8 @@ class NotifikasiController extends Controller
 
         /**
          * query untuk send notif
+         * dimana disini kamu akan mendapatkan player id
+         * dari masing masing mms dan dikirimkan notifnya
          */
         $query_player_id = "SELECT player_id FROM tbl_mms WHERE badge_id = '$badge_id'";
         $data_player_id = DB::select($query_player_id);

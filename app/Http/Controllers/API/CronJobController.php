@@ -18,11 +18,18 @@ class CronJobController extends Controller
     public function getSisaCuti()
     {
 
+        /**
+         * ini adalah proses insialisasi
+         * tahun dan bulan sekarang
+         */
         $tahun_skrg = date("Y");
         $bulan_skrg = date("m");
         $bulan_skrg = (int)$bulan_skrg;
 
-
+        /**
+         * lalu menggunakan guzzle panggil API
+         * yang telah disediakan dept MIS
+         */
         $client = new Client();
         $response = $client->post("http://snws07:8000/api/DOT/GetEmployeeLeave?dept=%&year=" . $tahun_skrg . "&month=" . $bulan_skrg . "");
         $statusCode = $response->getStatusCode();
@@ -30,7 +37,17 @@ class CronJobController extends Controller
         if ($statusCode == 200) {
             $data = json_decode($response->getBody(), true);
             $employeArray = json_decode($data['DATA']);
-
+            /**
+             * setelah kita mendapatkan response dari api
+             * yang dimaksud maka bisa di insert ke tabel sisa cuti
+             * dengan value yang ditulis dalam kode dibawah ini
+             * 
+             * sisa cuti kenapa ditambah dari  $item->GetLeaveNextMonth,
+             * karena saat pengembangan memang begitu formula nya
+             * apabila ingin pas dengan aplikasi yang di HR
+             * maka lakukan permintaan data hitungan sisa cuti dari MIS
+             * berupa response bilangan bulat 
+             */
             try {
                 DB::table('tbl_sisacuti')->truncate();
                 foreach ($employeArray as $key => $item) {

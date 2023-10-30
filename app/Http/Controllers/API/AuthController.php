@@ -12,7 +12,11 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    // function registrasi
+    /**
+     * Dalam registrasi ada beberapa request yang dibutuhkan pada API
+     * diaman registrasi ini adalah 
+     * employee, tgl lahir, password, questions id, dan answer
+     */
     public function registrasi(Request $request)
     {
 
@@ -31,12 +35,14 @@ class AuthController extends Controller
         $user_check = DB::table('tbl_karyawan')
             ->where('badge_id', $request->employee_no)
             ->first();
+        // Apabila gak ada maka karyawan artinya tidak terdaftar
         if (!$user_check) {
             return response()->json([
                 "message" => "Badge " . $request->employee_no . " tidak terdaftar"
             ], 400);
         }
 
+        // Apabila ada user dengan badge tersebut
         if ($user_check) {
 
             /**
@@ -54,7 +60,13 @@ class AuthController extends Controller
             DB::beginTransaction();
             try {
 
-                // uodate ke tabel karyawan
+                // update ke tabel karyawan
+                /**
+                 * dan set is_reset nya menjadi 1, hal ini berguna
+                 * guna ketika user membuka pertama kali aplikasi mobile
+                 * maka akan muncul dialog must change password
+                 * dan field is reset inilah sebagai parameter 
+                 */
                 DB::table('tbl_karyawan')
                     ->where('badge_id', $request->employee_no)
                     ->update([
@@ -67,7 +79,11 @@ class AuthController extends Controller
                         "is_reset"  => 1
                     ]);
 
-                // insert ke tabel alamat
+                /**
+                 * lalu setelah update tabel karyawan, proses selanjutnya adalah
+                 * dengan melakukan insert ke tabel alamat dengan informasi
+                 * seperti badge, alamat, kecamatan, dan kelurahan
+                 */
                 DB::table('tbl_alamat')
                     ->insert([
                         "badge_id" => $request->employee_no,
@@ -78,7 +94,12 @@ class AuthController extends Controller
                         // "longitude" => $request->longitude ? $request->longitude : null
                     ]);
 
-                // insert ke tabel tbl_securityquestion
+                /**
+                 * Lalu setelah insert ke tabel alamat, kemudian selanjutnya
+                 * lakukan insert ke tabel security question
+                 * berdasarkan pertanyaan yang telah dipilh user dari sisi mobile
+                 * dan jawaban yang telah di set oleh user.
+                 */
                 DB::table('tbl_securityquestion')
                     ->insert([
                         "badge_id" => $request->employee_no,
@@ -102,6 +123,12 @@ class AuthController extends Controller
     }
 
     // function login
+    /**
+     * ini adalah fungsi melakukan proses login
+     * dimana user melempar beberapa request yang 
+     * diperlukan seperti badge, password, uuid, tipe hp,
+     * merek hp, os, dan versi aplikasi
+     */
     public function login(Request $request)
     {
 
@@ -115,9 +142,14 @@ class AuthController extends Controller
             "versi_aplikasi" => "required"
         ]);
 
-
+        // Selanjutnya buatlah sebuah credentials
         $credentials = $request->only('badge_id', 'password');
 
+        /**
+         * lakukan proses pengecekan credentials dengan
+         * JWT. dimana pengecekan JWT ini menggunakan library 
+         * dari tymon/jwtauth
+         */
         try {
             if (Auth::attempt($credentials)) {
                 $token = JWTAuth::fromUser(Auth::user());
@@ -336,6 +368,11 @@ class AuthController extends Controller
     }
 
     // cek security answer
+    /**
+     * ini adalah proses melakukan pengecekan jawaban
+     * ketika user melaukan reset password, dimana dalam tampilan 
+     * UI nanti jawabannya akan di cek pada endpoint ini.
+     */
     public function checkAnswer(Request $request)
     {
         if (!$request->badge) {
@@ -352,7 +389,8 @@ class AuthController extends Controller
 
         /**
          * lakukan lowercase dan menghapus semua spasi 
-         * 
+         * dan kemudian lakukan pengecekan data ke tabel 
+         * securityquestion 
          */
         $jawaban = str_replace(' ', '', $request->answer);
         $jawaban = strtolower($jawaban);
@@ -387,6 +425,12 @@ class AuthController extends Controller
     }
 
     // change password
+    /**
+     * disini adalah proses pergantian password
+     * dimana flow awalnya pengguna mendapatkan
+     * jawaban dan mencocokkan security questionsnya
+     * 
+     */
     public function forgetPassword(Request $request)
     {
 
@@ -430,6 +474,8 @@ class AuthController extends Controller
 
         /**
          * lakukan update password ditabel karyawan
+         * dan proses flow change password selesai 
+         * sampai disini
          */
         DB::beginTransaction();
         try {

@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 class QuestionsController extends Controller
 {
     //function get all questions
+    /**
+     * Ini merupakan sebuah fungsi dimana kita mendapatkan
+     * get all question dari tabel question yang nantinya 
+     * akan ditampilkan pada tampilan mobile.
+     */
     public function getAllQuestions(){
         /**
          * get semua all questions

@@ -10,6 +10,11 @@ class PengumumanController extends Controller
 {
 
     // get all pengumuman
+    /**
+     * ini adalah pengumuman untuk mendapatkan
+     * data dari tabel pemberitahuan yang dibuat
+     * dari halaman admin
+     */
     public function getAllPengumuman(Request $request)
     {
         try {

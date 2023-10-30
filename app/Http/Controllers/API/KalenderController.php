@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 class KalenderController extends Controller
 {
     // function kalender 
+    /**
+     * Ini adalah fungsi untuk mendapatkan list kalender
+     * dimana ini mengambil dari tbl_kalender
+     * dan akan melakukan response hari2 terkiat hari libur nasional
+     */
     public function getAllList(Request $request)
     {
 
@@ -86,6 +91,7 @@ class KalenderController extends Controller
             ]);
         }
         else {
+            // Insialisasi query database 
             $query = "SELECT * FROM tbl_kalender WHERE MONTH(tanggal) = '$bulan' AND YEAR(tanggal) = '$tahun' ORDER BY tanggal ASC";
             $all_data = DB::select($query);
 
@@ -96,7 +102,7 @@ class KalenderController extends Controller
             $current_start_date = null;
             $current_end_date = null;
 
-
+            // Lakukan perulangan dari data tang telah didapatkan 
             foreach ($all_data as $key => $item) {
                 array_push($fill_colored_at, $item->tanggal);
 
@@ -124,6 +130,9 @@ class KalenderController extends Controller
                 return date("Y-m-d 00:00:00.000\Z", strtotime($date));
             }, $fill_colored_at);
 
+            /**
+             * dan ini response code yang dilempar ke movike
+             */
             $data = [
                 "fill_colored_at" => $fill_colored_at,
                 "keterangan_hari_ini" =>"Tidak ada agenda",

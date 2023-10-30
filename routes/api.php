@@ -232,3 +232,6 @@ Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
 
 // 15 Menit sebelum Meeting dimulai
 Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);
+
+// get list user by name or badge
+Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);

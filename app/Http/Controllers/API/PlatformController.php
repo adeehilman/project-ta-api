@@ -8,16 +8,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+
+/**
+ * ini merupakan sebuah class yang melakukan handle
+ * sharing endpoint kepada aplikasi lainnya.
+ * mislakan aplikasi digital sop ingin mendapatkan credentials login
+ * maka buat saja fungsi dari hal tersbeut disini.
+ * 
+ */
 class PlatformController extends Controller
 {
 
     /**
-     * function untuk send notif 
+     * function untuk send notif
      */
     public function sendNotif(Request $request)
     {
 
-        
+
         if(!request()->has('message')){
             $message = "";
         }
@@ -101,7 +109,7 @@ class PlatformController extends Controller
     {
 
         $badge_id = $request->badge_id;
-        $query    = "SELECT  
+        $query    = "SELECT
                         fullname as Fullname,
                         position_code as Position_Code
                     FROM tbl_karyawan WHERE badge_id = '$request->badge_id'";
@@ -127,7 +135,7 @@ class PlatformController extends Controller
         $query = "SELECT id, badge_id, fullname, password, position_code, line_code, dept_code, is_active FROM tbl_karyawan
                   WHERE badge_id = '$employee_no' ";
         $data  = DB::select($query);
-    
+
         if (COUNT($data) > 0) {
             $employee = $data[0];
             $checkPassword = Hash::check($password, $employee->password);
@@ -139,7 +147,7 @@ class PlatformController extends Controller
                         "RESPONSE_CODE" => 400,
                         "MESSAGETYPE"   => "E",
                         "MESSAGE"       => 'Sorry, your account is not active',
-        
+
                     ], 401)->header(
                         "Accept",
                         "application/json"
@@ -167,7 +175,7 @@ class PlatformController extends Controller
                     "RESPONSE_CODE" => 400,
                     "MESSAGETYPE"   => "E",
                     "MESSAGE"       => 'Badge or Password wrong',
-    
+
                 ], 401)->header(
                     "Accept",
                     "application/json"
@@ -186,5 +194,22 @@ class PlatformController extends Controller
                 "application/json"
             );
         }
+    }
+
+    /**
+     * get user by name or badge
+     */
+    public function listUserBy(Request $req)
+    {
+        $query    = "SELECT badge_id, fullname, dept_code FROM tbl_karyawan
+                        WHERE badge_id LIKE '%$req->user%' OR fullname LIKE '%$req->user%' LIMIT 100";
+        $data     = DB::select($query);
+
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS",
+            "DATA"          => $data
+        ]);
     }
 }
