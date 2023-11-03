@@ -188,7 +188,7 @@ Route::get('baca-notifikasi', [NotifikasiController::class, 'bacaNotif']);
  * Meeting Room
  */
 
-Route::post('/mobile/useraccess', [MenuAccessController::class, 'getMenuAccess']);
+Route::get('/mobile/useraccess', [MenuAccessController::class, 'getMenuAccess']);
 
 Route::group(['middleware' => 'api', 'prefix' => 'meeting'], function ($router) {
     Route::post('login', [MeetingRoomController::class, 'login']);
