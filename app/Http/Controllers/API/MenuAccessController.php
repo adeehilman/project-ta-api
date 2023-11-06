@@ -37,14 +37,12 @@ class MenuAccessController extends Controller
                         'DATA' => $data,
                     ]);
                 } catch (\Throwable $th) {
-                    return response()->json(
-                        [
-                            'RESPONSE_CODE' => 400,
-                            'MESSAGETYPE' => 'E',
-                            'MESSAGE' => 'User Not Have Authorized',
-                        ],
-                        400,
-                    );
+                    return response()->json([
+                        'RESPONSE' => 200,
+                        'MESSAGETYPE' => 'S',
+                        'MESSAGE' => 'Data retrieved Successfully',
+                        'DATA' => $data,
+                    ]);
                 }
             } else {
                 return response()->json(

@@ -284,9 +284,9 @@ class MeetingRoomController extends Controller
 
             if ($img == true) {
                 foreach ($data_allRoom as $key => $item) {
-                    $item->Room_Image_1 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_1;
-                    $item->Room_Image_2 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_2;
-                    $item->Room_Image_3 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_3;
+                    $item->Room_Image_1 = "https://webapi.satnusa.com:8085/RoomMeetingFoto/" . $item->Room_Image_1;
+                    $item->Room_Image_2 = "https://webapi.satnusa.com:8085/RoomMeetingFoto/" . $item->Room_Image_2;
+                    $item->Room_Image_3 = "https://webapi.satnusa.com:8085/RoomMeetingFoto/" . $item->Room_Image_3;
                 }
             }
 
