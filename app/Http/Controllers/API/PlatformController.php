@@ -4,35 +4,37 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
 
 /**
  * ini merupakan sebuah class yang melakukan handle
  * sharing endpoint kepada aplikasi lainnya.
  * mislakan aplikasi digital sop ingin mendapatkan credentials login
  * maka buat saja fungsi dari hal tersbeut disini.
- * 
+ *
  */
 class PlatformController extends Controller
 {
+    public function __construct()
+    {
 
+        $this->client = new Client();
+        $this->url = 'http://192.168.88.60:7005/RoomMeetingFoto/';
+    }
     /**
      * function untuk send notif
      */
     public function sendNotif(Request $request)
     {
-
-
-        if(!request()->has('message')){
-            $message = "";
+        if (!request()->has('message')) {
+            $message = '';
         }
 
-
         $badge_id = $request->badge_id;
-        $message  = $request->message;
+        $message = $request->message;
         /**
          * query untuk send notif
          */
@@ -57,10 +59,10 @@ class PlatformController extends Controller
                 'en' => $message,
             ],
             'contents' => [
-                'en' => 'Tap untuk membaca informasi lebih lanjut'
+                'en' => 'Tap untuk membaca informasi lebih lanjut',
             ],
             'data' => [
-                'Category' => 'DIGITAL_SOP'
+                'Category' => 'DIGITAL_SOP',
             ],
         ];
 
@@ -71,10 +73,7 @@ class PlatformController extends Controller
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Basic NmQ2ODI0YjEtNjZhYy00ZDA3LWJkMDEtY2ViZDJjZWNmMTk5',
-            'Content-Type: application/json'
-        ]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Basic NmQ2ODI0YjEtNjZhYy00ZDA3LWJkMDEtY2ViZDJjZWNmMTk5', 'Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $dataJson);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -96,9 +95,9 @@ class PlatformController extends Controller
         curl_close($ch);
 
         return response()->json([
-            "RESPONSE"      => 200,
-            "MESSAGETYPE"   => "S",
-            "MESSAGE"       => "SUCCESS"
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
         ]);
     }
 
@@ -107,19 +106,18 @@ class PlatformController extends Controller
      */
     public function getUserInfo(Request $request)
     {
-
         $badge_id = $request->badge_id;
-        $query    = "SELECT
+        $query = "SELECT
                         fullname as Fullname,
                         position_code as Position_Code
                     FROM tbl_karyawan WHERE badge_id = '$request->badge_id'";
-        $data     = DB::select($query);
+        $data = DB::select($query);
 
         return response()->json([
-            "RESPONSE"      => 200,
-            "MESSAGETYPE"   => "S",
-            "MESSAGE"       => "SUCCESS",
-            "DATA"          => $data[0]
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
+            'DATA' => $data[0],
         ]);
     }
 
@@ -130,69 +128,70 @@ class PlatformController extends Controller
     public function checkCredentials(Request $request)
     {
         $employee_no = $request->employee_no;
-        $password    = $request->password;
+        $password = $request->password;
 
         $query = "SELECT id, badge_id, fullname, password, position_code, line_code, dept_code, is_active FROM tbl_karyawan
                   WHERE badge_id = '$employee_no' ";
-        $data  = DB::select($query);
+        $data = DB::select($query);
 
         if (COUNT($data) > 0) {
             $employee = $data[0];
             $checkPassword = Hash::check($password, $employee->password);
 
-            if($checkPassword){
-
-                if($employee->is_active == 0){
-                    return response()->json([
-                        "RESPONSE_CODE" => 400,
-                        "MESSAGETYPE"   => "E",
-                        "MESSAGE"       => 'Sorry, your account is not active',
-
-                    ], 401)->header(
-                        "Accept",
-                        "application/json"
-                    );
+            if ($checkPassword) {
+                if ($employee->is_active == 0) {
+                    return response()
+                        ->json(
+                            [
+                                'RESPONSE_CODE' => 400,
+                                'MESSAGETYPE' => 'E',
+                                'MESSAGE' => 'Sorry, your account is not active',
+                            ],
+                            401,
+                        )
+                        ->header('Accept', 'application/json');
                 }
 
                 $data = [
-                    "Id"            => $employee->id,
-                    "Badge_Id"      => $employee->badge_id,
-                    "Fullname"      => $employee->fullname,
-                    "Position_Code" => $employee->position_code,
-                    "Line_Code"     => $employee->line_code,
-                    "Dept_Code"     => $employee->dept_code
+                    'Id' => $employee->id,
+                    'Badge_Id' => $employee->badge_id,
+                    'Fullname' => $employee->fullname,
+                    'Position_Code' => $employee->position_code,
+                    'Line_Code' => $employee->line_code,
+                    'Dept_Code' => $employee->dept_code,
                 ];
 
                 return response()->json([
-                    "RESPONSE"      => 200,
-                    "MESSAGETYPE"   => "S",
-                    "MESSAGE"       => "SUCCESS",
-                    "DATA"          => $data
+                    'RESPONSE' => 200,
+                    'MESSAGETYPE' => 'S',
+                    'MESSAGE' => 'SUCCESS',
+                    'DATA' => $data,
                 ]);
-            }
-            else {
-                return response()->json([
-                    "RESPONSE_CODE" => 400,
-                    "MESSAGETYPE"   => "E",
-                    "MESSAGE"       => 'Badge or Password wrong',
-
-                ], 401)->header(
-                    "Accept",
-                    "application/json"
-                );
+            } else {
+                return response()
+                    ->json(
+                        [
+                            'RESPONSE_CODE' => 400,
+                            'MESSAGETYPE' => 'E',
+                            'MESSAGE' => 'Badge or Password wrong',
+                        ],
+                        401,
+                    )
+                    ->header('Accept', 'application/json');
             }
         }
 
         if (COUNT($data) == 0) {
-            return response()->json([
-                "RESPONSE_CODE" => 400,
-                "MESSAGETYPE"   => "E",
-                "MESSAGE"       => 'Badge Not Found',
-
-            ], 401)->header(
-                "Accept",
-                "application/json"
-            );
+            return response()
+                ->json(
+                    [
+                        'RESPONSE_CODE' => 400,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Badge Not Found',
+                    ],
+                    401,
+                )
+                ->header('Accept', 'application/json');
         }
     }
 
@@ -201,15 +200,35 @@ class PlatformController extends Controller
      */
     public function listUserBy(Request $req)
     {
-        $query    = "SELECT badge_id, fullname, dept_code FROM tbl_karyawan
+        $query = "SELECT badge_id, fullname, dept_code FROM tbl_karyawan
                         WHERE badge_id LIKE '%$req->user%' OR fullname LIKE '%$req->user%' LIMIT 100";
-        $data     = DB::select($query);
+        $data = DB::select($query);
 
         return response()->json([
-            "RESPONSE"      => 200,
-            "MESSAGETYPE"   => "S",
-            "MESSAGE"       => "SUCCESS",
-            "DATA"          => $data
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
+            'DATA' => $data,
         ]);
+    }
+
+    public function uploadFile(Request $request)
+    {
+        // dd($request->all());
+
+        $filename = $request->file('file_upload')->getClientOriginalName();
+        $file = $request->file('file_upload')->getPathname();
+        
+        $response = $this->client->request('POST', $this->url, [
+            'multipart' => [
+                [
+                    'name' => 'file_upload',
+                    'contents' => fopen($file, 'r'),
+                    'filename' => $filename,
+                ],
+            ],
+        ]);
+
+        return response()->json(['message' => 'File berhasil dikirim', 'status_code' => $statusCode, 'response_body' => $body]);
     }
 }

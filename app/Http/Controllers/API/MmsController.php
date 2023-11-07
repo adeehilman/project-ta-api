@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 
 class MmsController extends Controller
@@ -270,6 +271,227 @@ class MmsController extends Controller
                 # code...
                 break;
         }
+    }
+
+    public function checkImei(Request $request)
+    {
+        $imei1 = $request->IMEI1;
+        $imei2 = $request->IMEI2;
+
+        // dd($request->all());
+        if($request->all()){
+
+            DB::beginTransaction();
+            try {
+                    // CEK IMEI 1 DI MI11 (XIAOMI)
+                    $client = new Client();
+                    $response = $client->post('http://snws07:8000/api/MES/Ext/IMEIVerification?plant=MI11&IMEI=' . $imei1);
+                    $statusCode = $response->getStatusCode();
+                    
+                    if($statusCode == 200)
+                    {
+                        $data = json_decode($response->getBody(), true);
+
+                        if($data['MESSAGETYPE'] == 'S'){
+                            $isShipData = json_decode($data['DATA']);
+                            
+                                
+                            $dataLog = array(
+                                'imei' => $imei1, 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'],
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+                            if($isShipData->is_shipped == null || $isShipData->is_shipped == "" || $isShipData->is_shipped == false){
+                                DB::table('tbl_mms')->where('imei1', $imei1)->update(['status_pendaftaran_mms' => 13, 'status_imei' => 2]);
+                            }
+
+                        }else{
+                                DB::table('tbl_mms')->where('imei1', $imei1)->update(['status_imei' => 1]);
+                                $dataLog = array(
+                                    'imei' => $imei1, 
+                                    'message_type' => $data['MESSAGETYPE'],
+                                    'message' => $data['MESSAGE'],
+                                    'data' => $data['DATA'], 
+                                    'created_at' => date('Y-m-d H:i:s')
+                                );
+                                DB::table('tbl_logcheckimei')->insert($dataLog);
+                            }         
+                    }else{
+                        return response()->json([
+                            'status' => 400,
+                            'message' => 'Gagal request ke api - ' . date('d M Y H:i'), 
+                        ]); 
+                    }
+
+                    // CEK IMEI 1 DI IS13 (ASUS)
+                    $client = new Client();
+                    $response = $client->post('http://snws07:8000/api/MES/Ext/IMEIVerification?plant=IS13&IMEI=' . $imei1);
+                    $statusCode = $response->getStatusCode();
+                    
+                    if($statusCode == 200){
+                        $data = json_decode($response->getBody(), true);
+
+                        if($data['MESSAGETYPE'] == 'S'){
+			            $isShipData = json_decode($data['DATA']);
+                            $dataLog = array(
+                                'imei' => $imei1 , 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'],
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+
+                            if($isShipData->is_shipped == null || $isShipData->is_shipped == "" || $isShipData->is_shipped == false){
+                                DB::table('tbl_mms')->where('imei1', $imei1)->update(['status_pendaftaran_mms' => 13, 'status_imei' => 2]);
+                                return response()->json([
+                                    'status' => 200,
+                                    'message' => 'Data imei telah diupdate - ' . date('d M Y H:i'), 
+                                ]);
+                            }
+
+                        }else{
+                            DB::table('tbl_mms')->where('imei1', $imei1)->update(['status_imei' => 1]);
+                            $dataLog = array(
+                                'imei' => $imei1, 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'], 
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+                        }
+                            
+                    }else{
+                        return response()->json([
+                            'status' => 400,
+                            'message' => 'Gagal request ke api - ' . date('d M Y H:i'), 
+                        ]); 
+                    }
+
+
+                /** 
+                 * CEK IMEI 2 
+                 */
+
+                 // CEK IMEI 2 DI MI11 (XIAOMI)
+                 $client = new Client();
+                    $response = $client->post('http://snws07:8000/api/MES/Ext/IMEIVerification?plant=MI11&IMEI=' . $imei2);
+                    $statusCode = $response->getStatusCode();
+                    if($statusCode == 200){
+                        $data = json_decode($response->getBody(), true);
+
+                        if($data['MESSAGETYPE'] == 'S'){
+
+			            $isShipData = json_decode($data['DATA']);
+                        
+                        $dataLog = array(
+                            'imei' => $imei2, 
+                            'message_type' => $data['MESSAGETYPE'],
+                            'message' => $data['MESSAGE'],
+                            'data' => $data['DATA'],
+                            'created_at' => date('Y-m-d H:i:s')
+                        );
+                        DB::table('tbl_logcheckimei')->insert($dataLog);
+
+                        if($isShipData->is_shipped == null || $isShipData->is_shipped == "" || $isShipData->is_shipped == false){
+                            DB::table('tbl_mms')->where('imei2', $imei2)->update(['status_pendaftaran_mms' => 13, 'status_imei' => 2]);
+                            return response()->json([
+                                    'status' => 200,
+                                    'message' => 'Data imei telah diupdate - ' . date('d M Y H:i'), 
+                                ]);   
+                     
+                        }
+                    }else{
+                            DB::table('tbl_mms')->where('imei2', $imei2)->update(['status_imei' => 1]);
+                            $dataLog = array(
+                                'imei' => $imei2, 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'], 
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+                        }
+                            
+                    }else{
+                        return response()->json([
+                            'status' => 400,
+                            'message' => 'Gagal request ke api - ' . date('d M Y H:i'), 
+                        ]); 
+                    }
+
+                    // CEK IMEI 2 DI IS13 (ASUS)
+                    $client = new Client();
+                    $response = $client->post('http://snws07:8000/api/MES/Ext/IMEIVerification?plant=IS13&IMEI=' . $imei2);
+                    $statusCode = $response->getStatusCode();
+                    if($statusCode == 200){
+                        $data = json_decode($response->getBody(), true);
+
+                        if($data['MESSAGETYPE'] == 'S'){
+
+                            $isShipData = json_decode($data['DATA']);
+                            
+                            $dataLog = array(
+                                'imei' => $row->imei, 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'],
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+                            if($isShipData->is_shipped == null || $isShipData->is_shipped == "" || $isShipData->is_shipped == false){
+                                DB::table('tbl_mms')->where('imei2', $imei2)->update(['status_pendaftaran_mms' => 13, 'status_imei' => 2]);   
+                                return response()->json([
+                                    'status' => 200,
+                                    'message' => 'Data imei telah diupdate - ' . date('d M Y H:i'), 
+                                ]);
+                
+                            }
+                        }else{
+                            DB::table('tbl_mms')->where('imei2', $imei2)->update(['status_imei' => 1]);
+                            $dataLog = array(
+                                'imei' => $imei2, 
+                                'message_type' => $data['MESSAGETYPE'],
+                                'message' => $data['MESSAGE'],
+                                'data' => $data['DATA'], 
+                                'created_at' => date('Y-m-d H:i:s')
+                            );
+                            DB::table('tbl_logcheckimei')->insert($dataLog);
+                        }
+                            
+                    }else{
+                        return response()->json([
+                            'status' => 400,
+                            'message' => 'Gagal request ke api - ' . date('d M Y H:i'), 
+                        ]); 
+                    }
+
+                DB::commit();
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Data imei telah diupdate - ' . date('d M Y H:i'), 
+                ]);
+            }catch (\Exception $ex) {
+                DB::rollback();
+                return response()->json([
+                    'status'    => 401, 
+                    'message'   => 'Gagal untuk mengupdate data ' . $ex->getMessage(), 
+                ]);
+            }
+
+            
+        }else{
+            return response()->json([
+                'status' => 200,
+                'message' => 'Tidak ada data imei untuk dicheck - ' . date('d M Y H:i'), 
+            ]); 
+        }
+
+
     }
 
     /**

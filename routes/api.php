@@ -107,6 +107,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
     Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
     Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
     Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
+  
 
     /**
      * User Role
@@ -114,6 +115,10 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
     Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 });
 
+/** 
+ * Check Imei MMS
+ */
+ Route::post('/mms/checkImei', [MmsController::class, 'checkImei']);
 /**
  * Karyawan API Service
  */
@@ -221,6 +226,7 @@ Route::group(['prefix' => 'digitalsop'], function ($router) {
 
 Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
+    Route::post('upload-file', [PlatformController::class, 'uploadFile']);
 });
 
 Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
