@@ -18,12 +18,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class PlatformController extends Controller
 {
-    public function __construct()
-    {
 
-        $this->client = new Client();
-        $this->url = 'http://192.168.88.60:7005/RoomMeetingFoto/';
-    }
     /**
      * function untuk send notif
      */
@@ -216,19 +211,17 @@ class PlatformController extends Controller
     {
         // dd($request->all());
 
-        $filename = $request->file('file_upload')->getClientOriginalName();
-        $file = $request->file('file_upload')->getPathname();
-        
-        $response = $this->client->request('POST', $this->url, [
-            'multipart' => [
-                [
-                    'name' => 'file_upload',
-                    'contents' => fopen($file, 'r'),
-                    'filename' => $filename,
-                ],
-            ],
-        ]);
+        // Pastikan request memiliki file dengan nama 'file'
+        if ($request->hasFile('file_upload')) {
+            $file = $request->file('file_upload');
 
-        return response()->json(['message' => 'File berhasil dikirim', 'status_code' => $statusCode, 'response_body' => $body]);
+            // Simpan file di dalam direktori public/RoomMeeting
+            $file->move(public_path('RoomMeetingFoto/'), $file->getClientOriginalName());
+
+            return response()->json(['message' => 'File berhasil diupload']);
+        }
+
+        return response()->json(['message' => 'File tidak ditemukan'], 400);
+
     }
 }
