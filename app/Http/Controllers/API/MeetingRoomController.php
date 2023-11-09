@@ -386,6 +386,7 @@ class MeetingRoomController extends Controller
                 a.jumlah_tamu as Jumlah_Tamu,
                 a.ext as Ext,
                 a.project_name as Project_Name,
+                a.customer_name as Customer_Name,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
@@ -629,6 +630,7 @@ class MeetingRoomController extends Controller
             $jumlah_tamu     = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
             $ext_no          = $request->ext;
             $project_name    = $request->project_name;
+            $customer_name    = $request->customer_name;
 
             $category_meeting = 0;
             if ($jumlah_tamu > 0) {
@@ -649,7 +651,8 @@ class MeetingRoomController extends Controller
                 'category_meeting'  => $category_meeting,
                 'jumlah_tamu'       => $jumlah_tamu,
                 'ext'               => $ext_no,
-                'project_name'      => $project_name
+                'project_name'      => $project_name,
+                'customer_name'     => $customer_name,
             ];
 
             /**
@@ -712,12 +715,13 @@ class MeetingRoomController extends Controller
 
             $formattedDate = date('d F Y', strtotime($meetDate));
             // $this->sendNotifKeResepsionis("200040", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
-            // $this->sendNotifKeResepsionis("200195", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
-            $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
-            $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
-            $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
-            $this->sendNotifKeResepsionis("039264", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
-            $this->sendNotifKeResepsionis("033861", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            $this->sendNotifKeResepsionis("PKL84", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
+            // prod
+            // $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            // $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            // $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            // $this->sendNotifKeResepsionis("039264", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
+            // $this->sendNotifKeResepsionis("033861", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
 
 
             return response()->json([
@@ -966,6 +970,7 @@ class MeetingRoomController extends Controller
                 $jumlah_tamu        = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
                 $ext_no             = $request->ext;
                 $project_name       = $request->project_name;
+                $customer_name      = $request->customer_name;
 
                 $category_meeting = 0;
                 if ($jumlah_tamu > 0) {
@@ -988,7 +993,8 @@ class MeetingRoomController extends Controller
                             'update_date'       => date('Y-m-d H:i:s'),
                             'updateby'          => $badge_pembuat,
                             'ext'               => $ext_no,
-                            'project_name'      => $project_name
+                            'project_name'      => $project_name,
+                            'customer_name'     => $customer_name,
                         ]);
 
                     // delete tabel participant utk insert ulang
@@ -1011,11 +1017,13 @@ class MeetingRoomController extends Controller
                     DB::commit();
 
                     // send update notif ke resepsionis
-                    $this->sendNotifKeResepsionis("200040", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-                    $this->sendNotifKeResepsionis("200195", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-                    $this->sendNotifKeResepsionis("036834", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-                    $this->sendNotifKeResepsionis("039264", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
-                    $this->sendNotifKeResepsionis("033861", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $this->sendNotifKeResepsionis("PKL84", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    // prod
+                    // $this->sendNotifKeResepsionis("200040", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    // $this->sendNotifKeResepsionis("200195", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    // $this->sendNotifKeResepsionis("036834", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    // $this->sendNotifKeResepsionis("039264", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    // $this->sendNotifKeResepsionis("033861", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
 
 
 
@@ -1066,6 +1074,7 @@ class MeetingRoomController extends Controller
         $jumlah_tamu        = $request->jumlah_tamu ? $request->jumlah_tamu : 0;
         $ext_no             = $request->ext;
         $project_name       = $request->project_name;
+        $customer_name      = $request->customer_name;
 
         $category_meeting = 0;
         if ($jumlah_tamu > 0) {
@@ -1091,7 +1100,8 @@ class MeetingRoomController extends Controller
                     'jumlah_tamu'       => $jumlah_tamu,
                     'update_date'       => date('Y-m-d H:i:s'),
                     'ext'               => $ext_no,
-                    'project_name'      => $project_name
+                    'project_name'      => $project_name,
+                    'customer_name'     => $customer_name,
                 ]);
 
             DB::table('tbl_riwayatmeeting')
@@ -1194,11 +1204,13 @@ class MeetingRoomController extends Controller
             DB::commit();
 
             // send update notif ke resepsionis
-            $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("036834", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("039264", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
-            $this->sendNotifKeResepsionis("033861", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $this->sendNotifKeResepsionis("PKL84", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            // prod
+            // $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            // $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            // $this->sendNotifKeResepsionis("036834", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            // $this->sendNotifKeResepsionis("039264", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            // $this->sendNotifKeResepsionis("033861", "Meeting `" . $title_meeting . "` telah dibatalkan", "Ketuk untuk lihat lebih detail");
 
 
             return response()->json([
@@ -1316,6 +1328,7 @@ class MeetingRoomController extends Controller
                 a.jumlah_tamu as Jumlah_Tamu,
                 a.ext as Ext,
                 a.project_name as Project_Name,
+                a.customer_name as Customer_Name,
                 (SELECT fullname FROM tbl_karyawan WHERE badge_id = a.booking_by) AS Employee_Name,
                 (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = a.statusmeeting_id) AS Status_Name,
                 a.statusmeeting_id as Status_Meeting_Id
