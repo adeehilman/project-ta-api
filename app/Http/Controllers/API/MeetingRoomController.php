@@ -1334,12 +1334,40 @@ class MeetingRoomController extends Controller
                 a.statusmeeting_id as Status_Meeting_Id
             FROM tbl_meeting a WHERE id = '$idMeeting'
         ";
+            $dataMeeting = DB::select($query);
+            $meeting_date =  $dataMeeting[0]->Meeting_Date;
+            $room =  $dataMeeting[0]->Room_Meeting_Id;
+            $meeting_end =  $dataMeeting[0]->Meeting_End;
 
-        $dataMeeting = DB::select($query);
+
         if (COUNT($dataMeeting) > 0) {
             if ($dataMeeting[0]->Reason == null) {
                 $dataMeeting[0]->Reason = '-';
             }
+
+            // insialisasi query interval max extend
+           
+           
+            
+            $checkDataInterval = "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id 
+            FROM tbl_meeting 
+            WHERE meeting_date = '$meeting_date' 
+            AND roommeeting_id = '$room' 
+            AND NOT statusmeeting_id 
+            IN ('5','6') AND meeting_start > '$meeting_end' LIMIT 1"; //13:00:00 start meeting
+            
+            $interval = DB::SELECT($checkDataInterval);
+            if($interval){
+                // dd($interval[0]->meeting_start);
+                $NextStart = abs((strtotime($interval[0]->meeting_start) - strtotime($dataMeeting[0]->Meeting_End)) / 60);
+            }else{
+                $NextStart = abs((strtotime('21:00:00') - strtotime($dataMeeting[0]->Meeting_End)) / 60);
+            }
+
+            // dd($NextStart);
+            
+
+            // dd($NextStart);
             // Insialisasi query participan
             $query_user = "SELECT
                                 participant,
@@ -1393,6 +1421,9 @@ class MeetingRoomController extends Controller
                 FROM tbl_meetingfasilitasdetail WHERE meeting_id = '$idMeeting'";
             $data_fasilitas  = DB::select($query_fasilitas);
 
+
+            $Info_Meeting = $dataMeeting[0];
+            $Info_Meeting->max_extend = $NextStart;
             return response()->json([
                 "RESPONSE"      => 200,
                 "MESSAGETYPE"   => "S",
