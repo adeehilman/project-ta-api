@@ -211,6 +211,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'meeting'], function ($router) 
     Route::get('search-user', [MeetingRoomController::class, 'searchUser']);
     Route::post('insert_meeting', [MeetingRoomController::class, 'insertMeeting']);
     Route::post('update-meeting', [MeetingRoomController::class, 'updateMeeting']);
+    Route::post('extend-meeting', [MeetingRoomController::class, 'extendMeeting']);
     Route::post('cancel-meeting', [MeetingRoomController::class, 'cancelMeeting']);
     Route::post('beri-tanggapan', [MeetingRoomController::class, 'beriTanggapan']);
     Route::get('my-meeting', [MeetingRoomController::class, 'myMeeting']);

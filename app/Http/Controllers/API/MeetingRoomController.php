@@ -1154,6 +1154,74 @@ class MeetingRoomController extends Controller
         }
     }
 
+    /** 
+     * function untuk extend meeting
+     * 
+     **/
+    public function extendMeeting(Request $request)
+    {
+        try {
+            $token = $request->header('Authorization');
+            $validateToken = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json([
+                "RESPONSE_CODE" => 401,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'UNAUTHORIZED',
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+        
+        $idMeeting          = $request->id_meeting;
+        $badge_pembuat      = $request->booking_by;
+        $meeting_end       = $request->extended_meeting_end;
+        
+        $query_karyawan = "SELECT fullname FROM tbl_karyawan WHERE badge_id = '$badge_pembuat' ";
+        $data_karyawan  = DB::select($query_karyawan);
+        $nama_pembuat   = $data_karyawan[0]->fullname;
+
+        DB::beginTransaction();
+        try {
+           // update meeting
+           DB::table('tbl_meeting')
+                ->where('id', $idMeeting)
+                ->update([
+                    'updateby'    => $badge_pembuat,
+                    'meeting_end'     => $meeting_end,
+                ]);
+
+            DB::table('tbl_riwayatmeeting')
+                ->insert([
+                    'meeting_id'            => $idMeeting,
+                    'statusmeeting_id'      => 4,
+                    'createby'              => $badge_pembuat,
+                    'createdate'            => date("Y-m-d H:i:s"),
+                    'remark'                => $nama_pembuat . " has just Extended the Meeting"
+                ]);
+
+                DB::commit();
+            return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS",
+                'MEEETING_ID'   => $idMeeting,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "RESPONSE_CODE" => 400,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'SOMETHING WENT WRONG',
+
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+    }
+
     /**
      * function cancel meeting
      * ini adalah proses untuk melakukan cancel meeting saat
@@ -1354,7 +1422,7 @@ class MeetingRoomController extends Controller
             WHERE meeting_date = '$meeting_date' 
             AND roommeeting_id = '$room' 
             AND NOT statusmeeting_id 
-            IN ('5','6') AND meeting_start > '$meeting_end' LIMIT 1"; //13:00:00 start meeting
+            IN ('5','6') AND meeting_start > '$meeting_end' ORDER BY meeting_start ASC LIMIT 1"; //13:00:00 start meeting
             
             $interval = DB::SELECT($checkDataInterval);
             if($interval){
