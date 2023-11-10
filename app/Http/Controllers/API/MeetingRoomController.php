@@ -1797,6 +1797,7 @@ class MeetingRoomController extends Controller
     {
 
         $id_meeting = $request->id_meeting;
+        // dd($id_meeting);
         if ($id_meeting == '') {
             return response()->json([
                 "RESPONSE"      => 400,
@@ -1822,11 +1823,13 @@ class MeetingRoomController extends Controller
                 $client = new Client();
                 $data   = [
                     'badge_id' => $item->participant,
-                    'message'  => "Rapat " . $title_meeting . " akan mulai dalam 15 menit",
-                    'sub_message' => "tap untuk informasi lebih lanjut",
+                    'message'  => "Rapat akan mulai dalam 15 menit",
+                    'sub_message' => "$title_meeting",
                     'category'    => "MEETING",
                     'tag'         => 'Meeting'
                 ];
+
+                // dd($data);   
                 $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
                     'json' => $data,
                 ]);
