@@ -128,6 +128,22 @@ class KaryawanController extends Controller
             ->first();
 
         /**
+         * Cek is active karyawan
+         **/
+        if($data_karyawan->is_active == '0'){
+            return response()
+                ->json(
+                    [
+                        'RESPONSE_CODE' => 401,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Employee sudah tidak aktif',
+                    ],
+                    401,
+                )
+            ->header('Accept', 'application/json');
+        }
+
+        /**
          * Get data alamat dari tabel alamat
          */
         $data_alamat = DB::table('tbl_alamat')
