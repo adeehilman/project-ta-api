@@ -1222,6 +1222,110 @@ class MeetingRoomController extends Controller
         }
     }
 
+    /** 
+     * function untuk speedup meeting
+     * ketika rapat sudah selesai akan mengirim notif 
+     * ke rapat selanjutnya
+     * 
+     **/
+    public function endEarlyMeeting(Request $request)
+    {
+        try {
+            $token = $request->header('Authorization');
+            $validateToken = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json([
+                "RESPONSE_CODE" => 401,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'UNAUTHORIZED',
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+        
+        $idMeeting          = $request->id_meeting;
+        $badge_pembuat      = $request->booking_by;
+        $meeting_end       = $request->meeting_end_early;
+
+        $data_meeting = DB::table('tbl_meeting')
+            ->where('id', $idMeeting)
+            ->first();    
+        
+        $checkDataInterval = 
+        "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id , booking_by
+        FROM tbl_meeting 
+        WHERE meeting_date = '$data_meeting->meeting_date' 
+            AND roommeeting_id = '$data_meeting->roommeeting_id' 
+            AND NOT statusmeeting_id IN ('5','6') 
+            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') >= '00:00:00' 
+            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') <= '02:00:00' 
+        ORDER BY meeting_start ASC;
+        ";  
+        $interval = DB::SELECT($checkDataInterval)[0];
+
+        // dd($interval);
+        if($interval){
+            
+            $data_room = DB::table('tbl_roommeeting')
+            ->where('id', $interval->roommeeting_id)
+            ->first();  
+
+            $client = new Client();
+                $data   = [
+                    'badge_id' => $interval->booking_by,
+                    'message'  => "Ruangan $data_room->room_name sudah tersedia lebih awal",
+                    'sub_message' => "Ketuk untuk mengubah jadwal rapat",
+                    'category'    => "MEETING",
+                    'tag'         => 'Meeting'
+                ];
+
+                // dd($data);   
+                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                    'json' => $data,
+                ]);
+            }
+
+        DB::beginTransaction();
+        try {
+           // update meeting
+           DB::table('tbl_meeting')
+                ->where('id', $idMeeting)
+                ->update([
+                    'updateby'    => $badge_pembuat,
+                    'meeting_end'     => $meeting_end,
+                    'statusmeeting_id' => '5'
+                ]);
+
+            DB::table('tbl_riwayatmeeting')
+                ->insert([
+                    'meeting_id'            => $idMeeting,
+                    'statusmeeting_id'      => 5,
+                    'createby'              => $badge_pembuat,
+                    'createdate'            => date("Y-m-d H:i:s")
+                ]);
+
+                DB::commit();
+            return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS",
+                'MEEETING_ID'   => $idMeeting,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                "RESPONSE_CODE" => 400,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'SOMETHING WENT WRONG',
+
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+    }
+
     /**
      * function cancel meeting
      * ini adalah proses untuk melakukan cancel meeting saat
