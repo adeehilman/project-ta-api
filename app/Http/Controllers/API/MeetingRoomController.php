@@ -106,9 +106,20 @@ class MeetingRoomController extends Controller
             $endDate   = $request->endDate;
             $status    = $request->status;
             $roomId    = $request->ruangan;
+            $badge_id = $request->badge_id;
+
+            $get_deptcode = "SELECT dept_code FROM tbl_deptauthorize WHERE badge_id = '$badge_id'";
+            $deptcode = DB::select($get_deptcode);
+
+            // Mengambil nilai dept_code dari setiap baris hasil query
+            $deptcodeValues = collect($deptcode)->pluck('dept_code')->toArray();
+
+            // Mengonversi array nilai dept_code menjadi string dengan pemisah koma
+            $deptcodeString = "'" . implode("','", $deptcodeValues) . "'";
+            // dd($deptcodeString);
 
             /**
-             * apabila startdate dan enddate
+             * apabila startdate dan enddate    
              */
             if ($startDate == '' || $endDate == '') {
                 return response()->json([
@@ -121,6 +132,8 @@ class MeetingRoomController extends Controller
                 );
             }
 
+            
+
             /**
              * Lakukan insialisasi query
              */
@@ -128,7 +141,8 @@ class MeetingRoomController extends Controller
                     a.id,
                     a.title_meeting,
                     a.roommeeting_id,
-                    (SELECT room_name FROM tbl_roommeeting WHERE id = roommeeting_id) AS room_name,
+                    rm.room_name,
+                    rm.dept,
                     a.meeting_date,
                     a.meeting_start,
                     a.meeting_end,
@@ -137,8 +151,11 @@ class MeetingRoomController extends Controller
                     (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_ina,
                     (SELECT status_name_eng FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_eng,
                     COALESCE((SELECT COUNT(*) FROM tbl_participant WHERE meeting_id = a.id), 0) AS jumlah_partisipan
-                FROM tbl_meeting a
-                WHERE (meeting_date BETWEEN '$startDate' AND '$endDate')";
+                FROM tbl_meeting a LEFT JOIN tbl_roommeeting rm ON rm.id = roommeeting_id 
+                WHERE (meeting_date BETWEEN '$startDate' AND '$endDate') AND
+                ( EXISTS ( SELECT 1 FROM tbl_participant p WHERE p.meeting_id = a.id AND p.participant = '$badge_id') OR
+                    rm.dept IN ($deptcodeString, 'SATNUSA'  )
+                )";
 
             if (request()->has('status')) {
                 $q .= "AND statusmeeting_id IN($status)";
@@ -243,6 +260,7 @@ class MeetingRoomController extends Controller
                 "DATA"          => $array_gabungan
             ]);
         } catch (\Throwable $th) {
+            dd($th);
             return response()->json([
                 "MESSAGETYPE"   => "E",
                 "MESSAGE" => "Something when wrong",
@@ -271,13 +289,27 @@ class MeetingRoomController extends Controller
             $txFilter = "roomimage_1 as Room_Image_1, roomimage_2 as Room_Image_2, roomimage_3 as Room_Image_3,";
         }
 
+        $badge_id = $request->badge_id;
+
+        $get_deptcode = "SELECT dept_code FROM tbl_deptauthorize WHERE badge_id = '$badge_id'";
+        $deptcode = DB::select($get_deptcode);
+
+        // Mengambil nilai dept_code dari setiap baris hasil query
+        $deptcodeValues = collect($deptcode)->pluck('dept_code')->toArray();
+
+        // Mengonversi array nilai dept_code menjadi string dengan pemisah koma
+        $deptcodeString = "'" . implode("','", $deptcodeValues) . "'";
+        // dd($deptcodeString);
+
         $query_allRoom = "SELECT
                             id as Id,
                             room_name as Room_Name,
                             floor as Floor,
+                            capacity as Capacity,
                             $txFilter
-                            capacity as Capacity
-                          FROM tbl_roommeeting ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name";
+                            dept
+                          FROM tbl_roommeeting WHERE dept IN ($deptcodeString,'SATNUSA') ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name
+                          ";
         $data_allRoom  = DB::select($query_allRoom);
 
         if (COUNT($data_allRoom) > 0) {
