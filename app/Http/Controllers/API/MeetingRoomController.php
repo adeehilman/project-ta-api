@@ -1570,7 +1570,7 @@ class MeetingRoomController extends Controller
                 $NextStart = abs((strtotime('21:00:00') - strtotime($dataMeeting[0]->Meeting_End)) / 60);
             }
 
-            // dd($NextStart);
+            $NextStart = intval($NextStart);
             
 
             // dd($NextStart);
