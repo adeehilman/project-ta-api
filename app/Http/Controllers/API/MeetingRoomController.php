@@ -1284,6 +1284,7 @@ class MeetingRoomController extends Controller
             ->where('id', $idMeeting)
             ->first();    
         
+            // dd($data_meeting);
         $checkDataInterval = 
         "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id , booking_by
         FROM tbl_meeting 
@@ -1294,18 +1295,19 @@ class MeetingRoomController extends Controller
             AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') <= '02:00:00' 
         ORDER BY meeting_start ASC;
         ";  
-        $interval = DB::SELECT($checkDataInterval)[0];
+        $interval = DB::SELECT($checkDataInterval);
+        // dd($interval);
 
         // dd($interval);
         if($interval){
             
             $data_room = DB::table('tbl_roommeeting')
-            ->where('id', $interval->roommeeting_id)
+            ->where('id', $interval[0]->roommeeting_id)
             ->first();  
 
             $client = new Client();
                 $data   = [
-                    'badge_id' => $interval->booking_by,
+                    'badge_id' => $interval[0]->booking_by,
                     'message'  => "Ruangan $data_room->room_name sudah tersedia lebih awal",
                     'sub_message' => "Ketuk untuk mengubah jadwal rapat",
                     'category'    => "MEETING",
