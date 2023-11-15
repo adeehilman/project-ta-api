@@ -1749,8 +1749,8 @@ class MeetingRoomController extends Controller
         dd('$newIdMeeting');
         // URL API tujuan
         // $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
-        // $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
-        $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';      
+        $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
+        // $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';      
 
         // Membuat instance Client Guzzle
         $client = new Client();
