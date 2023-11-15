@@ -61,7 +61,7 @@ class MeetingRoomController extends Controller
                 );
             }
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
             return response()->json([
                 "RESPONSE_CODE" => 400,
                 "MESSAGETYPE"   => "E",
@@ -260,7 +260,7 @@ class MeetingRoomController extends Controller
                 "DATA"          => $array_gabungan
             ]);
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
             return response()->json([
                 "MESSAGETYPE"   => "E",
                 "MESSAGE" => "Something when wrong",
@@ -747,7 +747,7 @@ class MeetingRoomController extends Controller
 
             $formattedDate = date('d F Y', strtotime($meetDate));
             
-            $badgeIds = $this->getBadgeAuthorizeNotification();
+            $badgeIds = $this->getBadgeAuthorizeNotification($meetingId);
 
             foreach ($badgeIds as $badgeId){
                 $this->sendNotifKeResepsionis($badgeId, "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
@@ -1054,7 +1054,7 @@ class MeetingRoomController extends Controller
 
                     DB::commit();
 
-                    $badgeIds = $this->getBadgeAuthorizeNotification();
+                    $badgeIds = $this->getBadgeAuthorizeNotification($roomMeetingId);
 
                     // dd($badgeIds);
                     foreach ($badgeIds as $badgeId) {
@@ -1078,6 +1078,7 @@ class MeetingRoomController extends Controller
                         'MEEETING_ID'   => $idMeeting,
                     ]);
                 } catch (\Throwable $th) {
+                    // dd($th);
                     DB::rollBack();
                     return response()->json([
                         "RESPONSE_CODE" => 400,
@@ -1091,7 +1092,7 @@ class MeetingRoomController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
             return response()->json([
                 "RESPONSE_CODE" => 400,
                 "MESSAGETYPE"   => "E",
@@ -1422,16 +1423,17 @@ class MeetingRoomController extends Controller
             /**
              * Ini mendapatkan title meeting
              */
-            $query_meeting_get = "SELECT title_meeting FROM tbl_meeting WHERE id = '$idMeeting'";
+            $query_meeting_get = "SELECT title_meeting, roommeeting_id FROM tbl_meeting WHERE id = '$idMeeting'";
             $data_meeting      = DB::select($query_meeting_get);
             $title_meeting         = '';
             if (COUNT($data_meeting) > 0) {
                 $title_meeting     = $data_meeting[0]->title_meeting;
+                $roommeeting_id     = $data_meeting[0]->roommeeting_id;
             }
 
             DB::commit();
 
-            $badgeIds = $this->getBadgeAuthorizeNotification();
+            $badgeIds = $this->getBadgeAuthorizeNotification($roommeeting_id);
                     foreach ($badgeIds as $badgeId) {
                         // send update notif ke resepsionis
                         $this->sendNotifKeResepsionis($badgeId, "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail", $idMeeting);
@@ -1994,16 +1996,15 @@ class MeetingRoomController extends Controller
                 $data   = [
                     'badge_id' => $item->participant,
                     'message'  => "Rapat akan mulai dalam 15 menit",
-                    'sub_message' => "$title_meeting",
-                    'category'    => "MEETING",
-                    'tag'         => 'Meeting'
+                    'sub_message' => "$title_meeting"
                 ];
 
-                // dd($data);   
-                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                // API yang hanya mengirim One Signal
+                $response =  $client->get('https://webapi.satnusa.com/api/meeting/send-notif', [
                     'json' => $data,
                 ]);
             } catch (\Throwable $th) {
+                dd($th);
                 return response()->json([
                     "RESPONSE"      => 400,
                     "MESSAGETYPE"   => "E",
@@ -2020,12 +2021,19 @@ class MeetingRoomController extends Controller
     }
 
 
-    public function getBadgeAuthorizeNotification()
-    {
+    public function getBadgeAuthorizeNotification($deptRoom)
+    {   
+        // dd($deptRoom);
+        // ambil department dari room
+        $Room = DB::table('tbl_roommeeting')
+        ->where('id',$deptRoom)
+        ->first();
+
         $badgeIds = DB::table('tbl_deptauthorize')
-            ->where('get_notif', '1')
-            ->pluck('badge_id')
-            ->toArray();
+        ->where('get_notif', '1')
+        ->where('dept_code', $Room->dept)
+        ->pluck('badge_id')
+        ->toArray();
 
        return $badgeIds;
     }
