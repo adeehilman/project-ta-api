@@ -1746,7 +1746,7 @@ class MeetingRoomController extends Controller
      */
     public function sendNotifKeResepsionis($badgeid, $message, $subMessage,$newIdMeeting)
     {
-        dd('$newIdMeeting');
+        // dd('$newIdMeeting');
         // URL API tujuan
         // $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
         $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
