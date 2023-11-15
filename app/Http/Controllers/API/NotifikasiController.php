@@ -29,6 +29,7 @@ class NotifikasiController extends Controller
         }
 
         $badgeId = $request->badge_id;
+        // $dynamic_Id = $request->dynamic_id;
 
         try {
             // lakukan query untuk get list notifikasi
@@ -42,7 +43,8 @@ class NotifikasiController extends Controller
                     createdate as Create_Date,
                     badge_id as Badge_Id,
                     isread as Is_Read, 
-                    read_date as Read_Date
+                    read_date as Read_Date,
+                    dynamic_id as Dynamic_Id
             FROM tbl_notification WHERE badge_id = '$badgeId' ";
             $data  = DB::select($query);
 
@@ -52,6 +54,7 @@ class NotifikasiController extends Controller
                     "MESSAGETYPE"   => "S",
                     "MESSAGE"       => "SUCCESS",
                     "DATA"          => $data
+                    // "Info_Meeting"     => $dataMeeting[0],
                 ]);
             }
         } catch (\Throwable $th) {
@@ -106,7 +109,7 @@ class NotifikasiController extends Controller
     public function sendNotif(Request $request)
     {
 
-
+        // dd($request->all());
         if (!request()->has('message')) {
             $message = "";
         }
@@ -132,11 +135,13 @@ class NotifikasiController extends Controller
          * untuk proses selanjutnya dalam aplikasi, seperti validasi, pemrosesan, penyimpanan, atau pengiriman respons.
          */
 
+      
         $badge_id = $request->badge_id;
         $message  = $request->message;
         $category = $request->category;
         $sub_message = $request->sub_message;
         $tag         = $request->tag;
+        $dynamic_Id = $request->dynamic_id;
 
 
         /**
@@ -204,7 +209,7 @@ class NotifikasiController extends Controller
         curl_close($ch);
 
         // insert ke tabel notifikasi
-        $notifikasi = new Notifikasi($message, $sub_message, $tag, $badge_id);
+        $notifikasi = new Notifikasi($message, $sub_message, $tag, $badge_id, $dynamic_Id);
         $notifikasi->insertNotifikasi();
 
         return response()->json([

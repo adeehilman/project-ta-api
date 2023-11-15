@@ -746,8 +746,8 @@ class MeetingRoomController extends Controller
             // send notif with hardcode
 
             $formattedDate = date('d F Y', strtotime($meetDate));
-            // $this->sendNotifKeResepsionis("200040", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
-            $this->sendNotifKeResepsionis("PKL84", "Rapat Baru : ".$titleMeeting , $meetDate . ", Pukul " .$meetStart);
+            
+            $this->sendNotifKeResepsionis("PKL84", "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
             // prod
             // $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             // $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
@@ -1744,20 +1744,26 @@ class MeetingRoomController extends Controller
      * ini adalah sebuah fungsi untuk melakukan send notifikasi
      * kepada resepsionis
      */
-    public function sendNotifKeResepsionis($badgeid, $message, $subMessage)
+    public function sendNotifKeResepsionis($badgeid, $message, $subMessage,$newIdMeeting)
     {
+        dd('$newIdMeeting');
         // URL API tujuan
-        $apiUrl = 'http://webapi.satnusa.com/api/meeting/send-notif';
+        // $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
+        // $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
+        $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';      
 
         // Membuat instance Client Guzzle
         $client = new Client();
 
-        // Mengirim permintaan GET ke API dengan parameter badge_id, message, dan sub_message
-        $client->get($apiUrl, [
+        // Mengirim permintaan POST ke API dengan parameter badge_id, message, dan sub_message
+        $client->post($apiUrl, [
             'query' => [
                 'badge_id' => $badgeid,
                 'message' => $message,
                 'sub_message' => $subMessage,
+                'category'    => "MEETING",
+                'tag'         => 'Info Meeting',
+                'dynamic_id'  => $newIdMeeting
             ],
         ]);
     }
