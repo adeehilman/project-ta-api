@@ -741,14 +741,20 @@ class MeetingRoomController extends Controller
                     ]);
             }
 
-            DB::commit();
+            DB::commit();    
 
             // send notif with hardcode
 
             $formattedDate = date('d F Y', strtotime($meetDate));
             
-            $this->sendNotifKeResepsionis("PKL84", "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
+            $badgeIds = $this->getBadgeAuthorizeNotification();
+
+            foreach ($badgeIds as $badgeId){
+                $this->sendNotifKeResepsionis($badgeId, "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
+            }
+            // $this->sendNotifKeResepsionis("PKL84", "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
             // prod
+            
             // $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             // $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             // $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
@@ -1048,8 +1054,14 @@ class MeetingRoomController extends Controller
 
                     DB::commit();
 
-                    // send update notif ke resepsionis
-                    $this->sendNotifKeResepsionis("PKL84", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
+                    $badgeIds = $this->getBadgeAuthorizeNotification();
+
+                    // dd($badgeIds);
+                    foreach ($badgeIds as $badgeId) {
+                        // dd($badgeId);
+                        // send update notif ke resepsionis
+                        $this->sendNotifKeResepsionis($badgeId, "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail", $idMeeting);
+                    }
                     // prod
                     // $this->sendNotifKeResepsionis("200040", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
                     // $this->sendNotifKeResepsionis("200195", "Ada perubahan pada meeting " . $titleMeeting, "Ketuk untuk lihat lebih detail");
@@ -1079,6 +1091,7 @@ class MeetingRoomController extends Controller
                 }
             }
         } catch (\Throwable $th) {
+            dd($th);
             return response()->json([
                 "RESPONSE_CODE" => 400,
                 "MESSAGETYPE"   => "E",
@@ -1305,17 +1318,26 @@ class MeetingRoomController extends Controller
             ->where('id', $interval[0]->roommeeting_id)
             ->first();  
 
+            $realtime = date('H:i', strtotime($meeting_end));
+            // dd($realtime);
+
             $client = new Client();
                 $data   = [
                     'badge_id' => $interval[0]->booking_by,
-                    'message'  => "Ruangan $data_room->room_name sudah tersedia lebih awal",
+                    'message'  => "Ruangan $data_room->room_name sudah tersedia lebih awal pada pukul $realtime",
                     'sub_message' => "Ketuk untuk mengubah jadwal rapat",
                     'category'    => "MEETING",
-                    'tag'         => 'Meeting'
+                    'tag'         => 'Meeting',
+                    'dynamic_id'  => $interval[0]->id
                 ];
 
                 // dd($data);   
-                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                // $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                //     'json' => $data,
+                // ]);
+
+                // dev
+                $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
                     'json' => $data,
                 ]);
             }
@@ -1409,8 +1431,12 @@ class MeetingRoomController extends Controller
 
             DB::commit();
 
-            // send update notif ke resepsionis
-            $this->sendNotifKeResepsionis("PKL84", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
+            $badgeIds = $this->getBadgeAuthorizeNotification();
+                    foreach ($badgeIds as $badgeId) {
+                        // send update notif ke resepsionis
+                        $this->sendNotifKeResepsionis($badgeId, "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail", $idMeeting);
+
+                    }
             // prod
             // $this->sendNotifKeResepsionis("200040", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
             // $this->sendNotifKeResepsionis("200195", "Meeting `" . $title_meeting ."` telah dibatalkan", "Ketuk untuk lihat lebih detail");
@@ -1991,5 +2017,16 @@ class MeetingRoomController extends Controller
             "MESSAGETYPE"   => "S",
             "MESSAGE"       => "SUCCESS"
         ]);
+    }
+
+
+    public function getBadgeAuthorizeNotification()
+    {
+        $badgeIds = DB::table('tbl_deptauthorize')
+            ->where('get_notif', '1')
+            ->pluck('badge_id')
+            ->toArray();
+
+       return $badgeIds;
     }
 }
