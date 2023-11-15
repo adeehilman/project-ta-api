@@ -20,14 +20,12 @@ class MenuAccessController extends Controller
                     $query = "SELECT a.accessmenu, b.name FROM tbl_mobilerole a, tbl_privatemenumobile b WHERE  a.accessmenu = b.id AND  a.badge_id = '$badgeno'";
                     $data = DB::SELECT($query);
                     if (!$data) {
-                        return response()->json(
-                            [
-                                'RESPONSE_CODE' => 400,
-                                'MESSAGETYPE' => 'E',
-                                'MESSAGE' => 'User Not Have Authorized',
-                            ],
-                            400,
-                        );
+                        return response()->json([
+                        'RESPONSE' => 200,
+                        'MESSAGETYPE' => 'S',
+                        'MESSAGE' => 'Data retrieved Successfully',
+                        'DATA' => $data,
+                    ]);
                     }
 
                     return response()->json([
