@@ -233,13 +233,13 @@ class PlatformController extends Controller
         $data = DB::select($query);
 
        // Pastikan ada data yang ditemukan sebelum mencoba mengakses properti
-if (!empty($data)) {
-    $base64Image = $data[0]->img_user;
-} else {
-    $base64Image = null; // Atau nilai default sesuai kebutuhan
-}
+        if (!empty($data)) {
+            $base64Image = $data[0]->img_user;
+        } else {
+            $base64Image = null; // Atau nilai default sesuai kebutuhan
+        }
 
-return response()->json(['image' => $base64Image]);
+        return response($base64Image)->header('Content-Type', 'text/plain');
 
     }
 }
