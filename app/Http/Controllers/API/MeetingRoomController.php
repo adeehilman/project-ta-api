@@ -1680,6 +1680,7 @@ class MeetingRoomController extends Controller
      */
     public function sendNotif(Request $request)
     {
+        // dd($badge_id);
 
         if (!request()->has('message')) {
             $message = "";
@@ -1700,6 +1701,7 @@ class MeetingRoomController extends Controller
         $query_player_id = "SELECT player_id FROM tbl_mms WHERE badge_id = '$badge_id'";
         $data_player_id = DB::select($query_player_id);
 
+        
         $arr_playerId = [];
         foreach ($data_player_id as $key => $value) {
             if ($value->player_id != null) {
@@ -1756,9 +1758,6 @@ class MeetingRoomController extends Controller
         // Menutup koneksi cURL
         curl_close($ch);
 
-        // notifikasi insert
-        $notifikasi = new Notifikasi($message,  $sub_message, $badge_id, 'MEETING');
-        $notifikasi->insertNotifikasi();
 
         return response()->json([
             "RESPONSE"      => 200,
