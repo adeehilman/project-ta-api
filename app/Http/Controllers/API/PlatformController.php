@@ -224,4 +224,22 @@ class PlatformController extends Controller
         return response()->json(['message' => 'File tidak ditemukan'], 400);
 
     }
+
+    public function EmployeeImg(Request $request)
+    {
+        $badge = $request->badge_id;
+        // dd($badge);
+        $query = "SELECT img_user FROM tbl_karyawan WHERE badge_id = '$badge'";
+        $data = DB::select($query);
+
+       // Pastikan ada data yang ditemukan sebelum mencoba mengakses properti
+if (!empty($data)) {
+    $base64Image = $data[0]->img_user;
+} else {
+    $base64Image = null; // Atau nilai default sesuai kebutuhan
+}
+
+return response()->json(['image' => $base64Image]);
+
+    }
 }
