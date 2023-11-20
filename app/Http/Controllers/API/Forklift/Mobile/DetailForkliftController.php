@@ -65,15 +65,16 @@ class DetailForkliftController extends Controller
             if (count($query) > 0) {
                 // Mengubah URL gambar di   dalam $query
                 foreach ($query as &$item) {
-                    $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
-                    $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
-                    $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
+                    // $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/uploadForklift/{$item->image1}");
+                    // $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/uploadForklift/{$item->image2}");
+                    // $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/uploadForklift/{$item->image3}");
+                    
+                    $item->image1 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image1}");
+                    $item->image2 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image2}");
+                    $item->image3 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image3}");
                     $item->last_drive = $lastdrive ? $lastdrive[0] : $lastdrivekosong;
 
                     //prod
-                    // $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
-                    // $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
-                    // $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
                 }
             }
 

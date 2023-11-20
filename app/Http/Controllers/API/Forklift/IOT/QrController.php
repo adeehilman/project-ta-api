@@ -12,6 +12,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class QrController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         try {
@@ -33,7 +36,7 @@ class QrController extends Controller
         $id = $request->id;
 
         // cek id apakah valid
-        $user = DB::table('tbl_forklift')
+        $user = $this->second->table('tbl_forklift')
             ->where('id', $id)
             ->first();
         if (!$user) {
@@ -46,16 +49,16 @@ class QrController extends Controller
                 404,
             );
         } else {
-            DB::beginTransaction();
+            $this->second->beginTransaction();
             try {
-                $checkstatus = DB::table('tbl_forklift')
+                $checkstatus = $this->second->table('tbl_forklift')
                     ->where('id', $id)
                     ->value('id_status');
 
                 // cek status forklift
                 if ($checkstatus == 1) {
                     // jika status sama dengan 1
-                    $qrCodeCheck = DB::table('tbl_forklift')
+                    $qrCodeCheck = $this->second->table('tbl_forklift')
                         ->where('id', $id)
                         ->value('qrcode');
 
@@ -67,22 +70,22 @@ class QrController extends Controller
                         ],
                     ]);
                 } else {
-                    $uniqueId = DB::table('tbl_forklift')
+                    $uniqueId = $this->second->table('tbl_forklift')
                         ->where('id', $id)
                         ->value('uniqueid');
 
                     $timestamp = now()->timestamp;
 
                     $qrcode = md5($uniqueId . $timestamp);
-                    DB::table('tbl_forklift')
+                    $this->second->table('tbl_forklift')
                         ->where('id', $id)
                         ->update([
                             'qrcode' => $qrcode,
                         ]);
 
-                    DB::commit();
+                    $this->second->commit();
                     // jika status sama dengan 1
-                    $qrCodeCheck = DB::table('tbl_forklift')
+                    $qrCodeCheck = $this->second->table('tbl_forklift')
                         ->where('id', $id)
                         ->value('qrcode');
 

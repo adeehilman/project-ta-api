@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class HeartbeatController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         try {
@@ -30,7 +33,7 @@ class HeartbeatController extends Controller
 
         $id = $request->id;
 
-        $user = DB::table('tbl_forklift')
+        $user = $this->second->table('tbl_forklift')
             ->where('id', $id)
             ->first();
         if (!$user) {
@@ -43,14 +46,14 @@ class HeartbeatController extends Controller
                 401,
             );
         } else {
-            DB::beginTransaction();
+            $this->second->beginTransaction();
             try {
-                DB::table('tbl_heartbeat')->insert([
+                $this->second->table('tbl_heartbeat')->insert([
                     'id_forklift' => $id,
                     'timestamp' => now(),
                 ]);
 
-                DB::commit();
+                $this->second->commit();
 
                 return response()->json([
                     'MESSAGETYPE' => 'S',

@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AunthenticationQrController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         //validasi token
@@ -32,7 +35,7 @@ class AunthenticationQrController extends Controller
         $id = $request->id;
 
         // cek id apakah valid
-        $user = DB::table('tbl_forklift')
+        $user = $this->second->table('tbl_forklift')
             ->where('id', $id)
             ->first();
         if (!$user) {
@@ -47,7 +50,7 @@ class AunthenticationQrController extends Controller
             );
         } else {
             try {
-                $checkstatus = DB::table('tbl_forklift')
+                $checkstatus = $this->second->table('tbl_forklift')
                     ->where('id', $id)
                     ->value('id_status');
 

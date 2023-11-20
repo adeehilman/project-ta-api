@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UpdateFirmController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         try {
@@ -32,16 +35,16 @@ class UpdateFirmController extends Controller
 
         // dd($id);
         try {
-            $checkversion = DB::table('tbl_espversion')
+            $checkversion = $this->second->table('tbl_espversion')
                 ->orderBy('createdate', 'desc')
                 ->value('version');
 
-            $latestVersion = DB::table('tbl_espversion')
+            $latestVersion = $this->second->table('tbl_espversion')
                 ->orderBy('createdate', 'desc')
                 ->value('filelocation');
 
             // lakukan query untuk get firm version
-            $forkliftVersion = DB::table('tbl_forklift')
+            $forkliftVersion = $this->second->table('tbl_forklift')
                 ->where('id', $id)
                 ->value('version');
 
@@ -66,15 +69,15 @@ class UpdateFirmController extends Controller
                     404,
                 );
             } else {
-                DB::beginTransaction();
-                DB::table('tbl_forklift')
+                $this->second->beginTransaction();
+                $this->second->table('tbl_forklift')
                     ->where('id', $id)
                     ->update([
                         'version' => $checkversion,
                         'updateby' => 'BOT',
                         'updatedate' => now(),
                     ]);
-                DB::commit();
+                $this->second->commit();
                 return response()->json([
                     'RESPONSE' => 200,
                     'MESSAGETYPE' => 'S',
@@ -125,11 +128,11 @@ class UpdateFirmController extends Controller
         $espversion = $request->version;
 
         try {
-            $checkversion = DB::table('tbl_espversion')
+            $checkversion = $this->second->table('tbl_espversion')
                 ->orderBy('createdate', 'desc')
                 ->value('version'); 
 
-            $latestVersion = DB::table('tbl_espversion')
+            $latestVersion = $this->second->table('tbl_espversion')
                 ->orderBy('createdate', 'desc')
                 ->value('filelocation');
 
@@ -156,15 +159,15 @@ class UpdateFirmController extends Controller
                     404,
                 );
             } else {
-                DB::beginTransaction();
-                DB::table('tbl_forklift')
+                $this->second->beginTransaction();
+                $this->second->table('tbl_forklift')
                     ->where('id', $id)
                     ->update([
                         'version' => $checkversion,
                         'updateby' => 'BOT',
                         'updatedate' => now(),
                     ]);
-                DB::commit();
+                $this->second->commit();
                 return response()->json([
                     'RESPONSE' => 200,
                     'MESSAGETYPE' => 'S',

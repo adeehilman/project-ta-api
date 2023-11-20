@@ -49,13 +49,13 @@ class ForkliftController extends Controller
         if (count($query) > 0) {
             // Mengubah URL gambar di dalam $query
             foreach ($query as &$item) {
-                $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
-                $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
-                $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
-                //prod
                 // $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
                 // $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
                 // $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
+                //prod
+                $item->image1 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image1}");
+                $item->image2 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image2}");
+                $item->image3 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image3}");
             }
         }
         return response()->json([
@@ -87,13 +87,13 @@ class ForkliftController extends Controller
         if (count($data) > 0) {
             // Mengubah URL gambar di dalam $query
             foreach ($data as &$item) {
-                $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
-                $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
-                $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
-                //prod
                 // $item->image1 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image1}");
                 // $item->image2 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image2}");
                 // $item->image3 = str_replace(' ', '%20', "http://192.168.88.60:7011/upload/{$item->image3}");
+                //prod
+                $item->image1 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image1}");
+                $item->image2 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image2}");
+                $item->image3 = str_replace(' ', '%20', "https://webapi.satnusa.com/uploadForklift/{$item->image3}");
             }
         }
 
@@ -114,7 +114,7 @@ class ForkliftController extends Controller
             $file = $request->file('file_upload');
 
             // Simpan file di dalam direktori public/RoomMeeting
-            $file->move(public_path('upload/'), $file->getClientOriginalName());
+            $file->move(public_path('uploadForklift/'), $file->getClientOriginalName());
 
             return response()->json(['message' => 'File berhasil diupload']);
         }

@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class MasterKeyController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         //validasi token
@@ -29,7 +32,7 @@ class MasterKeyController extends Controller
                 ->header('Accept', 'application/json');
         }
 
-        $rfidNos = DB::table('tbl_masterkey')
+        $rfidNos = $this->second->table('tbl_masterkey')
             ->select('id', 'rfidno as MASTERKEY')
             ->where('status', '1') // Menggunakan 'as' untuk memberi nama kembali kolom 'rfidno' menjadi 'MASTERKEY'
             ->get();
