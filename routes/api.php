@@ -20,6 +20,21 @@ use App\Http\Controllers\API\PlayStoreController;
 use App\Http\Controllers\API\QuestionsController;
 use App\Http\Controllers\API\UserRoleController;
 use App\Http\Controllers\API\MenuAccessController;
+use App\Http\Controllers\API\Forklift\Mobile\ActivationForkliftController;
+use App\Http\Controllers\API\Forklift\Mobile\DetailForkliftController;
+use App\Http\Controllers\API\Forklift\Mobile\ForkliftController;
+use App\Http\Controllers\API\Forklift\Mobile\HistoryForkliftController;
+use App\Http\Controllers\API\Forklift\Mobile\ParkingController;
+use App\Http\Controllers\API\Forklift\Mobile\ScanQrForkliftController;
+use App\Http\Controllers\API\Forklift\Mobile\StatusForkliftController;
+use App\Http\Controllers\API\Forklift\IOT\AunthenticationQrController;
+use App\Http\Controllers\API\Forklift\IOT\HeartbeatController;
+use App\Http\Controllers\API\Forklift\IOT\MasterKeyController;
+use App\Http\Controllers\API\Forklift\IOT\QrController;
+use App\Http\Controllers\API\Forklift\IOT\StatusForkliftController;
+use App\Http\Controllers\API\Forklift\IOT\TokenGenerateController;
+use App\Http\Controllers\API\Forklift\IOT\UpdateFirmController;
+
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\PemberitahuanController;
 use App\Http\Controllers\KritikController;
@@ -230,6 +245,32 @@ Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::post('upload-file', [PlatformController::class, 'uploadFile']);
 });
+
+// API MOBILE FORKLIFT
+Route::get('/mobile/statusforklift', [StatusForkliftController::class, 'index']);
+Route::get('/mobile/getlistforklift', [ForkliftController::class, 'index']);
+Route::get('/mobile/historyforklift', [HistoryForkliftController::class, 'index']);
+Route::get('/mobile/getlasdriver', [HistoryForkliftController::class, 'getLastDriver']);
+Route::get('/mobile/search-forklift', [ForkliftController::class, 'searchForklift']);
+Route::get('/mobile/getDetail', [DetailForkliftController::class, 'index']);
+Route::post('/mobile/parking', [ParkingController::class, 'index']);
+Route::post('/mobile/activation', [ActivationForkliftController::class, 'index']);
+Route::post('/mobile/scanForklift', [ScanQrForkliftController::class, 'index']);
+Route::post('/mobile/scanLocation', [ScanQrForkliftController::class, 'scanQrLocation']);
+Route::get('/mobile/useraccess', [MenuAccessController::class, 'index']);
+Route::post('upload-file', [ForkliftController::class, 'uploadFile']);
+
+//API IOT FORKLIFT
+Route::get('/iot/masterkey', [MasterKeyController::class, 'index']);
+Route::get('/iot/statusforklift', [StatusForkliftController::class, 'index']);
+Route::post('/iot/getToken', [TokenGenerateController::class, 'index']);
+Route::post('/iot/authentication', [AunthenticationQrController::class, 'index']);
+Route::post('/iot/firmwareVersion', [UpdateFirmController::class, 'index']);
+// version 2
+Route::post('/iot/updateFirmware', [UpdateFirmController::class, 'updateFirmware']);
+Route::post('/iot/qrcodeforklift', [QrController::class, 'index']);
+Route::post('/iot/heartbeat', [HeartbeatController::class, 'index']);
+
 
 Route::get('/meeting/all-room', [MeetingRoomController::class, 'getAllRoom']);
 Route::get('/meeting/send-notif', [MeetingRoomController::class, 'sendNotif']);
