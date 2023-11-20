@@ -255,7 +255,7 @@ Route::post('/mobile/parking', [ParkingController::class, 'index']);
 Route::post('/mobile/activation', [ActivationForkliftController::class, 'index']);
 Route::post('/mobile/scanForklift', [ScanQrForkliftController::class, 'index']);
 Route::post('/mobile/scanLocation', [ScanQrForkliftController::class, 'scanQrLocation']);
-Route::get('/mobile/useraccess', [MenuAccessController::class, 'index']);
+Route::get('/mobile/useraccess', [MenuAccessController::class, 'getMenuAccess']);
 Route::post('upload-file', [ForkliftController::class, 'uploadFile']);
 
 //API IOT FORKLIFT
