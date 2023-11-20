@@ -31,10 +31,8 @@ use App\Http\Controllers\API\Forklift\IOT\AunthenticationQrController;
 use App\Http\Controllers\API\Forklift\IOT\HeartbeatController;
 use App\Http\Controllers\API\Forklift\IOT\MasterKeyController;
 use App\Http\Controllers\API\Forklift\IOT\QrController;
-use App\Http\Controllers\API\Forklift\IOT\StatusForkliftController;
 use App\Http\Controllers\API\Forklift\IOT\TokenGenerateController;
 use App\Http\Controllers\API\Forklift\IOT\UpdateFirmController;
-
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\PemberitahuanController;
 use App\Http\Controllers\KritikController;

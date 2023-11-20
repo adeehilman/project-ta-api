@@ -10,8 +10,12 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class StatusForkliftController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
+        
         try {
             $token = $request->header('Authorization');
             $validateToken = JWTAuth::parseToken()->authenticate();
@@ -28,7 +32,7 @@ class StatusForkliftController extends Controller
                 ->header('Accept', 'application/json');
         }
 
-        $statusForklift = DB::table('tbl_vlookup')
+        $statusForklift = $this->second->table('tbl_vlookup')
             ->select('id', 'name as NAME')
             ->where('category', 'FORKLIFT')
             ->orderBy('sequence', 'asc') // Menggunakan 'as' untuk memberi nama kembali kolom 'rfidno' menjadi 'MASTERKEY'

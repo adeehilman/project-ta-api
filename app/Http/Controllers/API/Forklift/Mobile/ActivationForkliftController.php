@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ActivationForkliftController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         //validasi token
@@ -33,7 +36,7 @@ class ActivationForkliftController extends Controller
         $id = $request->id_forklift;
 
         //  cek apakah
-        $user = DB::table('tbl_driver')
+        $user = $this->second->table('tbl_driver')
             ->where('badgeno', $badgeno)
             ->first();
         if (!$user) {
@@ -46,10 +49,10 @@ class ActivationForkliftController extends Controller
                 400,
             );
         } else {
-            DB::beginTransaction();
+            $this->second->beginTransaction();
             try {
                 $drivercheck = "SELECT * FROM tbl_driver WHERE badgeno = '$badgeno'";
-                $isAccess = DB::select($drivercheck)[0];
+                $isAccess = $this->second->select($drivercheck)[0];
 
                 /**
                  * saat melakukan scan, mobile akan mengirim request badgeno session dan id_forklift
@@ -58,7 +61,7 @@ class ActivationForkliftController extends Controller
                 if ($isAccess) {
                     if ($isAccess->isactive == 1) {
                         if ($isAccess->isexpired == 0) {
-                            $forkliftData = DB::table('tbl_forklift')
+                            $forkliftData = $this->second->table('tbl_forklift')
                                 ->where('id', $id)
                                 ->first();
 
@@ -68,7 +71,7 @@ class ActivationForkliftController extends Controller
                                  *
                                  * **/
                                 $check = "SELECT * FROM tbl_forklifthistory WHERE id_status = '1' and startby = '$badgeno' AND endtime is NULL";
-                                $cekhistory = DB::select($check);
+                                $cekhistory = $this->second->select($check);
 
                                 if (count($cekhistory) > 0) {
                                     return response()->json(
@@ -79,14 +82,14 @@ class ActivationForkliftController extends Controller
                                         400,
                                     );
                                 } else {
-                                    DB::table('tbl_forklift')
+                                    $this->second->table('tbl_forklift')
                                         ->where('id', $id)
                                         ->update([
                                             'id_status' => 1,
                                             'updateby' => 'BOT',
                                             'updatedate' => now(),
                                         ]);
-                                    DB::table('tbl_forklifthistory')->insert([
+                                        $this->second->table('tbl_forklifthistory')->insert([
                                         'id_forklift' => $forkliftData->id,
                                         'id_status' => 1,
                                         'date' => date('Y-m-d'),
@@ -95,7 +98,7 @@ class ActivationForkliftController extends Controller
                                     ]);
 
                                     // update endby di tbl_forklift pada status tidak digunakan
-                                    DB::table('tbl_forklifthistory')
+                                    $this->second->table('tbl_forklifthistory')
                                         ->where('id_forklift', $forkliftData->id)
                                         ->where('id_status', 2)
                                         ->where('endtime', null)
@@ -104,7 +107,7 @@ class ActivationForkliftController extends Controller
                                             'endby' => $badgeno,
                                         ]);
 
-                                    DB::commit();
+                                    $this->second->commit();
 
                                     return response()->json([
                                         'RESPONSE' => 200,
@@ -171,7 +174,7 @@ class ActivationForkliftController extends Controller
         }
 
         // // cek id apakah valid
-        // $user = DB::table('tbl_forklift')
+        // $user = $this->second->table('tbl_forklift')
         //     ->where('id', $id)
         //     ->first();
         // if (!$user) {
@@ -184,16 +187,16 @@ class ActivationForkliftController extends Controller
         //         404,
         //     );
         // } else {
-        //     DB::beginTransaction();
+        //     $this->second->beginTransaction();
         //     try {
-        //         $checkstatus = DB::table('tbl_forklift')
+        //         $checkstatus = $this->second->table('tbl_forklift')
         //             ->where('id', $id)
         //             ->value('id_status');
 
         //         // cek status forklift
         //         if ($checkstatus != 1) {
         //             // jika status sama dengan 1
-        //             $qrCodeCheck = DB::table('tbl_forklift')
+        //             $qrCodeCheck = $this->second->table('tbl_forklift')
         //                 ->where('id', $id)
         //                 ->value('qrcode');
 
@@ -205,22 +208,22 @@ class ActivationForkliftController extends Controller
         //                 ],
         //             ]);
         //         } else {
-        //             $uniqueId = DB::table('tbl_forklift')
+        //             $uniqueId = $this->second->table('tbl_forklift')
         //                 ->where('id', $id)
         //                 ->value('uniqueid');
 
         //             $timestamp = now()->timestamp;
 
         //             $qrcode = md5($uniqueId . $timestamp);
-        //             DB::table('tbl_forklift')
+        //             $this->second->table('tbl_forklift')
         //                 ->where('id', $id)
         //                 ->update([
         //                     'qrcode' => $qrcode,
         //                 ]);
 
-        //             DB::commit();
+        //             $this->second->commit();
         //             // jika status sama dengan 1
-        //             $qrCodeCheck = DB::table('tbl_forklift')
+        //             $qrCodeCheck = $this->second->table('tbl_forklift')
         //                 ->where('id', $id)
         //                 ->value('qrcode');
 

@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ScanQrForkliftController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         // cek authorization token pada header
@@ -37,7 +40,7 @@ class ScanQrForkliftController extends Controller
         AND vl.id = f.id_status)as name_status
         from tbl_forklift f
         where f.qrcode = '$qrcode'";
-        $query = DB::select($forklift);
+        $query = $this->second->select($forklift);
 
         if ($query) {
             return response()->json([
@@ -81,7 +84,7 @@ class ScanQrForkliftController extends Controller
 
         $qrcode_location = $request->qr_location;
         $checkLocation = "SELECT * FROM tbl_location WHERE uniqueid = '$qrcode_location'";
-        $q = DB::select($checkLocation);
+        $q = $this->second->select($checkLocation);
 
         // dd($q);
 

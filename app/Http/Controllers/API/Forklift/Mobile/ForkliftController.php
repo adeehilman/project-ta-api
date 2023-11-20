@@ -11,6 +11,10 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ForkliftController extends Controller
 {
+
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         try {
@@ -40,7 +44,7 @@ class ForkliftController extends Controller
         name
         ";
 
-        $query = DB::select($forklift);
+        $query = $this->second->select($forklift);
 
         if (count($query) > 0) {
             // Mengubah URL gambar di dalam $query
@@ -78,7 +82,7 @@ class ForkliftController extends Controller
         (SELECT vl.name FROM tbl_vlookup vl WHERE vl.category = 'FORKLIFT' AND vl.id = id_status)as name_status
         FROM tbl_forklift
         WHERE (UPPER(NAME) LIKE '$txSearch' OR UPPER(brand) LIKE '$txSearch' OR UPPER(assetno) LIKE '$txSearch' OR UPPER(licenseno) LIKE '$txSearch')";
-        $data = DB::select($query);
+        $data =  $this->second->select($query);
 
         if (count($data) > 0) {
             // Mengubah URL gambar di dalam $query

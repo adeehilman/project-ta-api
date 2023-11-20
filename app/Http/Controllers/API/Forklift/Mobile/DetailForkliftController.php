@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class DetailForkliftController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         try {
@@ -30,12 +33,12 @@ class DetailForkliftController extends Controller
 
         $id = $request->id_forklift;
 
-        $forkliftData = DB::table('tbl_forklift')
+        $forkliftData = $this->second->table('tbl_forklift')
             ->where('id', $id)
             ->first();
         $forklift = "SELECT f.id,f.name, f.brand, f.assetno, f.licenseno,	f.battery, f.id_status, f.image1, f.image2, f.image3 , f.qrcode, l.name AS location_name, l.uniqueid AS location_unique_id, (SELECT vl.name FROM tbl_vlookup vl WHERE vl.category = 'FORKLIFT' AND vl.id = f.id_status)as name_status FROM tbl_forklift f LEFT JOIN tbl_location l ON l.id = f.id_location WHERE f.id = '$id'";
 
-        $query = DB::select($forklift);
+        $query = $this->second->select($forklift);
 
         if ($query) {
             $historybydid = "SELECT
@@ -48,7 +51,7 @@ class DetailForkliftController extends Controller
         LEFT JOIN tbl_division DIV ON DIV.dept = d.dept
         WHERE his.id_status = '1' AND his.id_forklift = '$forkliftData->id' ORDER BY his.id DESC LIMIT 1";
 
-            $lastdrive = DB::select($historybydid);
+            $lastdrive = $this->second->select($historybydid);
             $lastdrivekosong = [
                 'id' => null,
                 'name' => null,

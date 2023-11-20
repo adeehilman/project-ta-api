@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ParkingController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         //validasi token
@@ -34,7 +37,7 @@ class ParkingController extends Controller
         $qrcode_location = $request->qr_location;
 
         // cek id apakah valid
-        $user = DB::table('tbl_forklift')
+        $user = $this->second->table('tbl_forklift')
             ->where('id', $id)
             ->first();
         if (!$user) {
@@ -47,22 +50,22 @@ class ParkingController extends Controller
                 404,
             );
         } else {
-            $checkLocation = DB::table('tbl_location')
+            $checkLocation = $this->second->table('tbl_location')
                 ->where('uniqueid', $qrcode_location)
                 ->where('id_status', 1)
                 ->first();
 
             if ($checkLocation) {
-                DB::beginTransaction();
+                $this->second->beginTransaction();
                 try {
-                    $checkstatus = DB::table('tbl_forklift')
+                    $checkstatus = $this->second->table('tbl_forklift')
                         ->where('id', $id)
                         ->value('id_status');
 
                     // cek status forklift
                     if ($checkstatus != 1) {
                         // jika status tidak sama dengan 1
-                        $qrCodeCheck = DB::table('tbl_forklift')
+                        $qrCodeCheck = $this->second->table('tbl_forklift')
                             ->where('id', $id)
                             ->value('qrcode');
 
@@ -74,7 +77,7 @@ class ParkingController extends Controller
                             ],
                         ]);
                     } else {
-                        $uniqueId = DB::table('tbl_forklift')
+                        $uniqueId = $this->second->table('tbl_forklift')
                             ->where('id', $id)
                             ->value('uniqueid');
 
@@ -82,17 +85,17 @@ class ParkingController extends Controller
 
                         $qrcode = md5($uniqueId . $timestamp);
                
-                        DB::table('tbl_forklift')
+                        $this->second->table('tbl_forklift')
                             ->where('id', $id)
                             ->update([
                                 'qrcode' => $qrcode,
                             ]);
 
-                        DB::commit();
+                        $this->second->commit();
 
                         // dd($checkLocation->id);
                         // update status id di tbl_forklift
-                        DB::table('tbl_forklift')
+                        $this->second->table('tbl_forklift')
                             ->where('id', $id)
                             ->update([
                                 'qrcode' => $qrcode,
@@ -100,7 +103,7 @@ class ParkingController extends Controller
                                 'id_location' => $checkLocation->id,
                             ]);
                         // update endby di tbl_forklift
-                        DB::table('tbl_forklifthistory')
+                        $this->second->table('tbl_forklifthistory')
                             ->where('id_forklift', $id)
                             ->where('id_status', 1)
                             ->where('endtime', null)
@@ -110,7 +113,7 @@ class ParkingController extends Controller
                             ]);
 
                         // insert history forklift status tidak digunakan di tbl_forklift
-                        DB::table('tbl_forklifthistory')->insert([
+                        $this->second->table('tbl_forklifthistory')->insert([
                             'id_forklift' => $id,
                             'id_status' => 2,
                             'date' => date('Y-m-d'),
@@ -118,9 +121,9 @@ class ParkingController extends Controller
                             'startby' => $badgeno,
                         ]);
 
-                        DB::commit();
+                        $this->second->commit();
                         // jika status sama dengan 1
-                        $qrCodeCheck = DB::table('tbl_forklift')
+                        $qrCodeCheck = $this->second->table('tbl_forklift')
                             ->where('id', $id)
                             ->value('qrcode');
 

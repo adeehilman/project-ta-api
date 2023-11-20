@@ -10,6 +10,9 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class HistoryForkliftController extends Controller
 {
+    public function __construct(){
+        $this->second = DB::connection('second');
+    }
     public function index(Request $request)
     {
         //validasi token
@@ -49,9 +52,10 @@ class HistoryForkliftController extends Controller
             CASE WHEN a.endtime IS not null THEN 'Selesai' ELSE 'Digunakan' END AS status  FROM tbl_forklifthistory a,
             tbl_forklift b  WHERE a.id_forklift = b.id AND  a.startby = '$badgeno' AND a.id_status = 1 AND  EXTRACT(MONTH FROM a.STARTtime) = '$realtimemonth'
             ) AS a";
-            $querytotalhour = DB::select($totalhourinmonth)[0];
+            $querytotalhour = $this->second->select($totalhourinmonth)[0];
             $hasil_bulat_desimal = round($querytotalhour->totaljam, 1);
 
+    // dd($hasil_bulat_desimal);
             /**
              * Query list Summary Pemakaian sesuai badge
              * **/
@@ -61,7 +65,7 @@ class HistoryForkliftController extends Controller
             CASE WHEN a.endtime IS not null THEN 'Selesai' ELSE 'Digunakan' END AS status
              FROM tbl_forklifthistory a INNER JOIN tbl_driver d ON startby = d.badgeno, tbl_forklift b
              WHERE a.id_forklift = b.id AND  a.startby = '$badgeno' AND a.id_status = 1 AND  EXTRACT(MONTH FROM a.starttime) =  '$realtimemonth' ORDER BY a.starttime DESC";
-            $query = DB::select($historyforklift);
+            $query = $this->second->select($historyforklift);
 
             $response = [
                 'totaljam' => $hasil_bulat_desimal,
@@ -124,16 +128,17 @@ class HistoryForkliftController extends Controller
             f.licenseno,
             f.assetno,
             f.brand,
-            img.filelocation,
+            f.image1,
+            f.image2,
+            f.image3,
             (SELECT vl.name FROM tbl_vlookup vl WHERE vl.category = 'FORKLIFT' AND vl.id = f.id_status) AS status_real ,
             f.NAME, d.badgeno, d.name, d.dept, his.starttime, his.endtime
             FROM tbl_forklifthistory his
             INNER JOIN tbl_forklift f ON f.id = his.id_forklift
-            LEFT JOIN tbl_driver d ON d.badgeno = his.startby
-            LEFT JOIN tbl_imageforklift img ON img.id_forklift = f.id
+            LEFT JOIN tbl_driver d ON d.badgeno = his.startby   
             WHERE his.id_status = '1' AND his.id_forklift = '$id' ORDER BY his.id DESC LIMIT 1";
 
-            $query = DB::select($historybydid);
+            $query = $this->second->select($historybydid);
             return response()->json([
                 'RESPONSE' => 200,
                 'MESSAGETYPE' => 'S',
@@ -141,6 +146,7 @@ class HistoryForkliftController extends Controller
                 'DATA' => $query,
             ]);
         } catch (\Throwable $th) {
+            dd($th);
             return response()
                 ->json(
                     [
