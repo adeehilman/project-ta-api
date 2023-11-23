@@ -95,6 +95,7 @@ class ActivationForkliftController extends Controller
                                         'date' => date('Y-m-d'),
                                         'starttime' => now(),
                                         'startby' => $badgeno,
+                                        'dept' => $isAccess->dept,
                                     ]);
 
                                     // update endby di tbl_forklift pada status tidak digunakan
