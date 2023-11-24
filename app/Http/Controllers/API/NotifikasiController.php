@@ -236,4 +236,20 @@ class NotifikasiController extends Controller
             "MESSAGE"       => "SUCCESS"
         ]);
     }
+
+    // Baca Notifikasi Array
+    public function bacaNotifAll(Request $request)
+    {
+        $idNotifikasi = $request->id_notifikasi;
+
+        DB::table('tbl_notification')
+        ->whereIn('id', $idNotifikasi)
+        ->update(['isread' => 1]);
+
+        return response()->json([
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS"
+        ]);
+    }
 }

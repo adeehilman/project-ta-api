@@ -201,6 +201,7 @@ Route::get('/taskschedule/getaccessdoor', [CronJobController::class, 'getAccessD
 
 Route::get('list-notifikasi', [NotifikasiController::class, 'getListNotifikasi']);
 Route::get('baca-notifikasi', [NotifikasiController::class, 'bacaNotif']);
+Route::post('baca-all-notifikasi', [NotifikasiController::class, 'bacaNotifAll']);
 
 /**
  * Meeting Room
