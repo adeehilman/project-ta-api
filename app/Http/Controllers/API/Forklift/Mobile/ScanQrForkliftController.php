@@ -35,7 +35,7 @@ class ScanQrForkliftController extends Controller
         //Check QRCODE apakah ada pada database
 
         $qrcode = $request->qrcode;
-        $forklift = "SELECT f.id,f.name,f.id_status ,
+        $forklift = "SELECT f.id,f.name,f.id_status , f.iscoverage,
         (SELECT vl.name FROM tbl_vlookup vl WHERE vl.category = 'FORKLIFT'
         AND vl.id = f.id_status)as name_status
         from tbl_forklift f
@@ -43,6 +43,17 @@ class ScanQrForkliftController extends Controller
         $query = $this->second->select($forklift);
 
         if ($query) {
+            if($query[0]->iscoverage != 1){
+                return response()
+                ->json(
+                    [
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Gagal Scan, Pastikan Forklift online!',
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
+            }
             return response()->json([
                 'RESPONSE' => 200,
                 'MESSAGETYPE' => 'S',

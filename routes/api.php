@@ -243,6 +243,7 @@ Route::group(['prefix' => 'digitalsop'], function ($router) {
 Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::post('upload-file', [PlatformController::class, 'uploadFile']);
+    Route::get('themeEvent', [PlatformController::class, 'themeEvent']);
 });
 
 // API MOBILE FORKLIFT

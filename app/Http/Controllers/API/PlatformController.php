@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Hash;
  */
 class PlatformController extends Controller
 {
-
     /**
      * function untuk send notif
      */
@@ -222,7 +221,6 @@ class PlatformController extends Controller
         }
 
         return response()->json(['message' => 'File tidak ditemukan'], 400);
-
     }
 
     public function EmployeeImg(Request $request)
@@ -232,7 +230,7 @@ class PlatformController extends Controller
         $query = "SELECT img_user FROM tbl_karyawan WHERE badge_id = '$badge'";
         $data = DB::select($query);
 
-       // Pastikan ada data yang ditemukan sebelum mencoba mengakses properti
+        // Pastikan ada data yang ditemukan sebelum mencoba mengakses properti
         if (!empty($data)) {
             $base64Image = $data[0]->img_user;
         } else {
@@ -240,6 +238,21 @@ class PlatformController extends Controller
         }
 
         return response($base64Image)->header('Content-Type', 'text/plain');
+    }
 
+    public function themeEvent(Request $request)
+    {
+        $query = DB::table('tbl_mobiletheme')
+            ->whereDate('startdate', '>=', now()) 
+            ->orderBy('startdate', 'asc')
+            ->limit(1)
+            ->first();
+
+        return response()->json([
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
+            'DATA' => $query,
+        ]);
     }
 }
