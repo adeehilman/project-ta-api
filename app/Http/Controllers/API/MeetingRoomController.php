@@ -1333,14 +1333,14 @@ class MeetingRoomController extends Controller
                 ];
 
                 // dd($data);   
-                // $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
-                //     'json' => $data,
-                // ]);
-
-                // dev
-                $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
+                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
                     'json' => $data,
                 ]);
+
+                // dev
+                // $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
+                //     'json' => $data,
+                // ]);
             }
 
         DB::beginTransaction();
@@ -1775,8 +1775,8 @@ class MeetingRoomController extends Controller
     {
         // dd('$newIdMeeting');
         // URL API tujuan
-        // $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
-        $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
+        $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
+        // $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
         // $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';      
 
         // Membuat instance Client Guzzle
@@ -2034,6 +2034,7 @@ class MeetingRoomController extends Controller
         ->pluck('badge_id')
         ->toArray();
 
+// dd($badgeIds);
        return $badgeIds;
     }
 }
