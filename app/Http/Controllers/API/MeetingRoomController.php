@@ -308,25 +308,77 @@ class MeetingRoomController extends Controller
                             capacity as Capacity,
                             $txFilter
                             dept
-                          FROM tbl_roommeeting WHERE dept IN ($deptcodeString,'SATNUSA') ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name
+                          FROM tbl_roommeeting WHERE dept IN ($deptcodeString) 	ORDER BY
+	    SUBSTRING_INDEX(room_name, ' ', 1),
+	    CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED),
+	    room_name;
+
                           ";
         $data_allRoom  = DB::select($query_allRoom);
 
-        if (COUNT($data_allRoom) > 0) {
+        // Get all data Ruangan Public Satnusa
+        $queryAllPublicRoom = "SELECT
+                            id as Id,
+                            room_name as Room_Name,
+                            floor as Floor,
+                            capacity as Capacity,
+                            $txFilter
+                            dept
+                          FROM tbl_roommeeting WHERE dept IN ('SATNUSA') ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name
+                          ";
+        $dataSatnusaRoom  = DB::select($queryAllPublicRoom);
+        $arrData = array();
+        $arrData2 = array();
 
-            if ($img == true) {
-                foreach ($data_allRoom as $key => $item) {
-                    $item->Room_Image_1 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_1;
-                    $item->Room_Image_2 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_2;
-                    $item->Room_Image_3 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_3;
+        if (COUNT($data_allRoom) > 0) {
+            foreach ($data_allRoom as $r) {
+                // dd($r);
+
+                $d = array(
+                    'Id'          => $r->Id,
+                    'Room_Name'   => $r->Room_Name,
+                    'Floor'       => $r->Floor,
+                    'Capacity'    => $r->Capacity,
+                    'dept'        => $r->dept
+                );
+
+                // Tambahkan URL gambar jika $img true
+                if ($img == true) {
+                    $d['Room_Image_1'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_1;
+                    $d['Room_Image_2'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_2;
+                    $d['Room_Image_3'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_3;
                 }
+                    array_push($arrData, $d);
             }
+
+            // DATA RUANGAN PUBLIC SATNUSA
+            foreach ($dataSatnusaRoom as $r) {
+                // dd($r);
+
+                $d = array(
+                    'Id'          => $r->Id,
+                    'Room_Name'   => $r->Room_Name,
+                    'Floor'       => $r->Floor,
+                    'Capacity'    => $r->Capacity,
+                    'dept'        => $r->dept
+                );
+
+                // Tambahkan URL gambar jika $img true
+                if ($img == true) {
+                    $d['Room_Image_1'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_1;
+                    $d['Room_Image_2'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_2;
+                    $d['Room_Image_3'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_3;
+                }
+                    array_push($arrData2, $d);    
+            }
+          
+            $array_gabungan = array_merge($arrData, $arrData2);
 
             return response()->json([
                 "RESPONSE"      => 200,
                 "MESSAGETYPE"   => "S",
                 "MESSAGE"       => "SUCCESS",
-                "DATA"          => $data_allRoom
+                "DATA"          => $array_gabungan
             ]);
         }
 
@@ -858,8 +910,8 @@ class MeetingRoomController extends Controller
                 ->join('tbl_meeting as a', 'b.meeting_id', '=', 'a.id')
                 ->where('b.participant', $badge_id)
                 ->whereIn('a.statusmeeting_id', [2, 3, 4])
-                ->orderBy('a.meeting_date', 'DESC')
-                ->orderBy('a.meeting_start', 'DESC')
+                ->orderBy('a.meeting_date', 'ASC')
+                ->orderBy('a.meeting_start', 'ASC')
                 ->paginate(10);
         }
 
