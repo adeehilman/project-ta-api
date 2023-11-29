@@ -19,7 +19,7 @@ class MysatnusaAppCastController extends Controller
                     <title>Version 1.6.5</title>
                     <description>Testing update dari appcast ini bro </description>
                     <pubDate>Thu, 30 Nov 2023 12:59:30 +0000</pubDate>
-                    <enclosure url="https://play.google.com/store/apps/details?id=com.satnusa.karyaone_mobile" />
+                    <enclosure url="https://play.google.com/store/apps/details?id=com.satnusa.karyaone_mobile" version="1.6.5" os="android"/>
                 </item>
             </channel>
         </rss>
