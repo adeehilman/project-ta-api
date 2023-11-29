@@ -207,8 +207,9 @@ class MmsController extends Controller
                     }
 
                     DB::commit();
-
+                    
                     $checkImei = $this->checkImei($request->imei1, $request->imei2, $idMms, $request->badge_id);
+
 
                     return response()->json([
                         'message' => 'Response OK, Berhasil insert HP Anda Sebagai Karyawan Baru',
@@ -288,8 +289,8 @@ class MmsController extends Controller
 
     private function checkImei($imei1, $imei2, $idMms, $badge_id)
     {
-        // dd($request->all());
-        if (empty($imei1) || empty($imei2)) {
+        
+        if (empty($imei1)) {
             return false;
         }
 
@@ -366,7 +367,9 @@ class MmsController extends Controller
                     ];
                     DB::table('tbl_logcheckimei')->insert($dataLog);
 
+                    
                     if ($isShipData->is_shipped == null || $isShipData->is_shipped == '' || $isShipData->is_shipped == false) {
+
                         DB::table('tbl_mms')
                             ->where('imei1', $imei1)
                             ->update(['status_pendaftaran_mms' => 13, 'status_imei' => 2]);
