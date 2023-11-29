@@ -243,9 +243,6 @@ class PlatformController extends Controller
     public function themeEvent(Request $request)
     {
         $query = DB::table('tbl_mobiletheme')
-            ->whereDate('startdate', '=', now()) 
-            ->orderBy('startdate', 'asc')
-            ->limit(1)
             ->first();
 
         return response()->json([
