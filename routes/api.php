@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\MysatnusaAppCastController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CronJobController;
 use App\Http\Controllers\API\DurationBreakController;
@@ -233,6 +234,11 @@ Route::group(['middleware' => 'api', 'prefix' => 'meeting'], function ($router) 
     Route::get('detail-meeting-saya', [MeetingRoomController::class, 'detailMeetingSaya']);
     Route::post('aksi-kehadiran', [MeetingRoomController::class, 'aksiKehadiran']);
     Route::post('edit-partisipan', [MeetingRoomController::class, 'editPartisipan']);
+});
+
+
+Route::group(['middleware' => 'api', 'prefix' => 'appcast'], function ($router) {
+    Route::get('/appcast', [MysatnusaAppCastController::class, 'getAppcast']);
 });
 
 Route::group(['prefix' => 'digitalsop'], function ($router) {
