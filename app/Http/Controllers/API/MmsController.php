@@ -138,7 +138,7 @@ class MmsController extends Controller
         }
 
         // cek lagi UUID yang dikirim user, apakah ada duplikasi atau enggak
-        $query = "SELECT UUID FROM tbl_mms WHERE UUID = '$request->uuid'";
+        $query = "SELECT UUID FROM tbl_mms WHERE UUID = '$request->uuid' AND is_active = 1";
         $check_uuid = DB::select($query);
         if (count($check_uuid) > 0) {
             return response()->json(
@@ -208,13 +208,14 @@ class MmsController extends Controller
 
                     DB::commit();
 
-                    $checkImei = $this->checkImei($request->imei1, $request->imei2);
+                    $checkImei = $this->checkImei($request->imei1, $request->imei2, $idMms, $request->badge_id);
 
                     return response()->json([
                         'message' => 'Response OK, Berhasil insert HP Anda Sebagai Karyawan Baru',
                         'id_mms' => $idMms,
                     ]);
                 } catch (\Throwable $th) {
+                    dd($th);
                     return response()->json(
                         [
                             'message' => 'Something went wrong',
