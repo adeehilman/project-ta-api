@@ -327,6 +327,7 @@ class AuthController extends Controller
                      */
                     $existsUUID = DB::table('tbl_mms')
                         ->where('uuid', $request->uuid_new)
+                        ->where('is_active', 1)
                         ->exists();
                     if ($existsUUID) {
                         DB::rollBack();
