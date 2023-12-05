@@ -37,4 +37,15 @@ class Ip extends Model
 
         return $q;
     }
+
+    public function scopeUnblocked($query, $ip = null)
+    {
+        $q = $query->where('blocked', 1)->whereNotNull('deleted_at'); // Perbaikan
+
+        if ($ip) {
+            $q = $query->where('ip', $ip);
+        }
+
+        return $q;
+    }
 }

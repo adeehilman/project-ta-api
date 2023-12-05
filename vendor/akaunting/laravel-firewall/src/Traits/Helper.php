@@ -44,6 +44,7 @@ trait Helper
         return in_array(strtolower($this->request->method()), $methods);
     }
 
+    
     public function isRoute($middleware = null)
     {
         $middleware = $middleware ?? $this->middleware;

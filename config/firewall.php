@@ -26,7 +26,7 @@ return [
         'block' => [
             'view' => env('FIREWALL_BLOCK_VIEW', null),
             'redirect' => env('FIREWALL_BLOCK_REDIRECT', null),
-            'abort' => env('FIREWALL_BLOCK_ABORT', false),
+            'abort' => env('FIREWALL_BLOCK_ABORT', true),
             'code' => env('FIREWALL_BLOCK_CODE', 403),
             //'exception' => \Akaunting\Firewall\Exceptions\AccessDenied::class,
         ],
@@ -206,7 +206,7 @@ return [
             'auto_block' => [
                 'attempts' => 3,
                 'frequency' => 5 * 60, // 5 minutes
-                'period' => 30 * 60, // 30 minutes
+                'period' => 5 * 60, // 30 minutes
             ],
         ],
 
@@ -216,7 +216,7 @@ return [
             'auto_block' => [
                 'attempts' => 5,
                 'frequency' => 1 * 60, // 1 minute
-                'period' => 30 * 60, // 30 minutes
+                'period' => 5 * 60, // 5 minutes
             ],
         ],
 

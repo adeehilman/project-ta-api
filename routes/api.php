@@ -58,7 +58,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'registrasi']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::group(['middleware' => ['api', 'auth:api']], function () {
+Route::group(['middleware' => ['api', 'auth:api','firewall.all']], function () {
     /**
      * Pengumuman API Service
      */
