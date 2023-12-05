@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Akaunting\Firewall\Facade\Firewall;
 
 class AuthController extends Controller
 {
@@ -114,6 +115,7 @@ class AuthController extends Controller
                 ]);
             } catch (\Throwable $th) {
 
+                dd($th);
                 DB::rollBack();
                 return response()->json([
                     "message" => "Something went wrong"
@@ -131,7 +133,7 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-
+ 
         $request->validate([
             "badge_id" => "required",
             "password" => "required",
@@ -142,16 +144,36 @@ class AuthController extends Controller
             "versi_aplikasi" => "required"
         ]);
 
+        // if (Firewall::isBlocked($request)) {
+        //     // Tanggapi blokir dengan HTTP 403 dan pesan kesalahan
+        //     return response()->json(['error' => 'Percobaan login terlalu banyak. Akses diblokir.'], 403);
+        // }
+
         // Selanjutnya buatlah sebuah credentials
         $credentials = $request->only('badge_id', 'password');
 
+
+     
         /**
          * lakukan proses pengecekan credentials dengan
          * JWT. dimana pengecekan JWT ini menggunakan library 
          * dari tymon/jwtauth
          */
         try {
+            
             if (Auth::attempt($credentials)) {
+                $ip = $request->ip();
+                $blockedIpCount = DB::table('firewall_ips')
+                    ->where('ip', $ip)
+                    ->whereNull('deleted_at')
+                    ->count();
+
+                if ($blockedIpCount > 0) {
+                    return response()->json([
+                        "message" => "Maaf, Anda telah melebihi batas percobaan login. Silakan coba lagi dalam beberapa saat",
+                    ], 400);
+                }
+
                 $token = JWTAuth::fromUser(Auth::user());
                 $data = DB::table('tbl_karyawan')
                     ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
@@ -285,6 +307,10 @@ class AuthController extends Controller
                     }
                 }
     
+               
+
+
+
                 /**
                  * Apabila enggak dan hanya 1 device maka lakukan update uuid,
                  * atau timpa uuid lama dengan yang baru, yang diperoleh dari aplikasi mysatnusa baru
@@ -356,14 +382,27 @@ class AuthController extends Controller
                         "message" => "Terjadi kesalahan saat login",
                     ], 400);
                 }
-            } else {
+            }
+             else {
                 return response()->json([
                     "message" => "Gagal login, harap periksa badge dan password anda!",
                 ], 400);
             }
-        } catch (\Throwable $th) {
+        } catch (\Illuminate\Http\Exceptions\HttpResponseException $e) {
+
+            $response = $e->getResponse();
+            $blockedIp = $response->getData()->blocked_ip;
+
+            if($blockedIp){
+                return response()->json([
+                "message" => "Maaf, Anda telah melebihi batas percobaan login. Silakan coba lagi dalam beberapa saat",
+            ], 400);
+            }
+            // Lakukan sesuatu dengan informasi IP yang diblokir
+
+
             return response()->json([
-                "message" => "Something went wrong!",
+                "message" => "Something went wrong! $blockedIp",
             ], 400);
         }
     }

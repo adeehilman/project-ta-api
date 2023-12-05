@@ -15,23 +15,23 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
-        'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
+        'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
-        '3bd81c9b8fcc150b69d8b63b4d2ccf23' => __DIR__ . '/..' . '/spatie/flare-client-php/src/helpers.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '3bd81c9b8fcc150b69d8b63b4d2ccf23' => __DIR__ . '/..' . '/spatie/flare-client-php/src/helpers.php',
         '09f6b20656683369174dd6fa83b7e5fb' => __DIR__ . '/..' . '/symfony/polyfill-uuid/bootstrap.php',
         '47e1160838b5e5a10346ac4084b58c23' => __DIR__ . '/..' . '/laravel/prompts/src/helpers.php',
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '265b4faa2b3a9766332744949e83bf97' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/helpers.php',
         'c7a3c339e7e14b60e06a2d7fcce9476b' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Events/functions.php',
         'f0906e6318348a765ffb6eb24e0d0938' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'c72349b1fe8d0deeedd3a52e8aa814d8' => __DIR__ . '/..' . '/mockery/mockery/library/helpers.php',
         'ce9671a430e4846b44e1c68c7611f9f5' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery.php',
         'a1cfe24d14977df6878b9bf804af2d1c' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Phpunit/Autoload.php',
@@ -134,6 +134,11 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
             'Laravel\\Sail\\' => 13,
             'Laravel\\Prompts\\' => 16,
         ),
+        'J' => 
+        array (
+            'Jenssegers\\Agent\\' => 17,
+            'Jaybizzle\\CrawlerDetect\\' => 24,
+        ),
         'I' => 
         array (
             'Illuminate\\Support\\' => 19,
@@ -178,6 +183,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'A' => 
         array (
             'App\\' => 4,
+            'Akaunting\\Firewall\\' => 19,
         ),
     );
 
@@ -451,6 +457,14 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         array (
             0 => __DIR__ . '/..' . '/laravel/prompts/src',
         ),
+        'Jenssegers\\Agent\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jenssegers/agent/src',
+        ),
+        'Jaybizzle\\CrawlerDetect\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src',
+        ),
         'Illuminate\\Support\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Macroable',
@@ -540,13 +554,67 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
             0 => __DIR__ . '/../..' . '/app',
             1 => __DIR__ . '/..' . '/laravel/pint/app',
         ),
+        'Akaunting\\Firewall\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/akaunting/laravel-firewall/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'D' => 
+        array (
+            'Detection' => 
+            array (
+                0 => __DIR__ . '/..' . '/mobiledetect/mobiledetectlib/namespaced',
+            ),
+        ),
     );
 
     public static $classMap = array (
+        'Akaunting\\Firewall\\Abstracts\\Middleware' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Abstracts/Middleware.php',
+        'Akaunting\\Firewall\\Commands\\UnblockIp' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Commands/UnblockIp.php',
+        'Akaunting\\Firewall\\Events\\AttackDetected' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Events/AttackDetected.php',
+        'Akaunting\\Firewall\\Exceptions\\AccessDenied' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Exceptions/AccessDenied.php',
+        'Akaunting\\Firewall\\Listeners\\BlockIp' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Listeners/BlockIp.php',
+        'Akaunting\\Firewall\\Listeners\\CheckLogin' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Listeners/CheckLogin.php',
+        'Akaunting\\Firewall\\Listeners\\NotifyUsers' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Listeners/NotifyUsers.php',
+        'Akaunting\\Firewall\\Middleware\\Agent' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Agent.php',
+        'Akaunting\\Firewall\\Middleware\\Bot' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Bot.php',
+        'Akaunting\\Firewall\\Middleware\\Geo' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Geo.php',
+        'Akaunting\\Firewall\\Middleware\\Ip' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Ip.php',
+        'Akaunting\\Firewall\\Middleware\\Lfi' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Lfi.php',
+        'Akaunting\\Firewall\\Middleware\\Php' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Php.php',
+        'Akaunting\\Firewall\\Middleware\\Referrer' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Referrer.php',
+        'Akaunting\\Firewall\\Middleware\\Rfi' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Rfi.php',
+        'Akaunting\\Firewall\\Middleware\\Session' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Session.php',
+        'Akaunting\\Firewall\\Middleware\\Sqli' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Sqli.php',
+        'Akaunting\\Firewall\\Middleware\\Swear' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Swear.php',
+        'Akaunting\\Firewall\\Middleware\\Url' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Url.php',
+        'Akaunting\\Firewall\\Middleware\\Whitelist' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Whitelist.php',
+        'Akaunting\\Firewall\\Middleware\\Xss' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Middleware/Xss.php',
+        'Akaunting\\Firewall\\Models\\Ip' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Models/Ip.php',
+        'Akaunting\\Firewall\\Models\\Log' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Models/Log.php',
+        'Akaunting\\Firewall\\Notifications\\AttackDetected' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Notifications/AttackDetected.php',
+        'Akaunting\\Firewall\\Notifications\\Notifiable' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Notifications/Notifiable.php',
+        'Akaunting\\Firewall\\Provider' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Provider.php',
+        'Akaunting\\Firewall\\Traits\\Helper' => __DIR__ . '/..' . '/akaunting/laravel-firewall/src/Traits/Helper.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
         'App\\Http\\Controllers\\API\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/AuthController.php',
         'App\\Http\\Controllers\\API\\CronJobController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/CronJobController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\AunthenticationQrController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/AunthenticationQrController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\HeartbeatController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/HeartbeatController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\MasterKeyController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/MasterKeyController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\QrController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/QrController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\TokenGenerateController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/TokenGenerateController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\IOT\\UpdateFirmController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/IOT/UpdateFirmController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\ActivationForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/ActivationForkliftController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\DetailForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/DetailForkliftController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\ForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/ForkliftController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\HistoryForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/HistoryForkliftController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\ParkingController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/ParkingController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\ScanQrForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/ScanQrForkliftController.php',
+        'App\\Http\\Controllers\\API\\Forklift\\Mobile\\StatusForkliftController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Forklift/Mobile/StatusForkliftController.php',
         'App\\Http\\Controllers\\API\\ImageHelperController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/ImageHelperController.php',
         'App\\Http\\Controllers\\API\\KalenderController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/KalenderController.php',
         'App\\Http\\Controllers\\API\\KecamatanController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/KecamatanController.php',
@@ -555,7 +623,9 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'App\\Http\\Controllers\\API\\LmsController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/LmsController.php',
         'App\\Http\\Controllers\\API\\LowonganController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/LowonganController.php',
         'App\\Http\\Controllers\\API\\MeetingRoomController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/MeetingRoomController.php',
+        'App\\Http\\Controllers\\API\\MenuAccessController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/MenuAccessController.php',
         'App\\Http\\Controllers\\API\\MmsController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/MmsController.php',
+        'App\\Http\\Controllers\\API\\MysatnusaAppCastController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/MysatnusaAppCastController.php',
         'App\\Http\\Controllers\\API\\Notifikasi' => __DIR__ . '/../..' . '/app/Http/Controllers/API/Notifikasi.php',
         'App\\Http\\Controllers\\API\\NotifikasiController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/NotifikasiController.php',
         'App\\Http\\Controllers\\API\\PengumumanController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/PengumumanController.php',
@@ -578,6 +648,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'App\\Models\\BaseModel' => __DIR__ . '/../..' . '/app/Models/BaseModel.php',
         'App\\Models\\Category' => __DIR__ . '/../..' . '/app/Models/Category.php',
         'App\\Models\\EmployeeGroup' => __DIR__ . '/../..' . '/app/Models/EmployeeGroup.php',
+        'App\\Models\\Forklift' => __DIR__ . '/../..' . '/app/Models/Forklift.php',
         'App\\Models\\JobVacancy' => __DIR__ . '/../..' . '/app/Models/JobVacancy.php',
         'App\\Models\\Lookup' => __DIR__ . '/../..' . '/app/Models/Lookup.php',
         'App\\Models\\Mms' => __DIR__ . '/../..' . '/app/Models/Mms.php',
@@ -740,6 +811,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'DeepCopy\\TypeFilter\\Spl\\SplDoublyLinkedListFilter' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/Spl/SplDoublyLinkedListFilter.php',
         'DeepCopy\\TypeFilter\\TypeFilter' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/TypeFilter.php',
         'DeepCopy\\TypeMatcher\\TypeMatcher' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/TypeMatcher/TypeMatcher.php',
+        'Detection\\MobileDetect' => __DIR__ . '/..' . '/mobiledetect/mobiledetectlib/namespaced/Detection/MobileDetect.php',
         'Dflydev\\DotAccessData\\Data' => __DIR__ . '/..' . '/dflydev/dot-access-data/src/Data.php',
         'Dflydev\\DotAccessData\\DataInterface' => __DIR__ . '/..' . '/dflydev/dot-access-data/src/DataInterface.php',
         'Dflydev\\DotAccessData\\Exception\\DataException' => __DIR__ . '/..' . '/dflydev/dot-access-data/src/Exception/DataException.php',
@@ -2799,6 +2871,14 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'Illuminate\\View\\ViewFinderInterface' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewFinderInterface.php',
         'Illuminate\\View\\ViewName' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewName.php',
         'Illuminate\\View\\ViewServiceProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewServiceProvider.php',
+        'Jaybizzle\\CrawlerDetect\\CrawlerDetect' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/CrawlerDetect.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\AbstractProvider' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/AbstractProvider.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Crawlers' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Crawlers.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Exclusions' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Exclusions.php',
+        'Jaybizzle\\CrawlerDetect\\Fixtures\\Headers' => __DIR__ . '/..' . '/jaybizzle/crawler-detect/src/Fixtures/Headers.php',
+        'Jenssegers\\Agent\\Agent' => __DIR__ . '/..' . '/jenssegers/agent/src/Agent.php',
+        'Jenssegers\\Agent\\AgentServiceProvider' => __DIR__ . '/..' . '/jenssegers/agent/src/AgentServiceProvider.php',
+        'Jenssegers\\Agent\\Facades\\Agent' => __DIR__ . '/..' . '/jenssegers/agent/src/Facades/Agent.php',
         'Laravel\\Prompts\\Concerns\\Colors' => __DIR__ . '/..' . '/laravel/prompts/src/Concerns/Colors.php',
         'Laravel\\Prompts\\Concerns\\Cursor' => __DIR__ . '/..' . '/laravel/prompts/src/Concerns/Cursor.php',
         'Laravel\\Prompts\\Concerns\\Erase' => __DIR__ . '/..' . '/laravel/prompts/src/Concerns/Erase.php',
@@ -3317,6 +3397,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'League\\MimeTypeDetection\\GeneratedExtensionToMimeTypeMap' => __DIR__ . '/..' . '/league/mime-type-detection/src/GeneratedExtensionToMimeTypeMap.php',
         'League\\MimeTypeDetection\\MimeTypeDetector' => __DIR__ . '/..' . '/league/mime-type-detection/src/MimeTypeDetector.php',
         'League\\MimeTypeDetection\\OverridingExtensionToMimeTypeMap' => __DIR__ . '/..' . '/league/mime-type-detection/src/OverridingExtensionToMimeTypeMap.php',
+        'Mobile_Detect' => __DIR__ . '/..' . '/mobiledetect/mobiledetectlib/Mobile_Detect.php',
         'Mockery\\Adapter\\Phpunit\\MockeryPHPUnitIntegration' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryPHPUnitIntegration.php',
         'Mockery\\Adapter\\Phpunit\\MockeryPHPUnitIntegrationAssertPostConditions' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryPHPUnitIntegrationAssertPostConditions.php',
         'Mockery\\Adapter\\Phpunit\\MockeryTestCase' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryTestCase.php',
@@ -6658,6 +6739,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticIniteb48cad6aab029674a3c3cb692df8123::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticIniteb48cad6aab029674a3c3cb692df8123::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticIniteb48cad6aab029674a3c3cb692df8123::$prefixesPsr0;
             $loader->classMap = ComposerStaticIniteb48cad6aab029674a3c3cb692df8123::$classMap;
 
         }, null, ClassLoader::class);
