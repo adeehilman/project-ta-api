@@ -250,6 +250,7 @@ Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::post('upload-file', [PlatformController::class, 'uploadFile']);
     Route::get('themeEvent', [PlatformController::class, 'themeEvent']);
+    Route::get('getWeather', [PlatformController::class, 'getWeather']);
 });
 
 // API MOBILE FORKLIFT
@@ -290,4 +291,5 @@ Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting'
 
 // get list user by name or badge
 Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
+Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);

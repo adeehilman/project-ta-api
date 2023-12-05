@@ -242,8 +242,7 @@ class PlatformController extends Controller
 
     public function themeEvent(Request $request)
     {
-        $query = DB::table('tbl_mobiletheme')
-            ->first();
+        $query = DB::table('tbl_mobiletheme')->first();
 
         return response()->json([
             'RESPONSE' => 200,
@@ -251,5 +250,96 @@ class PlatformController extends Controller
             'MESSAGE' => 'SUCCESS',
             'DATA' => $query,
         ]);
+    }
+
+    public function getWeather(Request $request)
+    {
+        // URL API tujuan
+        $apiUrl = 'https://ibnux.github.io/BMKG-importer/cuaca/501601.json';
+        // $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
+        // $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';
+
+        // Membuat instance Client Guzzle
+        $client = new Client();
+
+        // Mengirim permintaan GET ke API dengan URL yang telah disusun
+        $response = $client->get($apiUrl);
+
+        // Mendapatkan body dari response dan mengonversi JSON menjadi array
+        $cuacaData = json_decode($response->getBody(), true);
+
+        // Waktu sekarang
+        // $now = now()->format('Y-m-d H:i:s'); // Menggunakan now() untuk mendapatkan waktu sekarang dalam konteks Laravel
+        $now = '2023-12-04 10:34:00'; // Menggunakan now() untuk mendapatkan waktu sekarang dalam konteks Laravel
+
+        // dd($now);
+        // Inisialisasi array untuk data cuaca sebelum dan setelah waktu sekarang
+        $dataBeforeNow = [];
+        $dataAfterNow = [];
+
+        // Iterasi melalui setiap entitas cuaca dalam data
+        foreach ($cuacaData as $cuaca) {
+            // Mengonversi string waktu cuaca menjadi objek DateTime
+            $cuacaTime = now()->parse($cuaca['jamCuaca']);
+
+            // Jika waktu cuaca lebih kecil dari waktu sekarang
+            if ($cuacaTime < now()) {
+                $dataBeforeNow[] = $cuaca;
+            } else {
+                $dataAfterNow[] = $cuaca;
+            }
+        }
+
+        // Inisialisasi variabel untuk menyimpan data cuaca terdekat sebelum dan setelah waktu sekarang
+        $closestCuacaBeforeNow = null;
+        $closestCuacaAfterNow = null;
+        $closestDifferenceBeforeNow = PHP_INT_MAX;
+        $closestDifferenceAfterNow = PHP_INT_MAX;
+
+        // Iterasi untuk data sebelum waktu sekarang
+        foreach ($dataBeforeNow as $cuaca) {
+            $cuacaTime = now()->parse($cuaca['jamCuaca']);
+            $difference = abs($cuacaTime->timestamp - now()->timestamp);
+
+            if ($difference < $closestDifferenceBeforeNow) {
+                $closestDifferenceBeforeNow = $difference;
+                $closestCuacaBeforeNow = $cuaca;
+            }
+        }
+
+        // Iterasi untuk data setelah waktu sekarang
+        foreach ($dataAfterNow as $cuaca) {
+            $cuacaTime = now()->parse($cuaca['jamCuaca']);
+            $difference = abs($cuacaTime->timestamp - now()->timestamp);
+
+            if ($difference < $closestDifferenceAfterNow) {
+                $closestDifferenceAfterNow = $difference;
+                $closestCuacaAfterNow = $cuaca;
+            }
+        }
+
+        // Membandingkan selisih waktu dan memilih data cuaca terdekat
+        if ($closestDifferenceBeforeNow < $closestDifferenceAfterNow) {
+            $closestCuaca = $closestCuacaBeforeNow;
+        } else {
+            $closestCuaca = $closestCuacaAfterNow;
+        }
+
+        // Menyusun kembali respons untuk API Anda
+        if ($response->getStatusCode() == 200) {
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+                'DATA' => $closestCuaca,
+            ]);
+        } else {
+            // Handle error response
+            return response()->json([
+                'RESPONSE' => $response->getStatusCode(),
+                'MESSAGETYPE' => 'E',
+                'MESSAGE' => 'Error in API request',
+            ]);
+        }
     }
 }
