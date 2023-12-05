@@ -1032,7 +1032,7 @@ class MeetingRoomController extends Controller
                                 WHERE
                           meeting_date = '$request->meeting_date' AND
                           ((TIME('$request->meeting_start') + INTERVAL 1 MINUTE) <= meeting_end AND (TIME('$request->meeting_end') - INTERVAL 1 MINUTE) >= meeting_start) AND
-                          (id <> $request->id_meeting) AND (roommeeting_id = $request->roommeeting_id)";
+                          (id <> $request->id_meeting) AND (roommeeting_id = $request->roommeeting_id) AND statusmeeting_id IN ('1','2','3','4')";
                 $data      = DB::select($query_cek);
                 if ($data[0]->count_meetings > 0) {
                     return response()->json([
