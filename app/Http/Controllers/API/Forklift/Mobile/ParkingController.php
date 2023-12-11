@@ -171,7 +171,7 @@ class ParkingController extends Controller
                         ->json(
                             [
                                 'MESSAGETYPE' => 'E',
-                                'MESSAGE' => 'Lokasi tidak ditemukan',
+                                'MESSAGE' => 'Lokasi tidak ditemukan.',
                             ],
                             400,
                         )
@@ -182,7 +182,7 @@ class ParkingController extends Controller
                             ->json(
                                 [
                                     'MESSAGETYPE' => 'E',
-                                    'MESSAGE' => 'Gagal Parkir, Pastikan Forklift dalam kondisi online !',
+                                    'MESSAGE' => 'Gagal Parkir, Silakan scan ulang 15 detik lagi. Pastikan Forklift dalam kondisi online!',
                                 ],
                                 400,
                             )
