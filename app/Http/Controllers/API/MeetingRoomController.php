@@ -557,14 +557,44 @@ class MeetingRoomController extends Controller
             );
         }
 
+        
         // Ini adalah insialisasi query dengan fullname
         $fullname = "%" . $request->fullname . "%";
-        $query = "		  SELECT
+
+        $badge = $request->badge_id;
+ 
+        
+        if(!$badge){
+            // jika tidak memasukan parameter badge
+            $query = "SELECT
                             id as Id,
                             fullname as Employee_Name,
                             badge_id as Badge,
                             (SELECT position_name FROM tbl_position WHERE position_code = a.position_code) as Position
                     FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30";
+
+        } else{
+            $query_dept = "SELECT LEFT(line_code, 4) AS linecode FROM `tbl_karyawan` WHERE line_code <> '-' AND badge_id = '$badge' GROUP BY linecode ";
+            $dept = DB::select($query_dept);
+            $dept = $dept[0];
+
+            // dd($dept->linecode);
+            if($dept->linecode == 'MG11' || $dept->linecode == 'DR11'){
+                $query = "SELECT
+                            id as Id,
+                            fullname as Employee_Name,
+                            badge_id as Badge,
+                            (SELECT position_name FROM tbl_position WHERE position_code = a.position_code) as Position
+                    FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30"; 
+            }else{
+                $query = "SELECT * FROM (
+                    SELECT a.id as Id, a.fullname AS Employee_Name, a.badge_id AS Badge, b.position_name as Position FROM tbl_karyawan a, tbl_position b 
+						  WHERE a.position_code = b.position_code AND left(a.line_code,4) = '$dept->linecode') AS a 
+						  where employee_name LIKE '$fullname' OR badge LIKE '$fullname' LIMIT 30";
+            }
+        }
+
+        // dd($query);
         $data = DB::select($query);
         $dataNew = [];
         if (COUNT($data) > 0) {
