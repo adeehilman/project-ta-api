@@ -648,6 +648,7 @@ class ComposerStaticIniteb48cad6aab029674a3c3cb692df8123
         'App\\Models\\BaseModel' => __DIR__ . '/../..' . '/app/Models/BaseModel.php',
         'App\\Models\\Category' => __DIR__ . '/../..' . '/app/Models/Category.php',
         'App\\Models\\EmployeeGroup' => __DIR__ . '/../..' . '/app/Models/EmployeeGroup.php',
+        'App\\Models\\FirewallLog' => __DIR__ . '/../..' . '/app/Models/FirewallLog.php',
         'App\\Models\\Forklift' => __DIR__ . '/../..' . '/app/Models/Forklift.php',
         'App\\Models\\JobVacancy' => __DIR__ . '/../..' . '/app/Models/JobVacancy.php',
         'App\\Models\\Lookup' => __DIR__ . '/../..' . '/app/Models/Lookup.php',
