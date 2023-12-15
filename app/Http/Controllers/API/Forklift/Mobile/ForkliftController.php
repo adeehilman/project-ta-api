@@ -126,7 +126,7 @@ class ForkliftController extends Controller
         $badge_id = $request->badge_id;
         DB::beginTransaction();
         try {
-            $q = "SELECT * FROM tbl_forklifthistory WHERE startby = '$badge_id' AND endtime IS NULL AND id_status ='1'";
+            $q = "SELECT id_forklift, starttime FROM tbl_forklifthistory WHERE startby = '$badge_id' AND endtime IS NULL AND id_status ='1'";
             $data = $this->second->select($q);
 
             DB::commit();

@@ -249,6 +249,7 @@ Route::group(['prefix' => 'digitalsop'], function ($router) {
 Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::post('upload-file', [PlatformController::class, 'uploadFile']);
+    Route::post('upload-file', [PlatformController::class, 'uploadFile']);
     Route::get('themeEvent', [PlatformController::class, 'themeEvent']);
     Route::get('getWeather', [PlatformController::class, 'getWeather']);
 });
@@ -289,8 +290,10 @@ Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
 
 // 15 Menit sebelum Meeting dimulai
 Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);
+Route::post('/homeapi/update-playerid', [PlatformController::class, 'updatePlayerId']);
 
 // get list user by name or badge
 Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
+Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
