@@ -83,6 +83,7 @@ return array(
     'App\\Models\\BaseModel' => $baseDir . '/app/Models/BaseModel.php',
     'App\\Models\\Category' => $baseDir . '/app/Models/Category.php',
     'App\\Models\\EmployeeGroup' => $baseDir . '/app/Models/EmployeeGroup.php',
+    'App\\Models\\FirewallLog' => $baseDir . '/app/Models/FirewallLog.php',
     'App\\Models\\Forklift' => $baseDir . '/app/Models/Forklift.php',
     'App\\Models\\JobVacancy' => $baseDir . '/app/Models/JobVacancy.php',
     'App\\Models\\Lookup' => $baseDir . '/app/Models/Lookup.php',

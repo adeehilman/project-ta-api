@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API\Forklift\Mobile;
 
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,8 +10,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ForkliftController extends Controller
 {
-
-    public function __construct(){
+    public function __construct()
+    {
         $this->second = DB::connection('second');
     }
     public function index(Request $request)
@@ -35,8 +34,8 @@ class ForkliftController extends Controller
 
         $status = $request->id_status;
 
-        $forklift = "SELECT f.id,f.name, f.assetno, f.licenseno,	f.battery, f.id_status, f.image1, f.image2, f.image3 , (SELECT vl.name FROM tbl_vlookup vl 
-        WHERE vl.category = 'FORKLIFT' AND vl.id = f.id_status)as name_status 
+        $forklift = "SELECT f.id,f.name, f.assetno, f.licenseno,	f.battery, f.id_status, f.image1, f.image2, f.image3 , (SELECT vl.name FROM tbl_vlookup vl
+        WHERE vl.category = 'FORKLIFT' AND vl.id = f.id_status)as name_status
         FROM tbl_forklift f
         WHERE f.id_status = '$status'
         ORDER BY
@@ -82,7 +81,7 @@ class ForkliftController extends Controller
         (SELECT vl.name FROM tbl_vlookup vl WHERE vl.category = 'FORKLIFT' AND vl.id = id_status)as name_status
         FROM tbl_forklift
         WHERE (UPPER(NAME) LIKE '$txSearch' OR UPPER(brand) LIKE '$txSearch' OR UPPER(assetno) LIKE '$txSearch' OR UPPER(licenseno) LIKE '$txSearch')";
-        $data =  $this->second->select($query);
+        $data = $this->second->select($query);
 
         if (count($data) > 0) {
             // Mengubah URL gambar di dalam $query
@@ -120,7 +119,36 @@ class ForkliftController extends Controller
         }
 
         return response()->json(['message' => 'File tidak ditemukan'], 400);
+    }
 
+    public function getForkliftUsed(Request $request)
+    {
+        $badge_id = $request->badge_id;
+        DB::beginTransaction();
+        try {
+            $q = "SELECT * FROM tbl_forklifthistory WHERE startby = '$badge_id' AND endtime IS NULL AND id_status ='1'";
+            $data = $this->second->select($q);
+
+            DB::commit();
+
+            $data = $data[0];
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'Data retrieved Successfully',
+                'DATA' => $data,
+            ]);
+        } catch (\Throwable $th) {
+            // dd($th->getMessage());
+            return response()
+                ->json(
+                    [
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => $th->getMessage(),
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
+        }
     }
 }
-

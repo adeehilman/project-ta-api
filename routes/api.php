@@ -58,7 +58,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'registrasi']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::group(['middleware' => ['api', 'auth:api','firewall.all']], function () {
+Route::group(['middleware' => ['api', 'auth:api']], function () {
     /**
      * Pengumuman API Service
      */
@@ -119,16 +119,16 @@ Route::group(['middleware' => ['api', 'auth:api','firewall.all']], function () {
      */
     Route::get('/mms/list', [MmsController::class, 'listmms']);
     Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
-    Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
     Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
-  
-
+    
+    
     /**
      * User Role
      */
     Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 });
 
+Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
 /** 
  * Check Imei MMS
  */
@@ -256,6 +256,7 @@ Route::group(['prefix' => 'platform'], function ($router) {
 // API MOBILE FORKLIFT
 Route::get('/mobile/statusforklift', [StatusForkliftController::class, 'index']);
 Route::get('/mobile/getlistforklift', [ForkliftController::class, 'index']);
+Route::get('/mobile/getForkliftUsed', [ForkliftController::class, 'getForkliftUsed']);
 Route::get('/mobile/historyforklift', [HistoryForkliftController::class, 'index']);
 Route::get('/mobile/getlasdriver', [HistoryForkliftController::class, 'getLastDriver']);
 Route::get('/mobile/search-forklift', [ForkliftController::class, 'searchForklift']);
