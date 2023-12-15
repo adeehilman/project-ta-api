@@ -58,7 +58,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'registrasi']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::group(['middleware' => ['api', 'auth:api','firewall.all']], function () {
+Route::group(['middleware' => ['api', 'auth:api']], function () {
     /**
      * Pengumuman API Service
      */
@@ -119,16 +119,16 @@ Route::group(['middleware' => ['api', 'auth:api','firewall.all']], function () {
      */
     Route::get('/mms/list', [MmsController::class, 'listmms']);
     Route::post('/mms/pengajuan', [MmsController::class, 'pengajuan']);
-    Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
     Route::post('/mms/tanggapan', [MmsController::class, 'beriTanggapan']);
-  
-
+    
+    
     /**
      * User Role
      */
     Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 });
 
+Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
 /** 
  * Check Imei MMS
  */
@@ -250,11 +250,13 @@ Route::group(['prefix' => 'platform'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::post('upload-file', [PlatformController::class, 'uploadFile']);
     Route::get('themeEvent', [PlatformController::class, 'themeEvent']);
+    Route::get('getWeather', [PlatformController::class, 'getWeather']);
 });
 
 // API MOBILE FORKLIFT
 Route::get('/mobile/statusforklift', [StatusForkliftController::class, 'index']);
 Route::get('/mobile/getlistforklift', [ForkliftController::class, 'index']);
+Route::get('/mobile/getForkliftUsed', [ForkliftController::class, 'getForkliftUsed']);
 Route::get('/mobile/historyforklift', [HistoryForkliftController::class, 'index']);
 Route::get('/mobile/getlasdriver', [HistoryForkliftController::class, 'getLastDriver']);
 Route::get('/mobile/search-forklift', [ForkliftController::class, 'searchForklift']);
@@ -290,4 +292,5 @@ Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting'
 
 // get list user by name or badge
 Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
+Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);

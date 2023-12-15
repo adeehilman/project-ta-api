@@ -125,7 +125,7 @@ class MmsController extends Controller
         ]);
 
         // cek dahulu imei1 dan imei2, apakah ada di database atau enggak ?
-        $query = "SELECT imei1, imei2 FROM tbl_mms WHERE (imei1 = '$request->imei1' OR imei2 ='$request->imei2') AND is_active = 1";
+        $query = "SELECT imei1, imei2 FROM tbl_mms WHERE (imei1 = '$request->imei1' OR imei2 ='$request->imei2') AND is_active = 1 AND status_pendaftaran_mms NOT IN ('3,5,8,10')";
         $check_imei = DB::select($query);
         // apabila ada imei yang di input user
         if (count($check_imei) > 0) {
@@ -138,7 +138,7 @@ class MmsController extends Controller
         }
 
         // cek lagi UUID yang dikirim user, apakah ada duplikasi atau enggak
-        $query = "SELECT UUID FROM tbl_mms WHERE UUID = '$request->uuid' AND is_active = 1";
+        $query = "SELECT UUID FROM tbl_mms WHERE UUID = '$request->uuid' AND is_active = 1 AND status_pendaftaran_mms NOT IN ('3,5,8,10')";
         $check_uuid = DB::select($query);
         if (count($check_uuid) > 0) {
             return response()->json(

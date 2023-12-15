@@ -242,8 +242,7 @@ class PlatformController extends Controller
 
     public function themeEvent(Request $request)
     {
-        $query = DB::table('tbl_mobiletheme')
-            ->first();
+        $query = DB::table('tbl_mobiletheme')->first();
 
         return response()->json([
             'RESPONSE' => 200,
@@ -251,5 +250,77 @@ class PlatformController extends Controller
             'MESSAGE' => 'SUCCESS',
             'DATA' => $query,
         ]);
+    }
+
+    public function getWeather(Request $request)
+    {
+        // URL API tujuan
+        $apiUrl = 'https://ibnux.github.io/BMKG-importer/cuaca/501601.json';
+
+        // Membuat instance Client Guzzle
+        $client = new Client();
+
+        // Mengirim permintaan GET ke API dengan URL yang telah disusun
+        $response = $client->get($apiUrl);
+
+        // Mendapatkan body dari response dan mengonversi JSON menjadi array
+        $cuacaData = json_decode($response->getBody(), true);
+
+        // Informasi meta
+        $metaInfo = [
+            'copyright' => 'BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)',
+            'website' => 'https://data.bmkg.go.id',
+            'url_reference' => 'https://data.bmkg.go.id/DataMKG/MEWS/DigitalForecast/DigitalForecast-KepulauanRiau.xml',
+        ];
+
+        // // Menyusun kembali respons untuk API Anda
+        if ($response->getStatusCode() == 200) {
+            DB::table('tbl_cuaca')->truncate();
+            foreach ($cuacaData as $cuacaItem) {
+                DB::table('tbl_cuaca')->insert([
+                    'datetimecuaca' => $cuacaItem['jamCuaca'],
+                    'kodecuaca' => $cuacaItem['kodeCuaca'],
+                    'cuaca' => $cuacaItem['cuaca'],
+                    'humidity' => $cuacaItem['humidity'],
+                    'tempcelcius' => $cuacaItem['tempC'],
+                    'tempfahrenheit' => $cuacaItem['tempF'],
+                ]);
+            }
+
+            $data = DB::table('tbl_cuaca')->get();
+            // Waktu sekarang
+            $now = now();
+
+            // Hitung selisih waktu untuk menentukan waktu terdekat yang sesuai dengan interval 6 jam
+            $nextSixHours = $now->copy()->addHours(6);
+            $previousSixHours = $now->copy()->subHours(6);
+
+            // Saring data cuaca berdasarkan waktu yang sesuai dengan interval 6 jam
+            $cuacaData = DB::table('tbl_cuaca')
+                ->whereBetween('datetimecuaca', [$previousSixHours, $nextSixHours])
+                ->get();
+
+            // Pilih satu data cuaca yang paling dekat dengan waktu sekarang
+            $selectedCuaca = $cuacaData
+                ->sortBy(function ($cuacaItem) use ($now) {
+                    return abs($now->diffInMinutes(now()->parse($cuacaItem->datetimecuaca)));
+                })
+                ->first();
+
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+                'META' => $metaInfo,
+                'DATA' => $selectedCuaca,
+            ]);
+        } else {
+            // Handle error response
+            return response()->json([
+                'RESPONSE' => $response->getStatusCode(),
+                'MESSAGETYPE' => 'E',
+                'MESSAGE' => 'Error in API request',
+            ]);
+        }
     }
 }

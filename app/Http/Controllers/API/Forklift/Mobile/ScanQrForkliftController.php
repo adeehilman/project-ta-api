@@ -65,7 +65,7 @@ class ScanQrForkliftController extends Controller
                 ->json(
                     [
                         'MESSAGETYPE' => 'E',
-                        'MESSAGE' => 'Forklift not found',
+                        'MESSAGE' => 'Forklift tidak ditemukan',
                     ],
                     400,
                 )
@@ -112,7 +112,7 @@ class ScanQrForkliftController extends Controller
                     ->json(
                         [
                             'MESSAGETYPE' => 'E',
-                            'MESSAGE' => 'Location Under Maintenance',
+                            'MESSAGE' => 'Lokasi sedang dalam Maintenance',
                         ],
                         400,
                     )
@@ -123,7 +123,7 @@ class ScanQrForkliftController extends Controller
                 ->json(
                     [
                         'MESSAGETYPE' => 'E',
-                        'MESSAGE' => 'Location not found',
+                        'MESSAGE' => 'Lokasi tidak ditemukan',
                     ],
                     400,
                 )
