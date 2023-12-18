@@ -351,31 +351,43 @@ class PlatformController extends Controller
 
             if ($passuid->isEmpty() && $player_id->isEmpty()) {
                 // UUID dan player_id Anda telah berubah, silahkan ke HRD
-                return response()
-                    ->json(
-                        [
-                            'RESPONSE_CODE' => 400,
-                            'MESSAGETYPE' => 'E',
-                            'MESSAGE' => 'UUID dan player id Anda telah berubah silahkan ke HRD',
-                        ],
-                        401,
-                    )
-                    ->header('Accept', 'application/json');
+                // return response()
+                //     ->json(
+                //         [
+                //             'RESPONSE_CODE' => 400,
+                //             'MESSAGETYPE' => 'E',
+                //             'MESSAGE' => 'UUID dan player id Anda telah berubah silahkan ke HRD',
+                //         ],
+                //         400,
+                //     )
+                //     ->header('Accept', 'application/json');
+
+                return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+            ]);
             }
 
             DB::beginTransaction();
             try {
                 // Jika UUID tidak ada, update UUID
                 if ($passuid->isEmpty()) {
-                    $result = DB::table('tbl_mms')
-                    ->select('id')
-                    ->where('player_id', $current_player_id)
-                    ->first();
+                    // $result = DB::table('tbl_mms')
+                    // ->select('id')
+                    // ->where('player_id', $current_player_id)
+                    // ->first();
 
-                    $idToUpdate = $result->id;
-                    DB::table('tbl_mms')
-                    ->where('id', $idToUpdate)
-                    ->update(['uuid' => $current_uuid]);
+                    // $idToUpdate = $result->id;
+                    // DB::table('tbl_mms')
+                    // ->where('id', $idToUpdate)
+                    // ->update(['uuid' => $current_uuid]);
+                    return response()->json([
+                        'RESPONSE' => 200,
+                        'MESSAGETYPE' => 'S',
+                        'MESSAGE' => 'SUCCESS',
+                    ]);
+
                 }
 
                 // Jika player_id tidak ada, update player_id
