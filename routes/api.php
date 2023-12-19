@@ -21,6 +21,7 @@ use App\Http\Controllers\API\PlayStoreController;
 use App\Http\Controllers\API\QuestionsController;
 use App\Http\Controllers\API\UserRoleController;
 use App\Http\Controllers\API\MenuAccessController;
+use App\Http\Controllers\API\RiwayatController;
 use App\Http\Controllers\API\Forklift\Mobile\ActivationForkliftController;
 use App\Http\Controllers\API\Forklift\Mobile\DetailForkliftController;
 use App\Http\Controllers\API\Forklift\Mobile\ForkliftController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\API\Forklift\IOT\MasterKeyController;
 use App\Http\Controllers\API\Forklift\IOT\QrController;
 use App\Http\Controllers\API\Forklift\IOT\TokenGenerateController;
 use App\Http\Controllers\API\Forklift\IOT\UpdateFirmController;
+use App\Http\Controllers\API\PlatMaintenance\MaintenanceMobilController;
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\PemberitahuanController;
 use App\Http\Controllers\KritikController;
@@ -127,6 +129,10 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
      */
     Route::get('/user-role', [UserRoleController::class, 'getMyRole']);
 });
+
+// riwayat
+Route::get('/riwayat/list', [RiwayatController::class, 'index']);
+
 
 Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
 /** 
@@ -297,3 +303,11 @@ Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
+
+
+// PLATMAINTENANCE
+Route::group(['prefix' => 'maintenancemobil'], function ($router) {
+    Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
+    Route::get('getListMaintenance', [MaintenanceMobilController::class, 'ActivityMaintenance']);
+    Route::get('getOngoingMaintenance', [MaintenanceMobilController::class, 'onGoingMaintenance']);
+});

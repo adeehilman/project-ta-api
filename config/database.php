@@ -93,6 +93,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'third' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_THIRD_URL'),
+            'host' => env('DB_THIRD_HOST', '127.0.0.1'),
+            'port' => env('DB_THIRD_PORT', '5432'),
+            'database' => env('DB_THIRD_DATABASE', 'forge'),
+            'username' => env('DB_THIRD_USERNAME', 'forge'),
+            'password' => env('DB_THIRD_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),
