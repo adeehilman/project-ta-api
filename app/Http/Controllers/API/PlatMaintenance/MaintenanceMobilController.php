@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\AppHelper;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Validator;
 
 class MaintenanceMobilController extends Controller
 {
@@ -112,6 +116,172 @@ class MaintenanceMobilController extends Controller
                     400,
                 )
                 ->header('Accept', 'application/json');
+        }
+    }
+
+    public function getDetailMobil(Request $request)
+    {
+        // dd($request->all());
+
+        $employee_no = $request->employee_no;
+
+        $query = "SELECT a.license_no,
+        a.fleet_name,
+        b.year_construction,
+        a.equipment_number,
+        b.plant,
+        b.planner_group
+        FROM tbl_carlist a
+        INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
+        WHERE driver = '$employee_no'";
+        $data = $this->third->select($query);
+
+        return response()->json([
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
+            'DATA' => $data,
+        ]);
+    }
+
+    public function addPengajuanMaintenance(Request $request)
+    {
+        // dd($request->all());
+
+        try {
+            $token = $request->header('Authorization');
+            $validateToken = JWTAuth::parseToken()->authenticate();
+        } catch (JWTException $e) {
+            return response()->json([
+                "RESPONSE_CODE" => 401,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'UNAUTHORIZED',
+            ], 401)->header(
+                "Accept",
+                "application/json"
+            );
+        }
+
+
+        try {
+            $this->third->beginTransaction();
+
+            $validator = Validator::make(request()->all(), [
+                'employee_no' => 'required',
+                'employee_name' => 'required',
+                'activitytype' => 'required',
+                'permasalahan' => 'required',
+                'priority' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()
+                    ->json(
+                        [
+                            'RESPONSE_CODE' => 400,
+                            'MESSAGETYPE' => 'E',
+                            'MESSAGE' => $validator->messages(),
+                        ],
+                        400,
+                    )
+                    ->header('Accept', 'application/json');
+            }
+
+                    
+            $employee_no = $request->employee_no;
+            $employee_name = $request->employee_name;
+            $activitytype = $request->activitytype;
+            $permasalahan = $request->permasalahan;
+            $priority = $request->priority;
+            $duedate = $request->duedate ?? NULL;
+
+            $getDeviceId = "SELECT b.id as device_id, b.plant, b.planner_group, b.department_id FROM tbl_carlist a INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number  WHERE driver = '$employee_no'";
+            $list = $this->third->select($getDeviceId);
+            $getDeviceId = $list[0];
+            // dd($getDeviceId);
+            // createticket
+            $currDay = date('Y-m-d') . ' 07:00:00';
+            $nextDay = date('Y-m-d', strtotime('+1 day', strtotime($currDay))) . ' 07:00:00';
+
+            $dataDowntime = $this->third->table('tbl_downtime')
+            ->whereBetween('createdate', [$currDay, $nextDay])
+            ->selectRaw('RIGHT(ticket_number, 6) as ticket_number')
+            ->orderBy('ticket_number', 'DESC')
+            ->first();
+            
+            $ticketNo = '';
+            if($dataDowntime){
+                $number = (int)$dataDowntime->ticket_number+1;
+                $paddedNumber = str_pad($number, 6, '0', STR_PAD_LEFT);
+                $ticketNo = $paddedNumber;
+            }else{
+                $number = 1;
+                $paddedNumber = str_pad($number, 6, '0', STR_PAD_LEFT);
+                $ticketNo = $paddedNumber;
+            }
+
+            $year = date('Y');
+            $month = (string)date('m');
+            $date = (string)date('d');
+            if(strlen($month) < 2){
+                $month = '0' . $month;
+            }
+            if(strlen($date) < 2){
+                $date = '0' . $date;
+            }
+
+            $newTicket = 'DT' . $year . $month . $date . $ticketNo;
+
+
+
+            
+            $dataDowntime = [
+                'ticket_number'         => $newTicket,
+                'device_id'             => $getDeviceId->device_id,
+                'createby'              => $employee_no,
+                'createdate'            => date("Y-m-d H:i:s"),
+                'statusdowntime_id'     => 1,
+                'updateby'              => $employee_no,
+                'lastupdate'            => date("Y-m-d H:i:s"),
+                'createby_name'         => $employee_name,
+                'updateby_name'         => $employee_name,
+                'ordertype'             => 'PM01',
+                'activitytype'          => $activitytype,
+                'priority'              => $priority,
+                'priority_start_date'   => date("Y-m-d"),
+                'priority_due_date'     => $duedate,
+                'plant'                 => $getDeviceId->plant,
+                'planner_group'         => $getDeviceId->planner_group,
+                'department_id'         => $getDeviceId->department_id,
+                'problem'               => $permasalahan,
+            ];
+
+            $newDowntime = $this->third->table('tbl_downtime')->insertGetId($dataDowntime);
+
+            $this->third->table('tbl_downtimehistory')
+                    ->insert([
+                        'downtime_id'           => $newDowntime,
+                        'status_downtime'       =>  1,
+                        'createby'              => $employee_no,
+                        'createdate'            => date("Y-m-d H:i:s"),
+                        'createby_name'         => $employee_name,
+                        'remark'                => $permasalahan
+                    ]);
+            
+                    $this->third->commit();
+                
+                return response()->json([
+                    "RESPONSE"      => 200,
+                    "MESSAGETYPE"   => "S",
+                    "MESSAGE"       => "SUCCESS",
+                    'DOWNTIME_ID'   => $newDowntime,
+                ]);
+        } catch (\Throwable $th) {
+            // $this->third->rollback();
+            return response()->json([
+                'status' => 401,
+                'message' => 'Gagal untuk menambah data ' . $th->getMessage(),
+            ]);
         }
     }
 }

@@ -305,9 +305,11 @@ Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
 
 
-// PLATMAINTENANCE
+// PLANTMAINTENANCE
 Route::group(['prefix' => 'maintenancemobil'], function ($router) {
     Route::post('check-credentials', [PlatformController::class, 'checkCredentials']);
     Route::get('getListMaintenance', [MaintenanceMobilController::class, 'ActivityMaintenance']);
     Route::get('getOngoingMaintenance', [MaintenanceMobilController::class, 'onGoingMaintenance']);
+    Route::get('getInfoMobil', [MaintenanceMobilController::class, 'getDetailMobil']);
+    Route::post('addPengajuan', [MaintenanceMobilController::class, 'addPengajuanMaintenance']);
 });
