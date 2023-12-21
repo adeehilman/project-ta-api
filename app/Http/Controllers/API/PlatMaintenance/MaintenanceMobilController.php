@@ -284,4 +284,41 @@ class MaintenanceMobilController extends Controller
             ]);
         }
     }
+
+    public function getDetailMaintenance(Request $request)
+    {
+        // dd($request->all());
+
+        $downtime_id = $request->id;
+
+        $querydetail = "SELECT 
+        a.license_no,
+        a.fleet_name,
+        b.year_construction,
+        a.equipment_number,
+        a.driver_name,
+        a.driver,
+        c.pr_no,
+        c.ticket_number,
+        c.maintenance_order,
+        c.activitytype,
+        c.problem,
+        (SELECT bp_name FROM tbl_bp d WHERE d.id = c.bp_id)AS vendor,
+        c.lastupdate,
+        c.statusdowntime_id,
+        b.plant,
+        b.planner_group
+        FROM tbl_carlist a
+        INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
+        INNER JOIN tbl_downtime c ON c.device_id = b.id
+        WHERE c.id = '$downtime_id'";
+        $result = $this->third->select($querydetail);
+
+        return response()->json([
+            'RESPONSE' => 200,
+            'MESSAGETYPE' => 'S',
+            'MESSAGE' => 'SUCCESS',
+            'DATA' => $result,
+        ]);
+    }
 }
