@@ -578,15 +578,25 @@ class MeetingRoomController extends Controller
             $dept = DB::select($query_dept);
             $dept = $dept[0];
 
-            // dd($dept->linecode);
-            if($dept->linecode == 'MG11' || $dept->linecode == 'DR11'){
+            $checkSpecialBadge = DB::table('tbl_allparticipantauthorize')->where('badge', $badge)->first();
+            
+            // ketika badge nya berada di special all participant view
+            if($checkSpecialBadge){
+                $query = "SELECT
+                            id as Id,
+                            fullname as Employee_Name,
+                            badge_id as Badge,
+                            (SELECT position_name FROM tbl_position WHERE position_code = a.position_code) as Position
+                    FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30";
+            }else if($dept->linecode == 'MG11' || $dept->linecode == 'DR11'){
                 $query = "SELECT
                             id as Id,
                             fullname as Employee_Name,
                             badge_id as Badge,
                             (SELECT position_name FROM tbl_position WHERE position_code = a.position_code) as Position
                     FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30"; 
-            }else{
+            }
+            else{
                 $query = "SELECT * FROM (
                     SELECT a.id as Id, a.fullname AS Employee_Name, a.badge_id AS Badge, b.position_name as Position FROM tbl_karyawan a, tbl_position b 
 						  WHERE a.position_code = b.position_code AND left(a.line_code,4) = '$dept->linecode') AS a 
