@@ -292,11 +292,12 @@ class MaintenanceMobilController extends Controller
         $downtime_id = $request->id;
 
         $querydetail = "SELECT 
+        c.id,
         a.license_no,
         a.fleet_name,
         b.year_construction,
         a.equipment_number,
-        a.driver_name,
+        CONCAT(a.driver_name, ' (', a.driver, ')') AS driver_name,
         a.driver,
         c.pr_no,
         c.ticket_number,
@@ -304,7 +305,7 @@ class MaintenanceMobilController extends Controller
         c.activitytype,
         c.problem,
         (SELECT bp_name FROM tbl_bp d WHERE d.id = c.bp_id)AS vendor,
-        c.lastupdate,
+        CONCAT(c.updateby_name, ' (', c.updateby, ')') AS updateby_name,
         c.statusdowntime_id,
         b.plant,
         b.planner_group
@@ -314,11 +315,30 @@ class MaintenanceMobilController extends Controller
         WHERE c.id = '$downtime_id'";
         $result = $this->third->select($querydetail);
 
+        $queryhistory = "SELECT
+        id,remark,CONCAT(createby_name, ' (',createby, ')') AS createby,createdate,
+            CASE
+                WHEN status_downtime IN (1, 2, 3, 4) THEN 'Sedang Berlangsung'
+                WHEN status_downtime IN (5, 6) THEN 'Close'
+                WHEN status_downtime IN (9) THEN 'Cancel'
+                ELSE 'Cancel'
+            END AS statusdowntime_transformed
+        FROM
+            tbl_downtimehistory
+        WHERE
+            downtime_id = '$downtime_id'";
+        $result_history = $this->third->select($queryhistory);
+
+        // dd($result_history);
+        $dataarray = [
+            'detail' => $result,
+            'history_status' => $result_history
+        ];
         return response()->json([
             'RESPONSE' => 200,
             'MESSAGETYPE' => 'S',
             'MESSAGE' => 'SUCCESS',
-            'DATA' => $result,
+            'DATA' => $dataarray,
         ]);
     }
 }
