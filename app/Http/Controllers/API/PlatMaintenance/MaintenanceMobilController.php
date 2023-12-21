@@ -135,6 +135,7 @@ class MaintenanceMobilController extends Controller
         INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
         WHERE driver = '$employee_no'";
         $data = $this->third->select($query);
+        $data = $data[0];
 
         return response()->json([
             'RESPONSE' => 200,
