@@ -316,13 +316,15 @@ class MaintenanceMobilController extends Controller
         $result = $this->third->select($querydetail);
 
         $queryhistory = "SELECT
-        id,remark,CONCAT(createby_name, ' (',createby, ')') AS createby,createdate,
+        id,remark,
+        CONCAT(createby_name, ' (',createby, ')') AS createby,
+        createdate AT TIME ZONE 'Asia/Jakarta' AS createdate,
             CASE
                 WHEN status_downtime IN (1, 2, 3, 4) THEN 'Sedang Berlangsung'
                 WHEN status_downtime IN (5, 6) THEN 'Close'
                 WHEN status_downtime IN (9) THEN 'Cancel'
                 ELSE 'Cancel'
-            END AS statusdowntime_transformed
+            END AS status
         FROM
             tbl_downtimehistory
         WHERE
