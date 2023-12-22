@@ -41,10 +41,28 @@ class RiwayatController extends Controller
             ], 400);
         }
 
-        
+
                 // Query pertama
         $query1 = DB::table(DB::raw("
-            (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date, b.stat_title 
+            (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date, b.stat_title ,
+            CASE
+                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN 'Ditinjau HRD'
+                    WHEN a.status_pendaftaran_mms IN (7,9) THEN 'Ditinjau QHSE'
+                    WHEN a.status_pendaftaran_mms IN (12,15) THEN 'Selesai'
+                    ELSE 'Dibatalkan'
+                END AS stat_title ,
+                CASE
+                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFFFF7E6'
+                    WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFFFF3E9'
+                    WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFFE8F8ED'
+                    ELSE '0xFFF9E9EA'
+            END AS bg_color ,
+            CASE
+                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFE8A100'
+                    WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFE6781C'
+                    WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFF1DB74E'
+                    ELSE '0xFFCD202E'
+            END AS txt_color
             FROM tbl_mms a , tbl_statusmms b, tbl_vlookup c 
             WHERE a.status_pendaftaran_mms = b.id AND a.merek_hp = c.id_vlookup AND a.badge_id = '$badge_id'
             UNION

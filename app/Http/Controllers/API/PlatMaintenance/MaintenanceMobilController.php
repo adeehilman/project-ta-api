@@ -316,16 +316,19 @@ class MaintenanceMobilController extends Controller
         c.pr_no,
         c.ticket_number,
         c.maintenance_order,
-        c.activitytype,
+        (SELECT description FROM tbl_activitytype WHERE activitype = c.activitytype LIMIT 1) AS activitytype,
         c.problem,
+        C.priority,
         (SELECT bp_name FROM tbl_bp d WHERE d.id = c.bp_id)AS vendor,
         CONCAT(c.updateby_name, ' (', c.updateby, ')') AS updateby_name,
         c.statusdowntime_id,
         b.plant,
-        b.planner_group
+        b.planner_group,
+        d.status_name
         FROM tbl_carlist a
         INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
         INNER JOIN tbl_downtime c ON c.device_id = b.id
+        INNER JOIN tbl_statusdowntime d ON d.id = c.statusdowntime_id
         WHERE c.id = '$downtime_id'";
         $result = $this->third->select($querydetail);
 
