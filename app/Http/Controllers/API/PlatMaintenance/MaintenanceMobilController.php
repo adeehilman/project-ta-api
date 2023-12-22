@@ -347,7 +347,7 @@ class MaintenanceMobilController extends Controller
 
         // dd($result_history);
         $dataarray = [
-            'detail' => $result,
+            'detail' => $result[0],
             'history_status' => $result_history
         ];
         return response()->json([

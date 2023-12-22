@@ -10,6 +10,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RiwayatController extends Controller
 {
+    public function __construct()
+    {
+        $this->third = DB::connection('third');
+    }
     public function index(Request $request)
     {
         try {
@@ -28,24 +32,82 @@ class RiwayatController extends Controller
                 ->header('Accept', 'application/json');
         }
 
-        $request->validate([
-            'badge_id' => 'required',
-        ]);
-
+        
         $badge_id = $request->badge_id;
 
-        $array_mms = $this->listMMs($badge_id);
-        $array_lms = $this->listLMS($badge_id);
-        // Menggabungkan kedua array
-        $mergedArray = array_merge($array_mms, $array_lms);
+        if ($badge_id == "") {
+            return response()->json([
+                "message" => "Badge ID tidak boleh kosong"
+            ], 400);
+        }
 
-        // Mengurutkan array berdasarkan waktu paling baru
-        // usort($mergedArray, function ($a, $b) {
-        //     return strtotime($b['timestamp']) - strtotime($a['timestamp']);
-        // });
+        
+                // Query pertama
+        $query1 = DB::table(DB::raw("
+            (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date, b.stat_title 
+            FROM tbl_mms a , tbl_statusmms b, tbl_vlookup c 
+            WHERE a.status_pendaftaran_mms = b.id AND a.merek_hp = c.id_vlookup AND a.badge_id = '$badge_id'
+            UNION
+            SELECT a.id, 'Pengajuan Laptop' AS category,'4' AS category_id, a.tipe_laptop AS title, c.name_vlookup AS subtitle, a.tanggal_pengajuan AS date, b.stat_title
+            FROM tbl_lms a , tbl_statuslms b, tbl_vlookup c 
+            WHERE a.brand = c.id_vlookup AND a.status_pendaftaran_lms = b.id AND a.badge_id = '$badge_id'
+            UNION
+            SELECT a.id, 'Meeting Room' AS category,'1' AS category_id, a.title_meeting AS title, CONCAT(c.room_name, ', ', DATE_FORMAT(a.meeting_date, '%d %b %Y'), ', ', TIME_FORMAT(a.meeting_start, '%H:%i'), '-', TIME_FORMAT(a.meeting_end, '%H:%i')) AS subtitle, 
+            a.booking_date AS date, d.status_name_ina AS stat_title
+            FROM tbl_meeting a , tbl_participant b, tbl_roommeeting c, tbl_statusmeeting d 
+            WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id'
+            ) AS A
+        "));
+
+        // Query kedua
+        $query2 = DB::connection('third')->table('tbl_carlist as a')
+        ->select([
+            'c.id',
+            DB::raw("'Maintenance Mobil' AS category"),
+            DB::raw("'10' AS category_id"),
+            'b.license_no AS title',
+            DB::raw("CONCAT((SELECT description FROM tbl_activitytype WHERE activityype = c.activitytype AND ordertype = 'PM01'), ', ', c.priority) AS subtitle"),
+            DB::raw("c.lastupdate AS date"),
+            DB::raw("CASE WHEN c.statusdowntime_id IN (1, 2, 3, 4) THEN 'Open' WHEN c.statusdowntime_id IN (5, 6) THEN 'Close' WHEN c.statusdowntime_id = 9 THEN 'Cancel' ELSE NULL END AS stat_title"),
+        ])
+        ->join('tbl_device as b', 'a.equipment_number', '=', 'b.equipment_number')
+        ->join('tbl_downtime as c', 'b.id', '=', 'c.device_id')
+        ->where('a.driver', '=', $badge_id);
+
+        // Gabungkan hasil kedua query
+        $result = $query1->get()->merge($query2->get());
+
+        // Sort hasil berdasarkan kolom date
+        $data = $result->sortByDesc('date')->values();
+
+        // dd($data);
+        // Tentukan jumlah item per halaman
+        $perPage = 10;
+
+        // Gunakan metode paginate
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $paginatedData = $data->slice(($page - 1) * $perPage, $perPage)->all();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginatedData, count($data), $perPage, $page, [
+            'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+        ]);
+
+        // Dapatkan informasi paginasi
+        $total = $paginator->total();
+        $current_page = $paginator->currentPage();
+        $last_page = $paginator->lastPage();
+        $next_page_url = $paginator->nextPageUrl();
+        $prev_page_url = $paginator->previousPageUrl();
+
         return response()->json([
-            'message' => 'Success get all history',
-            'data' => $mergedArray,
+            "RESPONSE"      => 200,
+            "MESSAGETYPE"   => "S",
+            "MESSAGE"       => "SUCCESS",
+            "CURRENT_PAGE"  => $current_page,
+            "LAST_PAGE"     => $last_page,
+            "NEXT_PAGE_URL" => $next_page_url,
+            "PREV_PAGE_URL" => $prev_page_url,
+            "DATA"          => $paginator->items()
         ]);
     }
 
