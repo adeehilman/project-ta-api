@@ -16,6 +16,7 @@ class RiwayatController extends Controller
     }
     public function index(Request $request)
     {
+        
         try {
             $token = $request->header('Authorization');
             $validateToken = JWTAuth::parseToken()->authenticate();
@@ -34,6 +35,7 @@ class RiwayatController extends Controller
 
         
         $badge_id = $request->badge_id;
+        $is_finish = $request->is_finish;
 
         if ($badge_id == "") {
             return response()->json([
@@ -41,62 +43,329 @@ class RiwayatController extends Controller
             ], 400);
         }
 
+        $lms_finish = '3,5,8,10,13,15,16,17,18';
+        $mms_finish = '3,5,8,10,13,14,12,15';
+        $meeting_finish = '5,6';
+        $downtime_finish = "5,6,9";
+        $downtime_array = explode(',', $downtime_finish);
 
-                // Query pertama
-        $query1 = DB::table(DB::raw("
-            (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date, b.stat_title ,
-            CASE
-                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN 'Ditinjau HRD'
-                    WHEN a.status_pendaftaran_mms IN (7,9) THEN 'Ditinjau QHSE'
-                    WHEN a.status_pendaftaran_mms IN (12,15) THEN 'Selesai'
-                    ELSE 'Dibatalkan'
-                END AS stat_title ,
-                CASE
-                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFFFF7E6'
-                    WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFFFF3E9'
-                    WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFFE8F8ED'
-                    ELSE '0xFFF9E9EA'
-            END AS bg_color ,
-            CASE
-                    WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFE8A100'
-                    WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFE6781C'
-                    WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFF1DB74E'
-                    ELSE '0xFFCD202E'
-            END AS txt_color
-            FROM tbl_mms a , tbl_statusmms b, tbl_vlookup c 
-            WHERE a.status_pendaftaran_mms = b.id AND a.merek_hp = c.id_vlookup AND a.badge_id = '$badge_id'
-            UNION
-            SELECT a.id, 'Pengajuan Laptop' AS category,'4' AS category_id, a.tipe_laptop AS title, c.name_vlookup AS subtitle, a.tanggal_pengajuan AS date, b.stat_title
-            FROM tbl_lms a , tbl_statuslms b, tbl_vlookup c 
-            WHERE a.brand = c.id_vlookup AND a.status_pendaftaran_lms = b.id AND a.badge_id = '$badge_id'
-            UNION
-            SELECT a.id, 'Meeting Room' AS category,'1' AS category_id, a.title_meeting AS title, CONCAT(c.room_name, ', ', DATE_FORMAT(a.meeting_date, '%d %b %Y'), ', ', TIME_FORMAT(a.meeting_start, '%H:%i'), '-', TIME_FORMAT(a.meeting_end, '%H:%i')) AS subtitle, 
-            a.booking_date AS date, d.status_name_ina AS stat_title
-            FROM tbl_meeting a , tbl_participant b, tbl_roommeeting c, tbl_statusmeeting d 
-            WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id'
-            ) AS A
-        "));
+        
 
-        // Query kedua
-        $query2 = DB::connection('third')->table('tbl_carlist as a')
-        ->select([
-            'c.id',
-            DB::raw("'Maintenance Mobil' AS category"),
-            DB::raw("'10' AS category_id"),
-            'b.license_no AS title',
-            DB::raw("CONCAT((SELECT description FROM tbl_activitytype WHERE activityype = c.activitytype AND ordertype = 'PM01'), ', ', c.priority) AS subtitle"),
-            DB::raw("c.lastupdate AS date"),
-            DB::raw("CASE WHEN c.statusdowntime_id IN (1, 2, 3, 4) THEN 'Open' WHEN c.statusdowntime_id IN (5, 6) THEN 'Close' WHEN c.statusdowntime_id = 9 THEN 'Cancel' ELSE NULL END AS stat_title"),
-        ])
-        ->join('tbl_device as b', 'a.equipment_number', '=', 'b.equipment_number')
-        ->join('tbl_downtime as c', 'b.id', '=', 'c.device_id')
-        ->where('a.driver', '=', $badge_id);
+        
+        try {
+            if($is_finish == 1){
+                $query1 = DB::table(DB::raw("
+                    (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date,
+                    a.updatedate as lastupdate,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN 'Ditinjau HRD'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN 'Ditinjau QHSE'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFFFF7E6'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFFFF3E9'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFE8A100'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFE6781C'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFF1DB74E' 
+                        ELSE '0xFFCD202E'
+                    END AS txt_color 
+                    FROM tbl_mms a , tbl_statusmms b, tbl_vlookup c 
+                    WHERE a.status_pendaftaran_mms = b.id AND a.merek_hp = c.id_vlookup AND a.badge_id = '$badge_id' AND a.status_pendaftaran_mms IN ($mms_finish)
+                    UNION
+                    SELECT a.id, 'Pengajuan Laptop' AS category,'4' AS category_id, a.tipe_laptop AS title, c.name_vlookup AS subtitle, a.tanggal_pengajuan AS date, 
+                    a.updatedate as lastupdate,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN 'Ditinjau HRD'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN 'Ditinjau QHSE'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN 'Disetujui Manager QHSE'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN '0xFFFFF7E6'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN '0xFFFFF3E9'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN '0xFFE6F2FA'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN '0xFFE8A100'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN '0xFFE6781C'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN '0xFF057DCD'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN '0xFF1DB74E'
+                        ELSE '0xFFCD202E'
+                    END AS txt_color
+                    FROM tbl_lms a , tbl_statuslms b, tbl_vlookup c 
+                    WHERE a.brand = c.id_vlookup AND a.status_pendaftaran_lms = b.id AND a.badge_id = '$badge_id' AND a.status_pendaftaran_lms IN ($lms_finish)
+                    UNION
+                    SELECT a.id, 'Meeting Room' AS category,'1' AS category_id, a.title_meeting AS title, CONCAT(c.room_name, ', ', DATE_FORMAT(a.meeting_date, '%d %b %Y'), ', ', TIME_FORMAT(a.meeting_start, '%H:%i'), '-', TIME_FORMAT(a.meeting_end, '%H:%i')) AS subtitle, 
+                    a.booking_date AS date, 
+                    a.update_date as lastupdate,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN 'Ruangan dibooking'
+                        WHEN a.statusmeeting_id IN (2) THEN 'Menunggu meeting dimulai'
+                        WHEN a.statusmeeting_id IN (4) THEN 'Sedang Berlangsung'
+                        WHEN a.statusmeeting_id IN (3) THEN 'Reschedule'
+                        WHEN a.statusmeeting_id IN (5) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN '0xFFF0F1F3'
+                        WHEN a.statusmeeting_id IN (2) THEN '0xFFFFF7E6'
+                        WHEN a.statusmeeting_id IN (4) THEN '0xFFE6F2FA'
+                        WHEN a.statusmeeting_id IN (3) THEN '0xFFFFEEF6'
+                        WHEN a.statusmeeting_id IN (5) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN '0xFF41443D'
+                        WHEN a.statusmeeting_id IN (2) THEN '0xFFE8A100'
+                        WHEN a.statusmeeting_id IN (4) THEN '0xFF057DCD'
+                        WHEN a.statusmeeting_id IN (3) THEN '0xFFE84B93'
+                        WHEN a.statusmeeting_id IN (5) THEN '0xFF1DB74E'
+                        ELSE '0xFFCD202E'
+                    END AS txt_color
+                    FROM tbl_meeting a , tbl_participant b, tbl_roommeeting c, tbl_statusmeeting d 
+                    WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id' AND a.statusmeeting_id IN ($meeting_finish)
+                    UNION
+                    SELECT  a.id,'Kritik dan Saran' AS category,                                                                                                               
+        '1' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,                          
+CASE                                                                                                                                                       
+            WHEN a.status_kritiksaran IN (1,2) THEN 'Menunggu Tanggapan HRD'                                                                               
+            WHEN a.status_kritiksaran IN (3) THEN 'Ditanggapi HRD'                                                                                         
+            WHEN a.status_kritiksaran IN (4) THEN 'Selesai'                                                                                                
+            ELSE 'Dibatalkan'                                                                                                                              
+        END AS stat_title,                                                                                                                                 
+        CASE                                                                                                                                               
+            WHEN a.status_kritiksaran IN (1,2) THEN '0xFFFFF7E6'                                                                                           
+            WHEN a.status_kritiksaran IN (3) THEN '0xFFE6F2FA'                                                                                             
+            WHEN a.status_kritiksaran IN (4) THEN '0xFFE8F8ED'                                                                                             
+            ELSE '0xFFF9E9EA'                                                                                                                              
+        END AS bg_color,                                                                                                                                   
+        CASE                                                                                                                                               
+            WHEN a.status_kritiksaran IN (1,2) THEN '0xFFE8A100'                                                                                           
+            WHEN a.status_kritiksaran IN (3) THEN '0xFFE84B93'                                                                                             
+            WHEN a.status_kritiksaran IN (4) THEN '0xFF1DB74E'                                                                                             
+            ELSE '0xFFCD202E'                                                                                                                              
+        END AS txt_color FROM tbl_kritiksaran a, tbl_vlookup b WHERE a.kategori = b.id_vlookup AND a.badge_id = '200400' AND a.status_kritiksaran IN  (3,4)
+                    ) AS A
+                "));
+
+                // Query kedua
+                $query2 = DB::connection('third')->table('tbl_carlist as a')
+                ->select([
+                    'c.id',
+                    DB::raw("'Maintenance Mobil' AS category"),
+                    DB::raw("'10' AS category_id"),
+                    'b.license_no AS title',
+                    DB::raw("CONCAT((SELECT description FROM tbl_activitytype WHERE activitytype = c.activitytype AND ordertype = 'PM01' LIMIT 1), ', ', c.priority) AS subtitle"),
+                    DB::raw("c.lastupdate AS date"),
+                    DB::raw("c.lastupdate AS lastupdate"),
+                    DB::raw("
+                    CASE
+                            WHEN c.statusdowntime_id IN (1) THEN 'Open Ticket'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN 'Maintenance Sedang Berlangsung'
+                            WHEN c.statusdowntime_id IN (3,5,6) THEN 'Selesai'
+                            ELSE 'Dibatalkan'
+                        END AS stat_title ,
+                        CASE
+                            WHEN c.statusdowntime_id IN (1) THEN '0xFFF0F1F3'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN '0xFFE6F2FA'
+                            WHEN c.statusdowntime_id IN (5) THEN '0xFFE8F8ED'
+                            ELSE '0xFFF9E9EA'
+                    END AS bg_color ,
+                    CASE
+                        WHEN c.statusdowntime_id IN (1) THEN '0xFF41443D'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN '0xFF057DCD'
+                            WHEN c.statusdowntime_id IN (3,5,6) THEN '0xFF1DB74E'
+                            ELSE '0xFFCD202E'
+                    END AS txt_color"),
+                ])
+                ->join('tbl_device as b', 'a.equipment_number', '=', 'b.equipment_number')
+                ->join('tbl_downtime as c', 'b.id', '=', 'c.device_id')
+                ->where('a.driver', '=', $badge_id)
+                ->whereIn('c.statusdowntime_id', $downtime_array);
+            }
+
+
+            $lms_ongoing = '1,2,4,6,7,9';
+            $mms_ongoing = '1,2,4,6,7,9,11,12,14';
+            $meeting_ongoing = '1,2,3,4';
+            $downtime_ongoing = '1,2,3,4,7';
+            $downtime_array_ongoing = explode(',', $downtime_ongoing);
+
+            if($is_finish != 1){
+                    $query1 = DB::table(DB::raw("
+                    (SELECT a.id, 'Pengajuan Handphone' AS category, '3' AS category_id, a.tipe_hp AS title, c.name_vlookup AS subtitle, a.waktu_pengajuan AS date, 
+                    a.updatedate as lastupdate,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN 'Ditinjau HRD'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN 'Ditinjau QHSE'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFFFF7E6'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFFFF3E9'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.status_pendaftaran_mms IN (1,2,4,6) THEN '0xFFE8A100'
+                        WHEN a.status_pendaftaran_mms IN (7,9) THEN '0xFFE6781C'
+                        WHEN a.status_pendaftaran_mms IN (12,15) THEN '0xFF1DB74E' 
+                        ELSE '0xFFCD202E'
+                    END AS txt_color 
+                    FROM tbl_mms a , tbl_statusmms b, tbl_vlookup c 
+                    WHERE a.status_pendaftaran_mms = b.id AND a.merek_hp = c.id_vlookup AND a.badge_id = '$badge_id' AND a.status_pendaftaran_mms IN ($mms_ongoing)
+                    UNION
+                    SELECT a.id, 'Pengajuan Laptop' AS category,'4' AS category_id, a.tipe_laptop AS title, c.name_vlookup AS subtitle, a.tanggal_pengajuan AS date, 
+                    a.updatedate as lastupdate,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN 'Ditinjau HRD'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN 'Ditinjau QHSE'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN 'Disetujui Manager QHSE'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN '0xFFFFF7E6'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN '0xFFFFF3E9'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN '0xFFE6F2FA'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.status_pendaftaran_lms IN (1,2,4,6) THEN '0xFFE8A100'
+                        WHEN a.status_pendaftaran_lms IN (7,9) THEN '0xFFE6781C'
+                        WHEN a.status_pendaftaran_lms IN (11,12,14) THEN '0xFF057DCD'
+                        WHEN a.status_pendaftaran_lms IN (15,18) THEN '0xFF1DB74E'
+                        ELSE '0xFFCD202E'
+                    END AS txt_color
+                    FROM tbl_lms a , tbl_statuslms b, tbl_vlookup c 
+                    WHERE a.brand = c.id_vlookup AND a.status_pendaftaran_lms = b.id AND a.badge_id = '$badge_id' AND a.status_pendaftaran_lms IN ($lms_ongoing)
+                    UNION
+                    SELECT a.id, 'Meeting Room' AS category,'1' AS category_id, a.title_meeting AS title, CONCAT(c.room_name, ', ', DATE_FORMAT(a.meeting_date, '%d %b %Y'), ', ', TIME_FORMAT(a.meeting_start, '%H:%i'), '-', TIME_FORMAT(a.meeting_end, '%H:%i')) AS subtitle, 
+                    a.booking_date AS date,
+                    a.update_date as lastupdate,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN 'Ruangan dibooking'
+                        WHEN a.statusmeeting_id IN (2) THEN 'Menunggu meeting dimulai'
+                        WHEN a.statusmeeting_id IN (4) THEN 'Sedang Berlangsung'
+                        WHEN a.statusmeeting_id IN (3) THEN 'Reschedule'
+                        WHEN a.statusmeeting_id IN (5) THEN 'Selesai'
+                        ELSE 'Dibatalkan'
+                    END AS stat_title,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN '0xFFF0F1F3'
+                        WHEN a.statusmeeting_id IN (2) THEN '0xFFFFF7E6'
+                        WHEN a.statusmeeting_id IN (4) THEN '0xFFE6F2FA'
+                        WHEN a.statusmeeting_id IN (3) THEN '0xFFFFEEF6'
+                        WHEN a.statusmeeting_id IN (5) THEN '0xFFE8F8ED'
+                        ELSE '0xFFF9E9EA'
+                    END AS bg_color,
+                    CASE
+                        WHEN a.statusmeeting_id IN (1) THEN '0xFF41443D'
+                        WHEN a.statusmeeting_id IN (2) THEN '0xFFE8A100'
+                        WHEN a.statusmeeting_id IN (4) THEN '0xFF057DCD'
+                        WHEN a.statusmeeting_id IN (3) THEN '0xFFE84B93'
+                        WHEN a.statusmeeting_id IN (5) THEN '0xFF1DB74E'
+                        ELSE '0xFFCD202E'
+                    END AS txt_color
+                    FROM tbl_meeting a , tbl_participant b, tbl_roommeeting c, tbl_statusmeeting d 
+                    WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id' AND a.statusmeeting_id IN ($meeting_ongoing)
+                    UNION
+                    SELECT  a.id,'Kritik dan Saran' AS category,
+        '1' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,
+CASE
+            WHEN a.status_kritiksaran IN (1,2) THEN 'Menunggu Tanggapan HRD' 
+            WHEN a.status_kritiksaran IN (3) THEN 'Ditanggapi HRD'
+            WHEN a.status_kritiksaran IN (4) THEN 'Selesai' 
+            ELSE 'Dibatalkan'
+        END AS stat_title,
+        CASE
+            WHEN a.status_kritiksaran IN (1,2) THEN '0xFFFFF7E6' 
+            WHEN a.status_kritiksaran IN (3) THEN '0xFFE6F2FA' 
+            WHEN a.status_kritiksaran IN (4) THEN '0xFFE8F8ED' 
+            ELSE '0xFFF9E9EA'
+        END AS bg_color,
+        CASE
+            WHEN a.status_kritiksaran IN (1,2) THEN '0xFFE8A100'
+            WHEN a.status_kritiksaran IN (3) THEN '0xFFE84B93' 
+            WHEN a.status_kritiksaran IN (4) THEN '0xFF1DB74E' 
+            ELSE '0xFFCD202E'
+        END AS txt_color FROM tbl_kritiksaran a, tbl_vlookup b WHERE a.kategori = b.id_vlookup AND a.badge_id = '200400' AND a.status_kritiksaran IN  (1,2)
+                    ) AS A
+                "));
+
+                // Query kedua
+                $query2 = DB::connection('third')->table('tbl_carlist as a')
+                ->select([
+                    'c.id',
+                    DB::raw("'Maintenance Mobil' AS category"),
+                    DB::raw("'10' AS category_id"),
+                    'b.license_no AS title',
+                    DB::raw("CONCAT((SELECT description FROM tbl_activitytype WHERE activitytype = c.activitytype AND ordertype = 'PM01' LIMIT 1), ', ', c.priority) AS subtitle"),
+                    DB::raw("c.lastupdate AS date"),
+                    DB::raw("c.lastupdate AS lastupdate"),
+                    DB::raw("
+                    CASE
+                            WHEN c.statusdowntime_id IN (1) THEN 'Open Ticket'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN 'Maintenance Sedang Berlangsung'
+                            WHEN c.statusdowntime_id IN (3,5,6) THEN 'Selesai'
+                            ELSE 'Dibatalkan'
+                        END AS stat_title ,
+                        CASE
+                            WHEN c.statusdowntime_id IN (1) THEN '0xFFF0F1F3'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN '0xFFE6F2FA'
+                            WHEN c.statusdowntime_id IN (5) THEN '0xFFE8F8ED'
+                            ELSE '0xFFF9E9EA'
+                    END AS bg_color ,
+                    CASE
+                        WHEN c.statusdowntime_id IN (1) THEN '0xFF41443D'
+                            WHEN c.statusdowntime_id IN (2, 4) THEN '0xFF057DCD'
+                            WHEN c.statusdowntime_id IN (3,5,6) THEN '0xFF1DB74E'
+                            ELSE '0xFFCD202E'
+                    END AS txt_color"),
+                ])
+                ->join('tbl_device as b', 'a.equipment_number', '=', 'b.equipment_number')
+                ->join('tbl_downtime as c', 'b.id', '=', 'c.device_id')
+                ->where('a.driver', '=', $badge_id)
+                ->whereIn('c.statusdowntime_id', $downtime_array_ongoing);
+
+            }
+        } catch (\Throwable $th) {
+             return response()
+                ->json(
+                    [
+                        'RESPONSE_CODE' => 400,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => $th->getMessage(),
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
+        }
+       
 
         // Gabungkan hasil kedua query
         $result = $query1->get()->merge($query2->get());
 
         // Sort hasil berdasarkan kolom date
-        $data = $result->sortByDesc('date')->values();
+        $data = $result->sort(function ($a, $b) {
+    // Bandingkan lastupdate
+    $lastupdateComparison = $b->lastupdate <=> $a->lastupdate;
+
+    // Jika lastupdate sama atau NULL, bandingkan date
+    return $lastupdateComparison === 0 ? ($b->date <=> $a->date) : $lastupdateComparison;
+})->values();
+
 
         // dd($data);
         // Tentukan jumlah item per halaman
@@ -108,7 +377,7 @@ class RiwayatController extends Controller
 
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginatedData, count($data), $perPage, $page, [
             'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
-        ]);
+        ]);        
 
         // Dapatkan informasi paginasi
         $total = $paginator->total();
