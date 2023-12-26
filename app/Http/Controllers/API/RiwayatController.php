@@ -359,12 +359,12 @@ CASE
 
         // Sort hasil berdasarkan kolom date
         $data = $result->sort(function ($a, $b) {
-    // Bandingkan lastupdate
-    $lastupdateComparison = $b->lastupdate <=> $a->lastupdate;
+        // Bandingkan lastupdate
+        $lastupdateComparison = $b->lastupdate <=> $a->lastupdate;
 
-    // Jika lastupdate sama atau NULL, bandingkan date
-    return $lastupdateComparison === 0 ? ($b->date <=> $a->date) : $lastupdateComparison;
-})->values();
+        // Jika lastupdate sama atau NULL, bandingkan date
+        return $lastupdateComparison === 0 ? ($b->date <=> $a->date) : $lastupdateComparison;
+        })->values();
 
 
         // dd($data);
@@ -373,11 +373,11 @@ CASE
 
         // Gunakan metode paginate
         $page = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
-        $paginatedData = $data->slice(($page - 1) * $perPage, $perPage)->all();
+        $paginatedData = $data->slice(($page - 1) * $perPage, $perPage)->values()->all();
 
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginatedData, count($data), $perPage, $page, [
             'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
-        ]);        
+        ]);       
 
         // Dapatkan informasi paginasi
         $total = $paginator->total();
@@ -386,6 +386,7 @@ CASE
         $next_page_url = $paginator->nextPageUrl();
         $prev_page_url = $paginator->previousPageUrl();
 
+        // dd($paginator->items());
         return response()->json([
             "RESPONSE"      => 200,
             "MESSAGETYPE"   => "S",
