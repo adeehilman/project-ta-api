@@ -135,7 +135,7 @@ class RiwayatController extends Controller
                     WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id' AND a.statusmeeting_id IN ($meeting_finish)
                     UNION
                     SELECT  a.id,'Kritik dan Saran' AS category,                                                                                                               
-        '1' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,                          
+        '10' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,                          
 CASE                                                                                                                                                       
             WHEN a.status_kritiksaran IN (1,2) THEN 'Menunggu Tanggapan HRD'                                                                               
             WHEN a.status_kritiksaran IN (3) THEN 'Ditanggapi HRD'                                                                                         
@@ -282,7 +282,7 @@ CASE
                     WHERE a.id = b.meeting_id AND a.roommeeting_id = c.id AND a.statusmeeting_id = d.id AND b.participant = '$badge_id' AND a.statusmeeting_id IN ($meeting_ongoing)
                     UNION
                     SELECT  a.id,'Kritik dan Saran' AS category,
-        '1' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,
+        '10' AS category_id, b.name_vlookup AS title, a.description AS subtitle, a.createdate AS date, a.createdate AS lastupdate,
 CASE
             WHEN a.status_kritiksaran IN (1,2) THEN 'Menunggu Tanggapan HRD' 
             WHEN a.status_kritiksaran IN (3) THEN 'Ditanggapi HRD'
