@@ -132,6 +132,7 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
 
 // riwayat
 Route::get('/riwayat/list', [RiwayatController::class, 'index']);
+Route::get('/riwayat/filter', [RiwayatController::class, 'filterRiwayat']);
 
 
 Route::get('/mms/detail', [MmsController::class, 'detailMMS']);
