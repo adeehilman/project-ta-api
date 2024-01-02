@@ -424,4 +424,55 @@ class PlatformController extends Controller
             ]);
         }
     }
+
+    public function notifAlarm(Request $request)
+    {
+        // dd($request->all());
+        try {
+            
+            $getBadge = DB::table('tbl_deptauthorize')->where('dept_code', 'ALARM')->where('get_notif', 1)->get();
+
+            
+            $client = new Client();
+            foreach($getBadge as $badge){
+                $data   = [
+                    'badge_id' => $badge->badge_id,
+                    'message'  => "ALARM KEAMANAN TELAH BERBUNYI!",
+                    'sub_message' => "Mohon segera mengikuti prosedur yang tersedia",
+                    'category'    => "ALARM",
+                    'tag'         => 'Alarm',
+                    'dynamic_id'  => ''
+                ];
+
+                // $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                //     'json' => $data,
+                // ]);
+
+                
+                 $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [ // dev
+                    'json' => $data,
+                ]);
+
+            }
+            // dd($data);
+           return response()->json([
+                "RESPONSE"      => 200,
+                "MESSAGETYPE"   => "S",
+                "MESSAGE"       => "SUCCESS"
+            ]);
+
+            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+                return response()
+                    ->json(
+                        [
+                            'MESSAGETYPE' => 'E',
+                            'MESSAGE' => $th->getMessage(),
+                        ],
+                        400,
+                    )
+                    ->header('Accept', 'application/json');
+        }
+    }
 }

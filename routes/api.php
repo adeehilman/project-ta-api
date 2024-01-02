@@ -299,6 +299,9 @@ Route::post('/notifikasi/send', [NotifikasiController::class, 'sendNotif']);
 Route::get('/reminder-meeting', [MeetingRoomController::class, 'reminderMeeting']);
 Route::post('/homeapi/update-playerid', [PlatformController::class, 'updatePlayerId']);
 
+// Endpoint notifikasi untuk alarm
+Route::post('/platform/notifikasi-alarm', [PlatformController::class, 'notifAlarm']);
+
 // get list user by name or badge
 Route::get('platform/listUserBy', [PlatformController::class, 'listUserBy']);
 Route::get('platform/EmployeeImg', [PlatformController::class, 'EmployeeImg']);
