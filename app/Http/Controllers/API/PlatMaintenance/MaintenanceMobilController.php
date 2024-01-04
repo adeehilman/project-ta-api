@@ -136,6 +136,8 @@ class MaintenanceMobilController extends Controller
         WHERE driver = '$employee_no'";
         $data = $this->third->select($query);
 
+       
+
         // dd($data);
         if(!$data){
             return response()->json([
@@ -147,7 +149,25 @@ class MaintenanceMobilController extends Controller
                 "application/json"
             );
         }
+        $licenseNO = $data[0]->license_no;
 
+        // dd($data);
+        $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id 
+                        IN (SELECT id FROM tbl_device 
+                        WHERE license_no = '$licenseNO') 
+                        AND statusdowntime_id IN (1,2,3)";
+        $countData = $this->third->select($queryCheck);
+
+        if(COUNT($countData) > 0){
+            return response()->json([
+                "RESPONSE" => 400,
+                "MESSAGETYPE"   => "E",
+                "MESSAGE"       => 'Anda telah melakukan Open ticket',
+            ], 400)->header(
+                "Accept",
+                "application/json"
+            );
+        }
         $data = $data[0];
 
         return response()->json([

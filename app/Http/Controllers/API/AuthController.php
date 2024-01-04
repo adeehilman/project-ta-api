@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Akaunting\Firewall\Facade\Firewall;
+use GuzzleHttp\Client;
 
 class AuthController extends Controller
 {
@@ -160,20 +161,9 @@ class AuthController extends Controller
          * dari tymon/jwtauth
          */
         try {
-            
+                
             if (Auth::attempt($credentials)) {
-                $ip = $request->ip();
-                $blockedIpCount = DB::table('firewall_ips')
-                    ->where('ip', $ip)
-                    ->whereNull('deleted_at')
-                    ->count();
-
-                if ($blockedIpCount > 0) {
-                    return response()->json([
-                        "message" => "Maaf, Anda telah melebihi batas percobaan login. Silakan coba lagi dalam beberapa saat",
-                    ], 400);
-                }
-
+                
                 $token = JWTAuth::fromUser(Auth::user());
                 $data = DB::table('tbl_karyawan')
                     ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
@@ -195,6 +185,21 @@ class AuthController extends Controller
                     )
                     ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
     
+
+                $ip = $request->ip();
+                $IpCount = "SELECT * FROM firewall_logs WHERE ip = '$ip' AND deleted_at IS NULL";
+                $blockedIpCount = DB::select($IpCount);
+
+                if (COUNT($blockedIpCount) == 4) {
+                    return response()->json([
+                        "message" => "Percobaan login anda tersisa 2 kali lagi",
+                    ], 400);
+                } else if(COUNT($blockedIpCount) == 5){
+                    return response()->json([
+                        "message" => "Percobaan login anda tersisa 1 kali lagi",
+                    ], 400);
+                }
+
                 /**
                  * apabila is_actice nya adalah 0 maka tidak boleh login
                  */
@@ -394,6 +399,41 @@ class AuthController extends Controller
             $blockedIp = $response->getData()->blocked_ip;
 
             if($blockedIp){
+                try {
+                    $clientOnesignal = new Client();
+                
+
+                    $getBadge = DB::table('tbl_deptauthorize')->where('dept_code', 'WAF')->where('get_notif', 1)->get();
+                    $client = new Client();
+                    foreach($getBadge as $badge){
+                       
+                        $dataOS   = [
+                            'badge_id' => $badge->badge_id,
+                            'message'  => "🔥 Possible attack on webapi.satnusa.com",
+                            'sub_message' => "A possible login attack on webapi.satnusa.com has been detected from $blockedIp"
+                        ];
+
+                        // API yang hanya mengirim One Signal
+                        $responseOS =  $clientOnesignal->get('https://webapi.satnusa.com/api/meeting/send-notif', [
+                            'json' => $dataOS,
+                        ]);
+
+                      
+
+                    }
+                } catch (\Throwable $th) {
+                    DB::rollBack();
+                    return response()
+                        ->json(
+                            [
+                                'MESSAGETYPE' => 'E',
+                                'MESSAGE' => $th->getMessage(),
+                            ],
+                            400,
+                        )
+                        ->header('Accept', 'application/json');
+                }
+                
                 return response()->json([
                 "message" => "Maaf, Anda telah melebihi batas percobaan login. Silakan coba lagi dalam beberapa saat",
             ], 400);
