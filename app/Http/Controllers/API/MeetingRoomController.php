@@ -598,9 +598,12 @@ class MeetingRoomController extends Controller
             }
             else{
                 $query = "SELECT * FROM (
-                    SELECT a.id as Id, a.fullname AS Employee_Name, a.badge_id AS Badge, b.position_name as Position FROM tbl_karyawan a, tbl_position b 
-						  WHERE a.position_code = b.position_code AND left(a.line_code,4) = '$dept->linecode') AS a 
-						  where employee_name LIKE '$fullname' OR badge LIKE '$fullname' LIMIT 30";
+                            (SELECT a.id AS Id, a.fullname AS Employee_Name, a.badge_id AS Badge, b.position_name AS POSITION FROM tbl_karyawan a, tbl_position b
+                            WHERE a.position_code = b.position_code AND LEFT(a.line_code,4) = '$dept->linecode')        
+                            UNION
+                            (SELECT  a.id AS Id, a.fullname AS Employee_Name, c.badge_id AS Badge, b.position_name AS POSITION
+                            FROM tbl_karyawan a, tbl_position b, tbl_mgworkarea c WHERE a.badge_id = c.badge_id AND a.position_code = b.position_code  AND  c.dept_code = '$dept->linecode')) AS A
+                            where employee_name LIKE '$fullname' OR badge LIKE '$fullname' LIMIT 30";
             }
         }
 
