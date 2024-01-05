@@ -315,6 +315,7 @@ Route::group(['prefix' => 'maintenancemobil'], function ($router) {
     Route::get('getListMaintenance', [MaintenanceMobilController::class, 'ActivityMaintenance']);
     Route::get('getOngoingMaintenance', [MaintenanceMobilController::class, 'onGoingMaintenance']);
     Route::get('getInfoMobil', [MaintenanceMobilController::class, 'getDetailMobil']);
+    Route::get('checkOpenTicket', [MaintenanceMobilController::class, 'CheckOpenticket']);
     Route::get('getDetailMaintenance', [MaintenanceMobilController::class, 'getDetailMaintenance']);
     Route::post('addPengajuan', [MaintenanceMobilController::class, 'addPengajuanMaintenance']);
 });

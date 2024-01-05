@@ -10,6 +10,7 @@ use App\Helpers\AppHelper;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Validator;
+use GuzzleHttp\Client;
 
 class MaintenanceMobilController extends Controller
 {
@@ -136,37 +137,39 @@ class MaintenanceMobilController extends Controller
         WHERE driver = '$employee_no'";
         $data = $this->third->select($query);
 
-       
-
         // dd($data);
-        if(!$data){
-            return response()->json([
-                "RESPONSE" => 400,
-                "MESSAGETYPE"   => "E",
-                "MESSAGE"       => 'Data vehicle tidak ditemukan',
-            ], 400)->header(
-                "Accept",
-                "application/json"
-            );
+        if (!$data) {
+            return response()
+                ->json(
+                    [
+                        'RESPONSE' => 400,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Data vehicle tidak ditemukan',
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
         }
         $licenseNO = $data[0]->license_no;
 
         // dd($data);
-        $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id 
-                        IN (SELECT id FROM tbl_device 
-                        WHERE license_no = '$licenseNO') 
+        $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id
+                        IN (SELECT id FROM tbl_device
+                        WHERE license_no = '$licenseNO')
                         AND statusdowntime_id IN (1,2,3)";
         $countData = $this->third->select($queryCheck);
 
-        if(COUNT($countData) > 0){
-            return response()->json([
-                "RESPONSE" => 400,
-                "MESSAGETYPE"   => "E",
-                "MESSAGE"       => 'Anda telah melakukan Open ticket',
-            ], 400)->header(
-                "Accept",
-                "application/json"
-            );
+        if (COUNT($countData) > 0) {
+            return response()
+                ->json(
+                    [
+                        'RESPONSE' => 400,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Anda telah melakukan Open ticket',
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
         }
         $data = $data[0];
 
@@ -186,16 +189,17 @@ class MaintenanceMobilController extends Controller
             $token = $request->header('Authorization');
             $validateToken = JWTAuth::parseToken()->authenticate();
         } catch (JWTException $e) {
-            return response()->json([
-                "RESPONSE_CODE" => 401,
-                "MESSAGETYPE"   => "E",
-                "MESSAGE"       => 'UNAUTHORIZED',
-            ], 401)->header(
-                "Accept",
-                "application/json"
-            );
+            return response()
+                ->json(
+                    [
+                        'RESPONSE_CODE' => 401,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'UNAUTHORIZED',
+                    ],
+                    401,
+                )
+                ->header('Accept', 'application/json');
         }
-
 
         try {
             $this->third->beginTransaction();
@@ -221,101 +225,169 @@ class MaintenanceMobilController extends Controller
                     ->header('Accept', 'application/json');
             }
 
-                    
             $employee_no = $request->employee_no;
             $employee_name = $request->employee_name;
             $activitytype = $request->activitytype;
             $permasalahan = $request->permasalahan;
             $priority = $request->priority;
-            $duedate = $request->duedate ?? NULL;
+            $duedate = $request->duedate ?? null;
 
-            $getDeviceId = "SELECT b.id as device_id, b.plant, b.planner_group, b.department_id FROM tbl_carlist a INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number  WHERE driver = '$employee_no'";
-            $list = $this->third->select($getDeviceId);
+            $getDeviceIdD = "SELECT b.id as device_id,b.device_name, b.plant, b.planner_group, a.license_no, b.department_id FROM tbl_carlist a INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number  WHERE a.driver = '$employee_no'";
+            $list = $this->third->select($getDeviceIdD);
             $getDeviceId = $list[0];
-            // dd($getDeviceId);
+            // dd($list);
             // createticket
             $currDay = date('Y-m-d') . ' 07:00:00';
             $nextDay = date('Y-m-d', strtotime('+1 day', strtotime($currDay))) . ' 07:00:00';
 
-            $dataDowntime = $this->third->table('tbl_downtime')
-            ->whereBetween('createdate', [$currDay, $nextDay])
-            ->selectRaw('RIGHT(ticket_number, 6) as ticket_number')
-            ->orderBy('ticket_number', 'DESC')
-            ->first();
-            
+            $dataDowntime = $this->third
+                ->table('tbl_downtime')
+                ->whereBetween('createdate', [$currDay, $nextDay])
+                ->selectRaw('RIGHT(ticket_number, 6) as ticket_number')
+                ->orderBy('ticket_number', 'DESC')
+                ->first();
+
             $ticketNo = '';
-            if($dataDowntime){
-                $number = (int)$dataDowntime->ticket_number+1;
+            if ($dataDowntime) {
+                $number = (int) $dataDowntime->ticket_number + 1;
                 $paddedNumber = str_pad($number, 6, '0', STR_PAD_LEFT);
                 $ticketNo = $paddedNumber;
-            }else{
+            } else {
                 $number = 1;
                 $paddedNumber = str_pad($number, 6, '0', STR_PAD_LEFT);
                 $ticketNo = $paddedNumber;
             }
 
             $year = date('Y');
-            $month = (string)date('m');
-            $date = (string)date('d');
-            if(strlen($month) < 2){
+            $month = (string) date('m');
+            $date = (string) date('d');
+            if (strlen($month) < 2) {
                 $month = '0' . $month;
             }
-            if(strlen($date) < 2){
+            if (strlen($date) < 2) {
                 $date = '0' . $date;
             }
 
             $newTicket = 'DT' . $year . $month . $date . $ticketNo;
 
+            $getLicense_no = $getDeviceId->license_no;
+            $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id
+                        IN (SELECT id FROM tbl_device
+                        WHERE license_no = '$getLicense_no')
+                        AND statusdowntime_id IN (1,2,3)";
+            $countData = $this->third->select($queryCheck);
 
+            // dd($countData);
+            if (COUNT($countData) > 0) {
+                return response()
+                    ->json(
+                        [
+                            'RESPONSE' => 400,
+                            'MESSAGETYPE' => 'E',
+                            'MESSAGE' => 'Anda telah melakukan Open ticket',
+                        ],
+                        400,
+                    )
+                    ->header('Accept', 'application/json');
+            }
 
-            
             $dataDowntime = [
-                'ticket_number'         => $newTicket,
-                'device_id'             => $getDeviceId->device_id,
-                'createby'              => $employee_no,
-                'createdate'            => date("Y-m-d H:i:s"),
-                'statusdowntime_id'     => 1,
-                'updateby'              => $employee_no,
-                'lastupdate'            => date("Y-m-d H:i:s"),
-                'createby_name'         => $employee_name,
-                'updateby_name'         => $employee_name,
-                'ordertype'             => 'PM01',
-                'activitytype'          => $activitytype,
-                'priority'              => $priority,
-                'priority_start_date'   => date("Y-m-d"),
-                'priority_due_date'     => $duedate,
-                'plant'                 => $getDeviceId->plant,
-                'planner_group'         => $getDeviceId->planner_group,
-                'department_id'         => $getDeviceId->department_id,
-                'problem'               => $permasalahan,
+                'ticket_number' => $newTicket,
+                'device_id' => $getDeviceId->device_id,
+                'createby' => $employee_no,
+                'createdate' => date('Y-m-d H:i:s'),
+                'statusdowntime_id' => 1,
+                'updateby' => $employee_no,
+                'lastupdate' => date('Y-m-d H:i:s'),
+                'createby_name' => $employee_name,
+                'updateby_name' => $employee_name,
+                'ordertype' => 'PM01',
+                'activitytype' => $activitytype,
+                'priority' => $priority,
+                'priority_start_date' => date('Y-m-d'),
+                'priority_due_date' => $duedate,
+                'plant' => $getDeviceId->plant,
+                'planner_group' => $getDeviceId->planner_group,
+                'department_id' => $getDeviceId->department_id,
+                'problem' => $permasalahan,
             ];
 
             $newDowntime = $this->third->table('tbl_downtime')->insertGetId($dataDowntime);
 
-            $this->third->table('tbl_downtimehistory')
-                    ->insert([
-                        'downtime_id'           => $newDowntime,
-                        'status_downtime'       =>  1,
-                        'createby'              => $employee_no,
-                        'createdate'            => date("Y-m-d H:i:s"),
-                        'createby_name'         => $employee_name,
-                        'remark'                => $permasalahan
-                    ]);
-            
-                    $this->third->commit();
-                
-                return response()->json([
-                    "RESPONSE"      => 200,
-                    "MESSAGETYPE"   => "S",
-                    "MESSAGE"       => "SUCCESS",
-                    'DOWNTIME_ID'   => $newDowntime,
-                ]);
-        } catch (\Throwable $th) {
-            // $this->third->rollback();
-            return response()->json([
-                'status' => 401,
-                'message' => 'Gagal untuk menambah data ' . $th->getMessage(),
+            // dd($newDowntime);
+            $this->third->table('tbl_downtimehistory')->insert([
+                'downtime_id' => $newDowntime,
+                'status_downtime' => 1,
+                'createby' => $employee_no,
+                'createdate' => date('Y-m-d H:i:s'),
+                'createby_name' => $employee_name,
+                'remark' => $permasalahan,
             ]);
+
+            $this->third->commit();
+
+            // get status name
+            $status = $this->third->select("SELECT * FROM tbl_downtime a INNER JOIN tbl_statusdowntime b ON a.statusdowntime_id = b.id WHERE a.id = '$newDowntime'");
+
+            $statusId = $status[0];
+            // dd($statusId->status_name);
+
+            // get location
+            $locationQ = $this->third->select("SELECT b.location_desc FROM tbl_device a INNER JOIN  tbl_fc b ON a.functional_location=b.func_loc WHERE a.id = '$getDeviceId->device_id'");
+
+            // Periksa apakah hasil query tidak kosong dan memiliki setidaknya satu elemen
+            if (!empty($locationQ) && is_array($locationQ) && isset($locationQ[0])) {
+                $location = $locationQ[0];
+
+                // Periksa apakah location_desc tidak null atau tidak kosong
+                if ($location->location_desc != null || $location->location_desc != '') {
+                    $locationSub = " - $location->location_desc";
+                } else {
+                    $locationSub = '';
+                }
+            } else {
+                // Handle jika hasil query kosong
+                $locationSub = '';
+            }
+
+            $client = new Client();
+
+            $dataOS = [
+                'badge_id' => $employee_no,
+                'message' => "Corrective Maintenance - $getDeviceId->device_name",
+                'sub_message' => "$statusId->status_name $locationSub",
+                'category' => 'Plant Maintenance',
+                'tag' => 'Plant Maintenance',
+                'dynamic_id' => "$newDowntime",
+            ];
+
+            // dd($dataOS);
+            // API yang hanya mengirim One Signal
+            //    $responseOS =  $clientOnesignal->get('https://webapi.satnusa.com/api/meeting/send-notif', [
+            //        'json' => $dataOS,
+            //    ]);
+            $response = $client->post('http://192.168.88.60:7005/api/notifikasi/send', [
+                // dev
+                'json' => $dataOS,
+            ]);
+
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+                'DOWNTIME_ID' => $newDowntime,
+            ]);
+        } catch (\Throwable $th) {
+            $this->third->rollback();
+            return response()
+                ->json(
+                    [
+                        'status' => 401,
+                        'message' => 'Gagal untuk menambah data. ERROR = ' . $th->getMessage(),
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
         }
     }
 
@@ -325,7 +397,7 @@ class MaintenanceMobilController extends Controller
 
         $downtime_id = $request->id;
 
-        $querydetail = "SELECT 
+        $querydetail = "SELECT
         c.id,
         a.license_no,
         a.fleet_name,
@@ -371,7 +443,7 @@ class MaintenanceMobilController extends Controller
         // dd($result_history);
         $dataarray = [
             'detail' => $result[0],
-            'history_status' => $result_history
+            'history_status' => $result_history,
         ];
         return response()->json([
             'RESPONSE' => 200,
@@ -379,5 +451,48 @@ class MaintenanceMobilController extends Controller
             'MESSAGE' => 'SUCCESS',
             'DATA' => $dataarray,
         ]);
+    }
+
+    public function CheckOpenticket(Request $request)
+    {
+        $employee_no = $request->employee_no;
+
+        $query = "SELECT a.license_no,
+        a.fleet_name,
+        b.year_construction,
+        a.equipment_number,
+        b.plant,
+        b.planner_group
+        FROM tbl_carlist a
+        INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
+        WHERE driver = '$employee_no'";
+        $data = $this->third->select($query);
+
+        $licenseNO = $data[0]->license_no;
+
+        // dd($data);
+        $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id
+                        IN (SELECT id FROM tbl_device
+                        WHERE license_no = '$licenseNO')
+                        AND statusdowntime_id IN (1,2,3)";
+        $countData = $this->third->select($queryCheck);
+
+        if (COUNT($countData) > 0) {
+            // DRIVER PUNYA OPEN TICKET YANG SEDANG BERLANGSUNG
+            // dd($countData);
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+                'DOWNTIME_ID' => $countData[0]->id,
+            ]);
+        } else {
+            return response()->json([
+                'RESPONSE' => 200,
+                'MESSAGETYPE' => 'S',
+                'MESSAGE' => 'SUCCESS',
+                'DATA' => '',
+            ]);
+        }
     }
 }
