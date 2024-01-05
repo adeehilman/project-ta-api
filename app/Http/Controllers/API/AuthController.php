@@ -186,19 +186,7 @@ class AuthController extends Controller
                     ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
     
 
-                $ip = $request->ip();
-                $IpCount = "SELECT * FROM firewall_logs WHERE ip = '$ip' AND deleted_at IS NULL";
-                $blockedIpCount = DB::select($IpCount);
-
-                if (COUNT($blockedIpCount) == 4) {
-                    return response()->json([
-                        "message" => "Percobaan login anda tersisa 2 kali lagi",
-                    ], 400);
-                } else if(COUNT($blockedIpCount) == 5){
-                    return response()->json([
-                        "message" => "Percobaan login anda tersisa 1 kali lagi",
-                    ], 400);
-                }
+                
 
                 /**
                  * apabila is_actice nya adalah 0 maka tidak boleh login
@@ -389,6 +377,21 @@ class AuthController extends Controller
                 }
             }
              else {
+
+                $ip = $request->ip();
+                $IpCount = "SELECT * FROM firewall_logs WHERE ip = '$ip' AND deleted_at IS NULL";
+                $blockedIpCount = DB::select($IpCount);
+
+                if (COUNT($blockedIpCount) == 4) {
+                    return response()->json([
+                        "message" => "Percobaan login anda tersisa 2 kali lagi",
+                    ], 400);
+                } else if(COUNT($blockedIpCount) == 5){
+                    return response()->json([
+                        "message" => "Gagal login, Percobaan login anda tersisa 1 kali lagi",
+                    ], 400);
+                }
+
                 return response()->json([
                     "message" => "Gagal login, harap periksa badge dan password anda!",
                 ], 400);
@@ -435,7 +438,7 @@ class AuthController extends Controller
                 }
                 
                 return response()->json([
-                "message" => "Maaf, Anda telah melebihi batas percobaan login. Silakan coba lagi dalam beberapa saat",
+                "message" => "Percobaan login gagal! Akun Anda telah terkunci sementara karena alasan keamanan. Silahkan tunggu selama semenit lagi sebelum mencoba login kembali.",
             ], 400);
             }
             // Lakukan sesuatu dengan informasi IP yang diblokir
