@@ -457,42 +457,72 @@ class MaintenanceMobilController extends Controller
     {
         $employee_no = $request->employee_no;
 
-        $query = "SELECT a.license_no,
-        a.fleet_name,
-        b.year_construction,
-        a.equipment_number,
-        b.plant,
-        b.planner_group
-        FROM tbl_carlist a
-        INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
-        WHERE driver = '$employee_no'";
-        $data = $this->third->select($query);
+        try {
+            $query = "SELECT a.license_no,
+            a.fleet_name,
+            b.year_construction,
+            a.equipment_number,
+            b.plant,
+            b.planner_group
+            FROM tbl_carlist a
+            INNER JOIN tbl_device b ON a.equipment_number = b.equipment_number
+            WHERE driver = '$employee_no'";
+            $data = $this->third->select($query);
 
-        $licenseNO = $data[0]->license_no;
+            if (!empty($data) && is_array($data) && isset($data[0])) {
+                $licenseNO = $data[0]->license_no;
 
-        // dd($data);
-        $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id
-                        IN (SELECT id FROM tbl_device
-                        WHERE license_no = '$licenseNO')
-                        AND statusdowntime_id IN (1,2,3)";
-        $countData = $this->third->select($queryCheck);
+                // dd($data);
+                $queryCheck = "SELECT * FROM tbl_downtime WHERE device_id
+                                IN (SELECT id FROM tbl_device
+                                WHERE license_no = '$licenseNO')
+                                AND statusdowntime_id IN (1,2,3)";
+                $countData = $this->third->select($queryCheck);
 
-        if (COUNT($countData) > 0) {
-            // DRIVER PUNYA OPEN TICKET YANG SEDANG BERLANGSUNG
-            // dd($countData);
-            return response()->json([
-                'RESPONSE' => 200,
-                'MESSAGETYPE' => 'S',
-                'MESSAGE' => 'SUCCESS',
-                'DOWNTIME_ID' => $countData[0]->id,
-            ]);
-        } else {
-            return response()->json([
-                'RESPONSE' => 200,
-                'MESSAGETYPE' => 'S',
-                'MESSAGE' => 'SUCCESS',
-                'DATA' => '',
-            ]);
+                if (COUNT($countData) > 0) {
+                    // DRIVER PUNYA OPEN TICKET YANG SEDANG BERLANGSUNG
+                    // dd($countData);
+                    return response()->json([
+                        'RESPONSE' => 200,
+                        'MESSAGETYPE' => 'S',
+                        'MESSAGE' => 'SUCCESS',
+                        'DOWNTIME_ID' => $countData[0]->id,
+                    ]);
+                } else {
+                    return response()->json([
+                        'RESPONSE' => 200,
+                        'MESSAGETYPE' => 'S',
+                        'MESSAGE' => 'SUCCESS',
+                        'DATA' => '',
+                    ]);
+                }
+            }else{
+                return response()
+                ->json(
+                    [
+                        'RESPONSE' => 400,
+                        'MESSAGETYPE' => 'E',
+                        'MESSAGE' => 'Data vehicle tidak ditemukan',
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
+            }
+
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->third->rollback();
+            return response()
+                ->json(
+                    [
+                        'status' => 400,
+                        'message' => $th->getMessage(),
+                    ],
+                    400,
+                )
+                ->header('Accept', 'application/json');
         }
+        
     }
 }
