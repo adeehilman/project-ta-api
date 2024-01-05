@@ -489,12 +489,15 @@ class MaintenanceMobilController extends Controller
                         'DOWNTIME_ID' => $countData[0]->id,
                     ]);
                 } else {
-                    return response()->json([
-                        'RESPONSE' => 200,
-                        'MESSAGETYPE' => 'S',
-                        'MESSAGE' => 'SUCCESS',
-                        'DATA' => '',
-                    ]);
+                    return response()
+                    ->json(
+                        [
+                            'RESPONSE' => 400,
+                            'MESSAGETYPE' => 'E',
+                        ],
+                        400,
+                    )
+                    ->header('Accept', 'application/json');
                 }
             }else{
                 return response()
