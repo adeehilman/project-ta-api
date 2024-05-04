@@ -16,7 +16,7 @@ class AuthController extends Controller
 {
     /**
      * Dalam registrasi ada beberapa request yang dibutuhkan pada API
-     * diaman registrasi ini adalah 
+     * diaman registrasi ini adalah
      * employee, tgl lahir, password, questions id, dan answer
      */
     public function registrasi(Request $request)
@@ -67,7 +67,7 @@ class AuthController extends Controller
                  * dan set is_reset nya menjadi 1, hal ini berguna
                  * guna ketika user membuka pertama kali aplikasi mobile
                  * maka akan muncul dialog must change password
-                 * dan field is reset inilah sebagai parameter 
+                 * dan field is reset inilah sebagai parameter
                  */
                 DB::table('tbl_karyawan')
                     ->where('badge_id', $request->employee_no)
@@ -128,13 +128,13 @@ class AuthController extends Controller
     // function login
     /**
      * ini adalah fungsi melakukan proses login
-     * dimana user melempar beberapa request yang 
+     * dimana user melempar beberapa request yang
      * diperlukan seperti badge, password, uuid, tipe hp,
      * merek hp, os, dan versi aplikasi
      */
     public function login(Request $request)
     {
- 
+
         $request->validate([
             "badge_id" => "required",
             "password" => "required",
@@ -154,19 +154,18 @@ class AuthController extends Controller
         $credentials = $request->only('badge_id', 'password');
 
 
-     
+
         /**
          * lakukan proses pengecekan credentials dengan
-         * JWT. dimana pengecekan JWT ini menggunakan library 
+         * JWT. dimana pengecekan JWT ini menggunakan library
          * dari tymon/jwtauth
          */
         try {
-                
+
             if (Auth::attempt($credentials)) {
-                
+
                 $token = JWTAuth::fromUser(Auth::user());
                 $data = DB::table('tbl_karyawan')
-                    ->join('tbl_vlookup', 'tbl_vlookup.id_vlookup', '=', 'tbl_karyawan.gender')
                     ->select(
                         'tbl_karyawan.badge_id',
                         'email',
@@ -178,16 +177,16 @@ class AuthController extends Controller
                         'pt',
                         'tempat_lahir',
                         'tgl_lahir',
-                        'name_vlookup as jenis_kelamin',
+                        'gender as jenis_kelamin',
                         'card_no',
                         'img_user',
                         'is_active'
                     )
                     ->where('tbl_karyawan.badge_id', $request->badge_id)->first();
-    
 
-                
 
+
+                dd($data);
                 /**
                  * apabila is_actice nya adalah 0 maka tidak boleh login
                  */
@@ -196,17 +195,17 @@ class AuthController extends Controller
                         "message" => "Akun anda sudah di non-aktifkan, anda tidak bisa login ke aplikasi ini!",
                     ], 400);
                 }
-    
-    
+
+
                 /**
                  * logic kak fara start
                  * Pengecekan untuk uuid lama, di app mysatnusa baru
                  * apabila sama bolehkan pengguna login
                  */
                 $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' AND is_active = '1' LIMIT 1");
-    
+
                 if (count($isUUIDMatching) > 0) {
-    
+
                     // lakukan update is_new_uuid agar tidak di timpa device lain. apabila is_new_uuid nya adalah 0
                     if ($isUUIDMatching[0]->is_new_uuid == '0') {
                         // atau org yg iseng
@@ -221,13 +220,13 @@ class AuthController extends Controller
                                     "versi_aplikasi" => $request->versi_aplikasi,
                                     "player_id" => $request->player_id
                                 ]);
-    
+
                             DB::commit();
                         } catch (\Throwable $th) {
                             DB::rollBack();
                         }
                     }
-    
+
                     // update is new uuid di tabel mms
                     DB::table('tbl_mms')
                         ->where('badge_id', $request->badge_id)
@@ -236,9 +235,9 @@ class AuthController extends Controller
                             "versi_aplikasi" => $request->versi_aplikasi,
                             "player_id" => $request->player_id
                         ]);
-    
+
                     DB::commit();
-    
+
                     return response()->json([
                         "message" => "Berhasil Login",
                         "data"    => $data,
@@ -248,32 +247,32 @@ class AuthController extends Controller
                 /**
                  * logic kak fara end
                  */
-    
-    
+
+
                 /**
                  * Lakukan pengecekan ke tabel mms
                  * untuk mendapatkan data device user yang terdaftar.
-                 * 
+                 *
                  * apabila device yang ditemukan hanya 1 phone
                  * maka replace uuid yang lama dengan uuid yang baru dari aplokasi mysatnusa DOT
-                 * 
+                 *
                  * apabila device yang ditemukan lebih dari 1
                  * maka return can't not login, butuh patching oleh TIM DOT
                  */
                 // $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' ");
                 $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' AND is_new_uuid = '0' ");
-    
-    
+
+
                 // apabila list device karyawan lebih dari 1, return can't not login, butuh patching oleh TIM DOT
                 if ($list_device_karyawan[0]->jlh > 0) {
                     /**
                      * dan masukkan ke tabel logs login apabila user gagal
                      * login karena device nya lebih dari 1 perangkat
                      */
-    
+
                     DB::beginTransaction();
                     try {
-    
+
                         DB::table('tbl_device_temp')
                             ->insert([
                                 "badge_id" => $request->badge_id,
@@ -284,23 +283,23 @@ class AuthController extends Controller
                                 "versi_aplikasi" => $request->versi_aplikasi,
                                 "createdate" => date("Y-m-d H:i:s")
                             ]);
-    
+
                         DB::commit();
-    
+
                         return response()->json([
                             "message" => "Kamu belum bisa login, ada hp lama kamu yang belum di pairing, kami akan bantu kamu agar bisa login, silahkan login kembali selama 2 X 24 Jam",
                         ], 400);
                     } catch (\Throwable $th) {
-    
-    
+
+
                         DB::rollBack();
                         return response()->json([
                             "message" => "Something went wrong, when insert logs login",
                         ], 400);
                     }
                 }
-    
-               
+
+
 
 
 
@@ -310,10 +309,10 @@ class AuthController extends Controller
                  * kondisi ini sudah di make sure bahwa uuid itu adalah value yg tidak berubah
                  * meskipun app satnusa baru di uninstall, dan di clear data/cache
                  */
-    
+
                 DB::beginTransaction();
                 try {
-    
+
                     /**
                      * cek terlebih dahulu apakah pengguna membawa uuid yang lama dan itu mathcing dengan database nya
                      * kalau iya boleh login
@@ -321,7 +320,7 @@ class AuthController extends Controller
                     $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' LIMIT 1");
                     if ($isUUIDMatching) {
                         // DB::rollBack();
-    
+
                         DB::table('tbl_mms')
                             ->where('badge_id', $request->badge_id)
                             ->where('uuid', $request->uuid_new)
@@ -329,17 +328,17 @@ class AuthController extends Controller
                                 "versi_aplikasi" => $request->versi_aplikasi,
                                 "player_id" => $request->player_id
                             ]);
-    
+
                         DB::commit();
-    
-    
+
+
                         return response()->json([
                             "message" => "Berhasil Login",
                             "data"    => $data,
                             "token"   => $token
                         ]);
                     }
-    
+
                     /**
                      * cek apakah uuid yang dilempar dari login
                      * sudah pernah digunakan di device lain atau enggak
@@ -354,16 +353,16 @@ class AuthController extends Controller
                             "message" => "Gagal login, UUID " . $request->uuid_new . " telah didaftarkan sebelumnya, silahkan ke HRD untuk validasi",
                         ], 400);
                     }
-    
+
                     // insert ke tabel temp uuid, dengan nilai badge_id, uuid, dan versi aplikasi harusnya
                     DB::table("tbl_temp_uuid")
                         ->insert([
                             "badge_id" => $request->badge_id,
                             "uuid"     => $request->uuid_new
                         ]);
-    
+
                     DB::commit();
-    
+
                     return response()->json([
                         "message" => "Berhasil Login",
                         "data"    => $data,
@@ -404,12 +403,12 @@ class AuthController extends Controller
             if($blockedIp){
                 try {
                     $clientOnesignal = new Client();
-                
+
 
                     $getBadge = DB::table('tbl_deptauthorize')->where('dept_code', 'WAF')->where('get_notif', 1)->get();
                     $client = new Client();
                     foreach($getBadge as $badge){
-                       
+
                         $dataOS   = [
                             'badge_id' => $badge->badge_id,
                             'message'  => "🔥 Possible attack on webapi.satnusa.com",
@@ -421,7 +420,7 @@ class AuthController extends Controller
                             'json' => $dataOS,
                         ]);
 
-                      
+
 
                     }
                 } catch (\Throwable $th) {
@@ -436,7 +435,7 @@ class AuthController extends Controller
                         )
                         ->header('Accept', 'application/json');
                 }
-                
+
                 return response()->json([
                 "message" => "Percobaan login gagal! Akun Anda telah terkunci sementara karena alasan keamanan. Silahkan tunggu selama semenit lagi sebelum mencoba login kembali.",
             ], 400);
@@ -453,7 +452,7 @@ class AuthController extends Controller
     // cek security answer
     /**
      * ini adalah proses melakukan pengecekan jawaban
-     * ketika user melaukan reset password, dimana dalam tampilan 
+     * ketika user melaukan reset password, dimana dalam tampilan
      * UI nanti jawabannya akan di cek pada endpoint ini.
      */
     public function checkAnswer(Request $request)
@@ -471,9 +470,9 @@ class AuthController extends Controller
         }
 
         /**
-         * lakukan lowercase dan menghapus semua spasi 
-         * dan kemudian lakukan pengecekan data ke tabel 
-         * securityquestion 
+         * lakukan lowercase dan menghapus semua spasi
+         * dan kemudian lakukan pengecekan data ke tabel
+         * securityquestion
          */
         $jawaban = str_replace(' ', '', $request->answer);
         $jawaban = strtolower($jawaban);
@@ -512,7 +511,7 @@ class AuthController extends Controller
      * disini adalah proses pergantian password
      * dimana flow awalnya pengguna mendapatkan
      * jawaban dan mencocokkan security questionsnya
-     * 
+     *
      */
     public function forgetPassword(Request $request)
     {
@@ -557,7 +556,7 @@ class AuthController extends Controller
 
         /**
          * lakukan update password ditabel karyawan
-         * dan proses flow change password selesai 
+         * dan proses flow change password selesai
          * sampai disini
          */
         DB::beginTransaction();
@@ -647,10 +646,10 @@ class AuthController extends Controller
             // lakukan pengeceka uuid apakah ada di tbl_mms
             // $query = "SELECT a.badge_id,  b.fullname, uuid, status_pendaftaran_mms, dept_code, position_code, img_dpn, img_blk, img_user FROM tbl_mms  AS a JOIN tbl_karyawan AS b ON b.badge_id = a.badge_id WHERE (UUID = '$uuid' OR imei1 = '$uuid' OR imei2 = '$uuid' ) AND a.is_active = '1' LIMIT 1";
             $query = "SELECT a.badge_id,  b.fullname, UUID, status_pendaftaran_mms, dept_code, position_code, img_dpn, img_blk, img_user, c.stat_title AS STATUS
-            FROM tbl_mms  AS a 
-            JOIN tbl_karyawan AS b ON b.badge_id = a.badge_id 
+            FROM tbl_mms  AS a
+            JOIN tbl_karyawan AS b ON b.badge_id = a.badge_id
             JOIN tbl_statusmms AS c ON c.id = a.status_pendaftaran_mms
-            WHERE (UUID = '$uuid' OR imei1 = '$uuid' OR imei2 = '$uuid' ) 
+            WHERE (UUID = '$uuid' OR imei1 = '$uuid' OR imei2 = '$uuid' )
             AND a.is_active = '1' LIMIT 1";
 
             $karyawan = DB::select($query);
@@ -680,7 +679,7 @@ class AuthController extends Controller
 
                     ) {
 
-                        // apabila belum ada masukkan ke tabel 
+                        // apabila belum ada masukkan ke tabel
                         DB::beginTransaction();
                         try {
                             DB::table("tbl_scanlog")
@@ -799,7 +798,7 @@ class AuthController extends Controller
                 }
             } else {
 
-                // apabila belum ada masukkan ke tabel 
+                // apabila belum ada masukkan ke tabel
                 DB::beginTransaction();
                 try {
                     DB::table("tbl_scanlog")
@@ -840,7 +839,7 @@ class AuthController extends Controller
         return false;
     }
     /**
-     * check apakah user baru pertama kali melakukan login 
+     * check apakah user baru pertama kali melakukan login
      * untuk pengguna yang lama, atau menghadapi masa transisi dari aplikasi mysatnusa lama
      * ke mysatnusa baru
      */
@@ -949,7 +948,7 @@ class AuthController extends Controller
             $data_mms = DB::select($query_mms);
 
             if ($data_mms) {
-                // apabila belum ada masukkan ke tabel 
+                // apabila belum ada masukkan ke tabel
                 DB::beginTransaction();
                 try {
                     DB::table("tbl_scanlog")
@@ -1000,7 +999,7 @@ class AuthController extends Controller
                     ]);
                 DB::commit();
             } catch (\Throwable $th) {
-                // dd($th->getMessage());  
+                // dd($th->getMessage());
                 DB::rollBack();
                 $status_check = 0;
                 $message = "SERVER ERROR";
@@ -1013,7 +1012,7 @@ class AuthController extends Controller
                 return $data;
             }
 
-            // apabila tidak ada korelasi 
+            // apabila tidak ada korelasi
             $status_check = 1;
             $message = "DEVICE FOUND, BUT KARYAWAN NOT FOUND";
             $data = [
@@ -1046,7 +1045,7 @@ class AuthController extends Controller
 
             if ($data_lms) {
 
-                // cek apakah enddate nya sudah expired 
+                // cek apakah enddate nya sudah expired
                 $end_date = $data_lms[0]->end_date ? $data_lms[0]->end_date : null;
                 if ($end_date != null) {
                     if ($end_date < $today) {
@@ -1062,7 +1061,7 @@ class AuthController extends Controller
                     }
                 }
 
-                // insialisasi 
+                // insialisasi
                 $data_lms[0]->dept_code =  $data_lms[0]->dept_code ?  $data_lms[0]->dept_code : '';
                 $data_lms[0]->dept_name = $this->printDeptnName($data_lms[0]->dept_code) ? $this->printDeptnName($data_lms[0]->dept_code) : '';
                 $data_lms[0]->position_code =  $data_lms[0]->position_code ?  $data_lms[0]->position_code : '';
@@ -1106,7 +1105,7 @@ class AuthController extends Controller
                 }
 
                 /**
-                 * apabila laptop belum ada di insert sama sekali, harusnya 
+                 * apabila laptop belum ada di insert sama sekali, harusnya
                  * laptop melakukan login terlebih dahulu
                  */
                 if (!$data_scanlogs && $status_toggle == "OUT") {
@@ -1121,7 +1120,7 @@ class AuthController extends Controller
                     return $data;
                 }
 
-                // apabila belum ada masukkan ke tabel 
+                // apabila belum ada masukkan ke tabel
                 DB::beginTransaction();
                 try {
                     DB::table("tbl_scanlog")
