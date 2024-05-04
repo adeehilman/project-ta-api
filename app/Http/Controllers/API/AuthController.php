@@ -186,7 +186,7 @@ class AuthController extends Controller
 
 
 
-                dd($data);
+                // dd($data);
                 /**
                  * apabila is_actice nya adalah 0 maka tidak boleh login
                  */
