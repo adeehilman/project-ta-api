@@ -10,7 +10,7 @@
             "dest": "/api/index.php"
         },
         {
-            "src": "/riwayat/filter",
+            "src": "/riwayat/lsit",
             "dest": "/api/index.php"
         }
     ],
