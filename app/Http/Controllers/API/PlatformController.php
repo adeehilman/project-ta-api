@@ -333,106 +333,28 @@ class PlatformController extends Controller
         /**
          * Cek data uuid dan player_id matching
          ***/
-        $query = "SELECT COUNT(id) as count FROM tbl_mms WHERE UUID = '$current_uuid' AND player_id = '$current_player_id' LIMIT 1";
-        $checkPass = DB::select($query);
-
-        $count = $checkPass[0]->count;
-
-        if ($count == 0) {
-            $passuid = DB::table('tbl_mms')
-            ->select('id')
-                ->where('uuid', $current_uuid)
-                ->get();
-
-            $player_id = DB::table('tbl_mms')
-            ->select('id')
-                ->where('player_id', $current_player_id)
-                ->get();
-
-            if ($passuid->isEmpty() && $player_id->isEmpty()) {
-                // UUID dan player_id Anda telah berubah, silahkan ke HRD
-                // return response()
-                //     ->json(
-                //         [
-                //             'RESPONSE_CODE' => 400,
-                //             'MESSAGETYPE' => 'E',
-                //             'MESSAGE' => 'UUID dan player id Anda telah berubah silahkan ke HRD',
-                //         ],
-                //         400,
-                //     )
-                //     ->header('Accept', 'application/json');
-
-                return response()->json([
-                'RESPONSE' => 200,
-                'MESSAGETYPE' => 'S',
-                'MESSAGE' => 'SUCCESS',
-            ]);
-            }
-
-            DB::beginTransaction();
-            try {
-                // Jika UUID tidak ada, update UUID
-                if ($passuid->isEmpty()) {
-                    // $result = DB::table('tbl_mms')
-                    // ->select('id')
-                    // ->where('player_id', $current_player_id)
-                    // ->first();
-
-                    // $idToUpdate = $result->id;
-                    // DB::table('tbl_mms')
-                    // ->where('id', $idToUpdate)
-                    // ->update(['uuid' => $current_uuid]);
-                    return response()->json([
-                        'RESPONSE' => 200,
-                        'MESSAGETYPE' => 'S',
-                        'MESSAGE' => 'SUCCESS',
-                    ]);
-
-                }
-
-                // Jika player_id tidak ada, update player_id
-                if ($player_id->isEmpty()) {
-                    DB::table('tbl_mms')
-                        ->where('uuid', $current_uuid)
+         DB::beginTransaction();
+         DB::table('tbl_mms')
+                        ->where('bagde_id', $request->badge_id)
                         ->update(['player_id' => $current_player_id]);
-                }
 
-                DB::commit();
-                $responseMessage = $passuid->isEmpty() ? 'Uuid' : 'Player ID';
-                return response()->json([
-                    'RESPONSE' => 200,
-                    'MESSAGETYPE' => 'S',
-                    'MESSAGE' => "$responseMessage telah berhasil diupdate",
-                ]);
-            } catch (\Throwable $th) {
-                DB::rollBack();
-                return response()
-                    ->json(
-                        [
-                            'MESSAGETYPE' => 'E',
-                            'MESSAGE' => $th->getMessage(),
-                        ],
-                        400,
-                    )
-                    ->header('Accept', 'application/json');
-            }
-        } else {
-            return response()->json([
+         DB::commit();
+
+         return response()->json([
                 'RESPONSE' => 200,
                 'MESSAGETYPE' => 'S',
                 'MESSAGE' => 'SUCCESS',
             ]);
-        }
     }
 
     public function notifAlarm(Request $request)
     {
         // dd($request->all());
         try {
-            
+
             $getBadge = DB::table('tbl_deptauthorize')->where('dept_code', 'ALARM')->where('get_notif', 1)->get();
 
-            
+
             $client = new Client();
             foreach($getBadge as $badge){
                 $data   = [
@@ -448,7 +370,7 @@ class PlatformController extends Controller
                 //     'json' => $data,
                 // ]);
 
-                
+
                  $response =  $client->post('http://192.168.88.60:7005/api/notifikasi/send', [ // dev
                     'json' => $data,
                 ]);
@@ -461,7 +383,7 @@ class PlatformController extends Controller
                 "MESSAGE"       => "SUCCESS"
             ]);
 
-            
+
         } catch (\Throwable $th) {
             DB::rollBack();
                 return response()

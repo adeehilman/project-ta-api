@@ -119,7 +119,7 @@ class MeetingRoomController extends Controller
             // dd($deptcodeString);
 
             /**
-             * apabila startdate dan enddate    
+             * apabila startdate dan enddate
              */
             if ($startDate == '' || $endDate == '') {
                 return response()->json([
@@ -132,7 +132,7 @@ class MeetingRoomController extends Controller
                 );
             }
 
-            
+
 
             /**
              * Lakukan insialisasi query
@@ -151,7 +151,7 @@ class MeetingRoomController extends Controller
                     (SELECT status_name_ina FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_ina,
                     (SELECT status_name_eng FROM tbl_statusmeeting WHERE id = statusmeeting_id) AS status_meeting_name_eng,
                     COALESCE((SELECT COUNT(*) FROM tbl_participant WHERE meeting_id = a.id), 0) AS jumlah_partisipan
-                FROM tbl_meeting a LEFT JOIN tbl_roommeeting rm ON rm.id = roommeeting_id 
+                FROM tbl_meeting a LEFT JOIN tbl_roommeeting rm ON rm.id = roommeeting_id
                 WHERE (meeting_date BETWEEN '$startDate' AND '$endDate') AND
                 ( EXISTS ( SELECT 1 FROM tbl_participant p WHERE p.meeting_id = a.id AND p.participant = '$badge_id') OR
                     rm.dept IN ($deptcodeString, 'SATNUSA'  )
@@ -344,9 +344,9 @@ class MeetingRoomController extends Controller
 
                 // Tambahkan URL gambar jika $img true
                 if ($img == true) {
-                    $d['Room_Image_1'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_1;
-                    $d['Room_Image_2'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_2;
-                    $d['Room_Image_3'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_3;
+                    $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
+                    $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
+                    $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
                 }
                     array_push($arrData, $d);
             }
@@ -365,13 +365,13 @@ class MeetingRoomController extends Controller
 
                 // Tambahkan URL gambar jika $img true
                 if ($img == true) {
-                    $d['Room_Image_1'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_1;
-                    $d['Room_Image_2'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_2;
-                    $d['Room_Image_3'] = "https://webapi.satnusa.com/RoomMeetingFoto/" . $r->Room_Image_3;
+                    $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
+                    $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
+                    $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
                 }
-                    array_push($arrData2, $d);    
+                    array_push($arrData2, $d);
             }
-          
+
             $array_gabungan = array_merge($arrData, $arrData2);
 
             return response()->json([
@@ -505,7 +505,7 @@ class MeetingRoomController extends Controller
                         'Fullname' => $item->fullname,
                         'Position' => $item->position_name,
                         'Kehadiran' => $item->kehadiran,
-                        'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG",
+                        'Image'    => env('BASE_URL'). "/EmplFoto/" . $item->participant . ".JPG",
                     ];
                     array_push($list_user, $arrItem);
                 }
@@ -557,13 +557,13 @@ class MeetingRoomController extends Controller
             );
         }
 
-        
+
         // Ini adalah insialisasi query dengan fullname
         $fullname = "%" . $request->fullname . "%";
 
         $badge = $request->badge_id;
- 
-        
+
+
         if(!$badge){
             // jika tidak memasukan parameter badge
             $query = "SELECT
@@ -579,7 +579,7 @@ class MeetingRoomController extends Controller
             $dept = $dept[0];
 
             $checkSpecialBadge = DB::table('tbl_allparticipantauthorize')->where('badge', $badge)->first();
-            
+
             // ketika badge nya berada di special all participant view
             if($checkSpecialBadge){
                 $query = "SELECT
@@ -594,12 +594,12 @@ class MeetingRoomController extends Controller
                             fullname as Employee_Name,
                             badge_id as Badge,
                             (SELECT position_name FROM tbl_position WHERE position_code = a.position_code) as Position
-                    FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30"; 
+                    FROM tbl_karyawan a WHERE fullname LIKE '$fullname' OR badge_id LIKE '$fullname'  LIMIT 30";
             }
             else{
                 $query = "SELECT * FROM (
                             (SELECT a.id AS Id, a.fullname AS Employee_Name, a.badge_id AS Badge, b.position_name AS POSITION FROM tbl_karyawan a, tbl_position b
-                            WHERE a.position_code = b.position_code AND LEFT(a.line_code,4) = '$dept->linecode')        
+                            WHERE a.position_code = b.position_code AND LEFT(a.line_code,4) = '$dept->linecode')
                             UNION
                             (SELECT  a.id AS Id, a.fullname AS Employee_Name, c.badge_id AS Badge, b.position_name AS POSITION
                             FROM tbl_karyawan a, tbl_position b, tbl_mgworkarea c WHERE a.badge_id = c.badge_id AND a.position_code = b.position_code  AND  c.dept_code = '$dept->linecode')) AS A
@@ -612,7 +612,7 @@ class MeetingRoomController extends Controller
         $dataNew = [];
         if (COUNT($data) > 0) {
             foreach ($data as $key => $item) {
-                $item->image = "https://webapi.satnusa.com/EmplFoto/" . $item->Badge . ".JPG";
+                $item->image = env('BASE_URL') . "/EmplFoto/" . $item->Badge . ".JPG";
                 array_push($dataNew, $item);
             }
             return response()->json([
@@ -836,12 +836,12 @@ class MeetingRoomController extends Controller
                     ]);
             }
 
-            DB::commit();    
+            DB::commit();
 
             // send notif with hardcode
 
             $formattedDate = date('d F Y', strtotime($meetDate));
-            
+
             $badgeIds = $this->getBadgeAuthorizeNotification($meetingId);
 
             foreach ($badgeIds as $badgeId){
@@ -849,7 +849,7 @@ class MeetingRoomController extends Controller
             }
             // $this->sendNotifKeResepsionis("PKL84", "Rapat Baru  ".$titleMeeting , $formattedDate . ", Pukul " .$meetStart, $newIdMeeting);
             // prod
-            
+
             // $this->sendNotifKeResepsionis("200040", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             // $this->sendNotifKeResepsionis("200195", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
             // $this->sendNotifKeResepsionis("036834", "Rapat Baru : " . $titleMeeting, $formattedDate . ", Pukul " . $meetStart);
@@ -1295,9 +1295,9 @@ class MeetingRoomController extends Controller
         }
     }
 
-    /** 
+    /**
      * function untuk extend meeting
-     * 
+     *
      **/
     public function extendMeeting(Request $request)
     {
@@ -1314,11 +1314,11 @@ class MeetingRoomController extends Controller
                 "application/json"
             );
         }
-        
+
         $idMeeting          = $request->id_meeting;
         $badge_pembuat      = $request->booking_by;
         $meeting_end       = $request->extended_meeting_end;
-        
+
         $query_karyawan = "SELECT fullname FROM tbl_karyawan WHERE badge_id = '$badge_pembuat' ";
         $data_karyawan  = DB::select($query_karyawan);
         $nama_pembuat   = $data_karyawan[0]->fullname;
@@ -1363,11 +1363,11 @@ class MeetingRoomController extends Controller
         }
     }
 
-    /** 
+    /**
      * function untuk speedup meeting
-     * ketika rapat sudah selesai akan mengirim notif 
+     * ketika rapat sudah selesai akan mengirim notif
      * ke rapat selanjutnya
-     * 
+     *
      **/
     public function endEarlyMeeting(Request $request)
     {
@@ -1384,35 +1384,35 @@ class MeetingRoomController extends Controller
                 "application/json"
             );
         }
-        
+
         $idMeeting          = $request->id_meeting;
         $badge_pembuat      = $request->booking_by;
         $meeting_end       = $request->meeting_end_early;
 
         $data_meeting = DB::table('tbl_meeting')
             ->where('id', $idMeeting)
-            ->first();    
-        
+            ->first();
+
             // dd($data_meeting);
-        $checkDataInterval = 
+        $checkDataInterval =
         "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id , booking_by
-        FROM tbl_meeting 
-        WHERE meeting_date = '$data_meeting->meeting_date' 
-            AND roommeeting_id = '$data_meeting->roommeeting_id' 
-            AND NOT statusmeeting_id IN ('5','6') 
-            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') >= '00:00:00' 
-            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') <= '02:00:00' 
+        FROM tbl_meeting
+        WHERE meeting_date = '$data_meeting->meeting_date'
+            AND roommeeting_id = '$data_meeting->roommeeting_id'
+            AND NOT statusmeeting_id IN ('5','6')
+            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') >= '00:00:00'
+            AND TIMEDIFF(meeting_start, '$data_meeting->meeting_end') <= '02:00:00'
         ORDER BY meeting_start ASC;
-        ";  
+        ";
         $interval = DB::SELECT($checkDataInterval);
         // dd($interval);
 
         // dd($interval);
         if($interval){
-            
+
             $data_room = DB::table('tbl_roommeeting')
             ->where('id', $interval[0]->roommeeting_id)
-            ->first();  
+            ->first();
 
             $realtime = date('H:i', strtotime($meeting_end));
             // dd($realtime);
@@ -1427,8 +1427,8 @@ class MeetingRoomController extends Controller
                     'dynamic_id'  => $interval[0]->id
                 ];
 
-                // dd($data);   
-                $response =  $client->post('https://webapi.satnusa.com/api/notifikasi/send', [
+                // dd($data);
+                $response =  $client->post(env('BASE_URL'). '/api/notifikasi/send', [
                     'json' => $data,
                 ]);
 
@@ -1675,16 +1675,16 @@ class MeetingRoomController extends Controller
             }
 
             // insialisasi query interval max extend
-           
-           
-            
-            $checkDataInterval = "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id 
-            FROM tbl_meeting 
-            WHERE meeting_date = '$meeting_date' 
-            AND roommeeting_id = '$room' 
-            AND NOT statusmeeting_id 
+
+
+
+            $checkDataInterval = "SELECT id, title_meeting, roommeeting_id, meeting_date, meeting_start, meeting_end, statusmeeting_id
+            FROM tbl_meeting
+            WHERE meeting_date = '$meeting_date'
+            AND roommeeting_id = '$room'
+            AND NOT statusmeeting_id
             IN ('5','6') AND meeting_start > '$meeting_end' ORDER BY meeting_start ASC LIMIT 1"; //13:00:00 start meeting
-            
+
             $interval = DB::SELECT($checkDataInterval);
             if($interval){
                 // dd($interval[0]->meeting_start);
@@ -1694,7 +1694,7 @@ class MeetingRoomController extends Controller
             }
 
             $NextStart = intval($NextStart);
-            
+
 
             // dd($NextStart);
             // Insialisasi query participan
@@ -1718,7 +1718,7 @@ class MeetingRoomController extends Controller
                         'Fullname' => $item->fullname,
                         'Kehadiran' => $item->kehadiran,
                         'Position' => $item->position_name,
-                        'Image'    => "http://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
+                        'Image'    => env('BASE_URL') . "/EmplFoto/" . $item->participant . ".JPG"
                     ];
                     array_push($list_user, $arrItem);
                     $index = array_search($dataMeeting[0]->Booking_By, array_column($list_user, 'Badge_Id'));
@@ -1740,7 +1740,7 @@ class MeetingRoomController extends Controller
                                 FROM tbl_tanggapanmeeting WHERE meeting_id = '$idMeeting' ORDER BY id DESC";
             $data_tanggapan  = DB::select($query_tanggapan);
             foreach ($data_tanggapan as $key => $value) {
-                $value->Image = "http://webapi.satnusa.com/EmplFoto/" . $value->Create_By . ".JPG";
+                $value->Image =  env('BASE_URL') ."/EmplFoto/" . $value->Create_By . ".JPG";
             }
 
             // get fasilitas by detail
@@ -1796,7 +1796,7 @@ class MeetingRoomController extends Controller
         $query_player_id = "SELECT player_id FROM tbl_mms WHERE badge_id = '$badge_id'";
         $data_player_id = DB::select($query_player_id);
 
-        
+
         $arr_playerId = [];
         foreach ($data_player_id as $key => $value) {
             if ($value->player_id != null) {
@@ -1870,9 +1870,9 @@ class MeetingRoomController extends Controller
     {
         // dd('$newIdMeeting');
         // URL API tujuan
-        $apiUrl = 'https://webapi.satnusa.com/api/notifikasi/send';
+        $apiUrl = env('BASE_URL') . '/api/notifikasi/send';
         // $apiUrl = 'http://192.168.88.60:7005/api/notifikasi/send';
-        // $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';      
+        // $apiUrl = 'http://127.0.0.1:8000/api/notifikasi/send';
 
         // Membuat instance Client Guzzle
         $client = new Client();
@@ -2094,7 +2094,7 @@ class MeetingRoomController extends Controller
                 ];
 
                 // API yang hanya mengirim One Signal
-                $response =  $client->get('https://webapi.satnusa.com/api/meeting/send-notif', [
+                $response =  $client->get(env('BASE_URL') . '/api/meeting/send-notif', [
                     'json' => $data,
                 ]);
             } catch (\Throwable $th) {
@@ -2116,7 +2116,7 @@ class MeetingRoomController extends Controller
 
 
     public function getBadgeAuthorizeNotification($deptRoom)
-    {   
+    {
         // dd($deptRoom);
         // ambil department dari room
         $Room = DB::table('tbl_roommeeting')

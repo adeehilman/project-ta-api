@@ -202,19 +202,11 @@ class AuthController extends Controller
                  * Pengecekan untuk uuid lama, di app mysatnusa baru
                  * apabila sama bolehkan pengguna login
                  */
-                $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' AND is_active = '1' LIMIT 1");
-
-                if (count($isUUIDMatching) > 0) {
-
-                    // lakukan update is_new_uuid agar tidak di timpa device lain. apabila is_new_uuid nya adalah 0
-                    if ($isUUIDMatching[0]->is_new_uuid == '0') {
-                        // atau org yg iseng
-                        DB::beginTransaction();
+                 DB::beginTransaction();
                         try {
                             // update is new uuid di tabel mms
                             DB::table('tbl_mms')
                                 ->where('badge_id', $request->badge_id)
-                                ->where('uuid', $request->uuid_new)
                                 ->update([
                                     "is_new_uuid" => '1',
                                     "versi_aplikasi" => $request->versi_aplikasi,
@@ -225,25 +217,6 @@ class AuthController extends Controller
                         } catch (\Throwable $th) {
                             DB::rollBack();
                         }
-                    }
-
-                    // update is new uuid di tabel mms
-                    DB::table('tbl_mms')
-                        ->where('badge_id', $request->badge_id)
-                        ->where('uuid', $request->uuid_new)
-                        ->update([
-                            "versi_aplikasi" => $request->versi_aplikasi,
-                            "player_id" => $request->player_id
-                        ]);
-
-                    DB::commit();
-
-                    return response()->json([
-                        "message" => "Berhasil Login",
-                        "data"    => $data,
-                        "token"   => $token
-                    ]);
-                }
                 /**
                  * logic kak fara end
                  */
@@ -416,7 +389,7 @@ class AuthController extends Controller
                         ];
 
                         // API yang hanya mengirim One Signal
-                        $responseOS =  $clientOnesignal->get('https://webapi.satnusa.com/api/meeting/send-notif', [
+                        $responseOS =  $clientOnesignal->get(env('BASE_URL') . '/api/meeting/send-notif', [
                             'json' => $dataOS,
                         ]);
 
