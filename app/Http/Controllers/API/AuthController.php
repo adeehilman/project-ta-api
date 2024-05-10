@@ -233,7 +233,7 @@ class AuthController extends Controller
                  * maka return can't not login, butuh patching oleh TIM DOT
                  */
                 // $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' ");
-                $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' AND is_new_uuid = '0' ");
+                $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id'");
 
 
                 // apabila list device karyawan lebih dari 1, return can't not login, butuh patching oleh TIM DOT
@@ -290,7 +290,7 @@ class AuthController extends Controller
                      * cek terlebih dahulu apakah pengguna membawa uuid yang lama dan itu mathcing dengan database nya
                      * kalau iya boleh login
                      */
-                    $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' AND UUID = '$request->uuid_new' LIMIT 1");
+                    $isUUIDMatching = DB::select("SELECT * FROM tbl_mms WHERE badge_id = '$request->badge_id' LIMIT 1");
                     if ($isUUIDMatching) {
                         // DB::rollBack();
 
