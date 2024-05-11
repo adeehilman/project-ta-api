@@ -217,60 +217,7 @@ class AuthController extends Controller
                         } catch (\Throwable $th) {
                             DB::rollBack();
                         }
-                /**
-                 * logic kak fara end
-                 */
 
-
-                /**
-                 * Lakukan pengecekan ke tabel mms
-                 * untuk mendapatkan data device user yang terdaftar.
-                 *
-                 * apabila device yang ditemukan hanya 1 phone
-                 * maka replace uuid yang lama dengan uuid yang baru dari aplokasi mysatnusa DOT
-                 *
-                 * apabila device yang ditemukan lebih dari 1
-                 * maka return can't not login, butuh patching oleh TIM DOT
-                 */
-                // $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id' ");
-                $list_device_karyawan = DB::select("SELECT COUNT(*) AS jlh FROM tbl_mms WHERE badge_id = '$request->badge_id'");
-
-
-                // apabila list device karyawan lebih dari 1, return can't not login, butuh patching oleh TIM DOT
-                if ($list_device_karyawan[0]->jlh > 0) {
-                    /**
-                     * dan masukkan ke tabel logs login apabila user gagal
-                     * login karena device nya lebih dari 1 perangkat
-                     */
-
-                    DB::beginTransaction();
-                    try {
-
-                        DB::table('tbl_device_temp')
-                            ->insert([
-                                "badge_id" => $request->badge_id,
-                                "uuid_new" => $request->uuid_new,
-                                "tipe_hp"  => $request->tipe_hp,
-                                "merek_hp" => $request->merek_hp,
-                                "os"       => $request->os,
-                                "versi_aplikasi" => $request->versi_aplikasi,
-                                "createdate" => date("Y-m-d H:i:s")
-                            ]);
-
-                        DB::commit();
-
-                        return response()->json([
-                            "message" => "Kamu belum bisa login, ada hp lama kamu yang belum di pairing, kami akan bantu kamu agar bisa login, silahkan login kembali selama 2 X 24 Jam",
-                        ], 400);
-                    } catch (\Throwable $th) {
-
-
-                        DB::rollBack();
-                        return response()->json([
-                            "message" => "Something went wrong, when insert logs login",
-                        ], 400);
-                    }
-                }
 
 
 
