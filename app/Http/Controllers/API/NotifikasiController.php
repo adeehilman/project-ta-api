@@ -10,7 +10,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class NotifikasiController extends Controller
 {
-    // buat dapetin list notifikasi by badge 
+    // buat dapetin list notifikasi by badge
     public function getListNotifikasi(Request $request)
     {
 
@@ -35,14 +35,14 @@ class NotifikasiController extends Controller
             // lakukan query untuk get list notifikasi
             // Di sini, kita melakukan query ke database untuk mengambil data notifikasi berdasarkan badge_id tertentu.
             // Data notifikasi ini kemudian akan digunakan untuk memberikan respons kepada pengguna melalui API.
-            $query = "SELECT 
+            $query = "SELECT
                     id as Id,
                     title as Title,
-                    description as Description, 
+                    description as Description,
                     category as Category,
                     createdate as Create_Date,
                     badge_id as Badge_Id,
-                    isread as Is_Read, 
+                    isread as Is_Read,
                     read_date as Read_Date,
                     dynamic_id as Dynamic_Id
             FROM tbl_notification WHERE badge_id = '$badgeId' ";
@@ -95,16 +95,16 @@ class NotifikasiController extends Controller
         ]);
     }
 
-    // send notifikasi 
+    // send notifikasi
     /**
      * function untuk send notif dimana fungsi ini
      * dibuat secara flexibel yaitu terkait message title
-     * dan message detailnya. dimana menggunakan one signal 
+     * dan message detailnya. dimana menggunakan one signal
      * nantinya akan dikirimkan di perangkat pengguna.
-     * 
-     * setelah itu juga dimasukkan kedalam sebuah tabel notfikasi 
-     * yang nantinya akan ditampilkan kedalam list notifikasi 
-     * poda aplikasi mobile 
+     *
+     * setelah itu juga dimasukkan kedalam sebuah tabel notfikasi
+     * yang nantinya akan ditampilkan kedalam list notifikasi
+     * poda aplikasi mobile
      */
     public function sendNotif(Request $request)
     {
@@ -135,7 +135,7 @@ class NotifikasiController extends Controller
          * untuk proses selanjutnya dalam aplikasi, seperti validasi, pemrosesan, penyimpanan, atau pengiriman respons.
          */
 
-      
+
         $badge_id = $request->badge_id;
         $message  = $request->message;
         $category = $request->category;
@@ -173,7 +173,8 @@ class NotifikasiController extends Controller
                 'en' => $sub_message
             ],
             'data' => [
-                'Category' => $request->category ? $request->category : ''
+                'Category' => $request->category ? $request->category : '',
+                'Dynamic_id' => $dynamic_Id
             ],
         ];
 

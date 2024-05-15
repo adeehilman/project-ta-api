@@ -1789,6 +1789,7 @@ class MeetingRoomController extends Controller
         $badge_id = $request->badge_id;
         $message  = $request->message;
         $sub_message = $request->sub_message;
+        $meetingId = $request->dynamic_id;
 
         /**
          * query untuk send notif
@@ -1818,7 +1819,8 @@ class MeetingRoomController extends Controller
                 'en' => $sub_message
             ],
             'data' => [
-                'Category' => 'MEETING_ROOM'
+                'Category' => 'MEETING_ROOM',
+                'Dynamic_id' => $meetingId
             ],
         ];
 
@@ -2090,7 +2092,8 @@ class MeetingRoomController extends Controller
                 $data   = [
                     'badge_id' => $item->participant,
                     'message'  => "Rapat akan mulai dalam 15 menit",
-                    'sub_message' => "$title_meeting"
+                    'sub_message' => "$title_meeting",
+                    'dynamic_id'  => $id_meeting
                 ];
 
                 // API yang hanya mengirim One Signal
