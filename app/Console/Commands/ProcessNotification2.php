@@ -34,9 +34,8 @@ class ProcessNotification2 extends Command
                 CONCAT(meeting_date, ' ', meeting_start) = DATE_FORMAT(NOW() + INTERVAL 10 MINUTE, '%Y-%m-%d %H:%i:00');
             ");
 
-            $dummy = '651';
-            if ($dummy) {
-                foreach ($dummy as $key => $value) {
+            if ($getId) {
+                foreach ($getId as $key => $value) {
                     $client = new Client();
                     $url = env('BASE_URL') . '/api/reminder-meeting?id_meeting=' . $value->id;
                 }
