@@ -2092,7 +2092,7 @@ class MeetingRoomController extends Controller
 
                  DB::table('tbl_queuenotif')->insert([
                     'badge_id' => $item->participant,
-                    'message' => 'Rapat akan mulai dalam 15 menit',
+                    'message' => 'Rapat akan mulai dalam 10 menit',
                     'sub_message' => "Ketuk untuk lihat lebih detail",
                     'category' => 'Meeting',
                     'tag' => 'Meeting',
