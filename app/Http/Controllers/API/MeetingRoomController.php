@@ -2087,26 +2087,21 @@ class MeetingRoomController extends Controller
 
         // Proses Looping  Participant
         foreach ($data_participant as $key => $item) {
-            try {
-                $client = new Client();
-                $data   = [
-                    'badge_id' => $item->participant,
-                    'message'  => "Rapat akan mulai dalam 15 menit",
-                    'sub_message' => "$title_meeting",
-                    'dynamic_id'  => $id_meeting
-                ];
 
-                // API yang hanya mengirim One Signal
-                $response =  $client->get(env('BASE_URL') . '/api/meeting/send-notif', [
-                    'json' => $data,
+            try {
+
+                 DB::table('tbl_queuenotif')->insert([
+                    'badge_id' => $item->participant,
+                    'message' => 'Rapat akan mulai dalam 15 menit',
+                    'sub_message' => "Ketuk untuk lihat lebih detail",
+                    'category' => 'Meeting',
+                    'tag' => 'Meeting',
+                    'dynamic_id' => "$id_meeting",
+                    'is_send'    => 0,
+                    'is_log'     => 1,
                 ]);
             } catch (\Throwable $th) {
                 dd($th);
-                return response()->json([
-                    "RESPONSE"      => 400,
-                    "MESSAGETYPE"   => "E",
-                    "MESSAGE"       => "FAILED"
-                ], 400);
             }
         }
 
