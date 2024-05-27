@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('notif:queue')->everySecond();
         $schedule->command('firewall:unblockip')->everyMinute();
-        $schedule->command('notif:queue2')->everySecond();
+        $schedule->command('notif:queue2')->everyMinute();
     }
 
     /**
