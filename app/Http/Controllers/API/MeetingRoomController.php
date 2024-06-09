@@ -199,7 +199,7 @@ class MeetingRoomController extends Controller
                                 'Participant' => $rp->participant,
                                 'Participan_Name' => $rp->participant_name,
                                 'Dept_Code' => $rp->dept_code ? $rp->dept_code : 'N/A',
-                                'Participant_Image' => "http://webapi.satnusa.com/EmplFoto/" . $rp->participant . ".JPG"
+                                'Participant_Image' => env('BASE_URL') ."/EmplFoto/" . $rp->participant . ".JPG"
                             );
                             array_push($arrParticipant, $dp);
                         }

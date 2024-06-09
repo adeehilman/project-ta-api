@@ -331,8 +331,8 @@ class AuthController extends Controller
 
                         $dataOS   = [
                             'badge_id' => $badge->badge_id,
-                            'message'  => "🔥 Possible attack on webapi.satnusa.com",
-                            'sub_message' => "A possible login attack on webapi.satnusa.com has been detected from $blockedIp"
+                            'message'  => "🔥 ",
+                            'sub_message' => "A possible login attack been detected from $blockedIp"
                         ];
 
                         // API yang hanya mengirim One Signal
