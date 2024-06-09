@@ -152,7 +152,7 @@ class MeetingRoomController extends Controller
                                 'Id' => $rp->id,
                                 'Meeting_Id' => $rp->meeting_id,
                                 'Participant' => $rp->participant,
-                                'Participant_Image' => "https://webapi.satnusa.com/EmplFoto/" . $rp->participant . ".JPG"
+                                'Participant_Image' => env('BASE_URL') . "/EmplFoto/" . $rp->participant . ".JPG"
                             );
                             array_push($arrParticipant, $dp);
                         }
@@ -219,9 +219,9 @@ class MeetingRoomController extends Controller
 
             if ($img == true) {
                 foreach ($data_allRoom as $key => $item) {
-                    $item->Room_Image_1 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_1;
-                    $item->Room_Image_2 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_2;
-                    $item->Room_Image_3 = "https://webapi.satnusa.com/RoomMeetingFoto/" . $item->Room_Image_3;
+                    $item->Room_Image_1 = env('BASE_URL') . "/RoomMeetingFoto/" . $item->Room_Image_1;
+                    $item->Room_Image_2 = env('BASE_URL') . "/RoomMeetingFoto/" . $item->Room_Image_2;
+                    $item->Room_Image_3 = env('BASE_URL') . "/RoomMeetingFoto/" . $item->Room_Image_3;
                 }
             }
 
@@ -337,7 +337,7 @@ class MeetingRoomController extends Controller
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
                         'Position' => $item->position_name,
-                        'Image'    => "https://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
+                        'Image'    => env('BASE_URL') ."/EmplFoto/" . $item->participant . ".JPG"
                     ];
                     array_push($list_user, $arrItem);
                 }
@@ -386,7 +386,7 @@ class MeetingRoomController extends Controller
         $dataNew = [];
         if (COUNT($data) > 0) {
             foreach ($data as $key => $item) {
-                $item->image = "https://webapi.satnusa.com/EmplFoto/" . $item->Badge . ".JPG";
+                $item->image = env('BASE_URL') ."/EmplFoto/" . $item->Badge . ".JPG";
                 array_push($dataNew, $item);
             }
             return response()->json([
@@ -1008,7 +1008,7 @@ class MeetingRoomController extends Controller
                         'Optional' => $item->optional,
                         'Fullname' => $item->fullname,
                         'Position' => $item->position_name,
-                        'Image'    => "https://webapi.satnusa.com/EmplFoto/" . $item->participant . ".JPG"
+                        'Image'    => env('BASE_URL') ."/EmplFoto/" . $item->participant . ".JPG"
                     ];
                     array_push($list_user, $arrItem);
                 }
