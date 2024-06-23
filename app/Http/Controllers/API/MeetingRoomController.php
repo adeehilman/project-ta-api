@@ -284,111 +284,131 @@ class MeetingRoomController extends Controller
     {
 
         $img = $request->img == "true" ? true : false;
-        $txFilter = "";
-        if ($img == true) {
-            $txFilter = "roomimage_1 as Room_Image_1, roomimage_2 as Room_Image_2, roomimage_3 as Room_Image_3,";
-        }
+$txFilter = "";
+if ($img == true) {
+    $txFilter = "roomimage_1 as Room_Image_1, roomimage_2 as Room_Image_2, roomimage_3 as Room_Image_3,";
+}
 
-        $badge_id = $request->badge_id;
+$badge_id = $request->badge_id;
 
-        $get_deptcode = "SELECT dept_code FROM tbl_deptauthorize WHERE badge_id = '$badge_id'";
-        $deptcode = DB::select($get_deptcode);
+$get_deptcode = "SELECT dept_code FROM tbl_deptauthorize WHERE badge_id = '$badge_id'";
+$deptcode = DB::select($get_deptcode);
 
-        // Mengambil nilai dept_code dari setiap baris hasil query
-        $deptcodeValues = collect($deptcode)->pluck('dept_code')->toArray();
+// Mengambil nilai dept_code dari setiap baris hasil query
+$deptcodeValues = collect($deptcode)->pluck('dept_code')->toArray();
 
-        // Mengonversi array nilai dept_code menjadi string dengan pemisah koma
-        $deptcodeString = "'" . implode("','", $deptcodeValues) . "'";
-        // dd($deptcodeString);
+// Mengonversi array nilai dept_code menjadi string dengan pemisah koma
+$deptcodeString = "'" . implode("','", $deptcodeValues) . "'";
 
-        $query_allRoom = "SELECT
-                            id as Id,
-                            room_name as Room_Name,
-                            floor as Floor,
-                            capacity as Capacity,
-                            $txFilter
-                            dept
-                          FROM tbl_roommeeting WHERE dept IN ($deptcodeString) 	ORDER BY
-	    SUBSTRING_INDEX(room_name, ' ', 1),
-	    CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED),
-	    room_name;
+// Query untuk semua ruangan sesuai dept
+$query_allRoom = "SELECT
+                    id as Id,
+                    room_name as Room_Name,
+                    floor as Floor,
+                    capacity as Capacity,
+                    $txFilter
+                    dept
+                  FROM tbl_roommeeting
+                  WHERE dept IN ($deptcodeString)
+                  ORDER BY
+                  SUBSTRING_INDEX(room_name, ' ', 1),
+                  CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED),
+                  room_name";
 
-                          ";
-        $data_allRoom  = DB::select($query_allRoom);
+$data_allRoom  = DB::select($query_allRoom);
 
-        // Get all data Ruangan Public Satnusa
-        $queryAllPublicRoom = "SELECT
-                            id as Id,
-                            room_name as Room_Name,
-                            floor as Floor,
-                            capacity as Capacity,
-                            $txFilter
-                            dept
-                          FROM tbl_roommeeting WHERE dept IN ('SATNUSA') ORDER BY CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED), room_name
-                          ";
-        $dataSatnusaRoom  = DB::select($queryAllPublicRoom);
-        $arrData = array();
-        $arrData2 = array();
+// Query untuk ruangan public Satnusa
+$queryAllPublicRoom = "SELECT
+                        r.id AS Id,
+                        r.room_name AS Room_Name,
+                        r.floor AS Floor,
+                        r.capacity AS Capacity,
+                        $txFilter
+                        r.dept,
+                        CASE
+                            WHEN m.roommeeting_id IS NOT NULL THEN 'false'
+                            ELSE 'true'
+                        END AS disable
+                    FROM
+                        tbl_roommeeting r
+                    LEFT JOIN
+                        (SELECT DISTINCT roommeeting_id
+                         FROM tbl_meeting
+                         WHERE meeting_date = '$request->meetingdate'
+                           AND (TIME('$request->meetingstart') + INTERVAL 1 MINUTE) <= meeting_end
+                           AND (TIME('$request->meetingend') - INTERVAL 1 MINUTE) >= meeting_start
+                           AND statusmeeting_id <> '6') m
+                    ON r.id = m.roommeeting_id
+                    WHERE r.dept IN ('SATNUSA')
+                    ORDER BY
+                        CAST(SUBSTRING_INDEX(r.room_name, ' ', -1) AS UNSIGNED),
+                        r.room_name";
 
-        if (COUNT($data_allRoom) > 0) {
-            foreach ($data_allRoom as $r) {
-                // dd($r);
+$dataSatnusaRoom  = DB::select($queryAllPublicRoom);
 
-                $d = array(
-                    'Id'          => $r->Id,
-                    'Room_Name'   => $r->Room_Name,
-                    'Floor'       => $r->Floor,
-                    'Capacity'    => $r->Capacity,
-                    'dept'        => $r->dept
-                );
+$arrData = [];
 
-                // Tambahkan URL gambar jika $img true
-                if ($img == true) {
-                    $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
-                    $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
-                    $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
-                }
-                    array_push($arrData, $d);
-            }
+// Menggabungkan data dari data_allRoom
+foreach ($data_allRoom as $r) {
+    $d = [
+        'Id'        => $r->Id,
+        'Room_Name' => $r->Room_Name,
+        'Floor'     => $r->Floor,
+        'Capacity'  => $r->Capacity,
+        'dept'      => $r->dept
+    ];
 
-            // DATA RUANGAN PUBLIC SATNUSA
-            foreach ($dataSatnusaRoom as $r) {
-                // dd($r);
+    // Tambahkan URL gambar jika $img true
+    if ($img == true) {
+        $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
+        $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
+        $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
+    }
 
-                $d = array(
-                    'Id'          => $r->Id,
-                    'Room_Name'   => $r->Room_Name,
-                    'Floor'       => $r->Floor,
-                    'Capacity'    => $r->Capacity,
-                    'dept'        => $r->dept
-                );
+    array_push($arrData, $d);
+}
 
-                // Tambahkan URL gambar jika $img true
-                if ($img == true) {
-                    $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
-                    $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
-                    $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
-                }
-                    array_push($arrData2, $d);
-            }
+// DATA RUANGAN PUBLIC SATNUSA
+foreach ($dataSatnusaRoom as $r) {
+    $d = [
+        'Id'        => $r->Id,
+        'Room_Name' => $r->Room_Name,
+        'Floor'     => $r->Floor,
+        'Capacity'  => $r->Capacity,
+        'dept'      => $r->dept,
+        'available' => $r->disable // Pastikan ini ditambahkan
+    ];
 
-            $array_gabungan = array_merge($arrData, $arrData2);
+    // Tambahkan URL gambar jika $img true
+    if ($img == true) {
+        $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
+        $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
+        $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
+    }
 
-            return response()->json([
-                "RESPONSE"      => 200,
-                "MESSAGETYPE"   => "S",
-                "MESSAGE"       => "SUCCESS",
-                "DATA"          => $array_gabungan
-            ]);
-        }
+    array_push($arrData, $d);
+}
 
-        return response()->json([
-            "MESSAGETYPE"   => "E",
-            "MESSAGE" => "Something when wrong",
-        ], 400)->header(
-            "Accept",
-            "application/json"
-        );
+// Menggabungkan data
+$array_gabungan = $arrData;
+
+if (count($array_gabungan) > 0) {
+    return response()->json([
+        "RESPONSE"      => 200,
+        "MESSAGETYPE"   => "S",
+        "MESSAGE"       => "SUCCESS",
+        "DATA"          => $array_gabungan
+    ]);
+}
+
+return response()->json([
+    "MESSAGETYPE"   => "E",
+    "MESSAGE" => "Something went wrong",
+], 400)->header(
+    "Accept",
+    "application/json"
+);
+
     }
 
     /**
