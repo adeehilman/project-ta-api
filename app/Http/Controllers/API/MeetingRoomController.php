@@ -300,23 +300,6 @@ $deptcodeValues = collect($deptcode)->pluck('dept_code')->toArray();
 // Mengonversi array nilai dept_code menjadi string dengan pemisah koma
 $deptcodeString = "'" . implode("','", $deptcodeValues) . "'";
 
-// Query untuk semua ruangan sesuai dept
-$query_allRoom = "SELECT
-                    id as Id,
-                    room_name as Room_Name,
-                    floor as Floor,
-                    capacity as Capacity,
-                    $txFilter
-                    dept
-                  FROM tbl_roommeeting
-                  WHERE dept IN ($deptcodeString)
-                  ORDER BY
-                  SUBSTRING_INDEX(room_name, ' ', 1),
-                  CAST(SUBSTRING_INDEX(room_name, ' ', -1) AS UNSIGNED),
-                  room_name";
-
-$data_allRoom  = DB::select($query_allRoom);
-
 // Query untuk ruangan public Satnusa
 $queryAllPublicRoom = "SELECT
                         r.id AS Id,
@@ -348,27 +331,7 @@ $dataSatnusaRoom  = DB::select($queryAllPublicRoom);
 
 $arrData = [];
 
-// Menggabungkan data dari data_allRoom
-foreach ($data_allRoom as $r) {
-    $d = [
-        'Id'        => $r->Id,
-        'Room_Name' => $r->Room_Name,
-        'Floor'     => $r->Floor,
-        'Capacity'  => $r->Capacity,
-        'dept'      => $r->dept
-    ];
-
-    // Tambahkan URL gambar jika $img true
-    if ($img == true) {
-        $d['Room_Image_1'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_1;
-        $d['Room_Image_2'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_2;
-        $d['Room_Image_3'] = env('BASE_URL') . "/RoomMeetingFoto/" . $r->Room_Image_3;
-    }
-
-    array_push($arrData, $d);
-}
-
-// DATA RUANGAN PUBLIC SATNUSA
+// Menggabungkan data dari dataSatnusaRoom
 foreach ($dataSatnusaRoom as $r) {
     $d = [
         'Id'        => $r->Id,
@@ -376,7 +339,7 @@ foreach ($dataSatnusaRoom as $r) {
         'Floor'     => $r->Floor,
         'Capacity'  => $r->Capacity,
         'dept'      => $r->dept,
-        'available' => $r->disable // Pastikan ini ditambahkan
+        'available'   => $r->disable // Pastikan ini ditambahkan
     ];
 
     // Tambahkan URL gambar jika $img true
